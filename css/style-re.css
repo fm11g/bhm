@@ -1,0 +1,341 @@
+
+/* 전체 폼을 감싸는 최상위 컨테이너 */
+.form-box {
+	width: 100%;
+	max-width: 720px; /* 폼의 최대 너비 (반응형) */
+	margin: 0 auto;
+	font-family: 'Noto Sans KR', sans-serif;
+	color: #333;
+  }
+  
+  /* form-box의 id="#fm-box"가 달려있지만, 동일한 요소이므로 중복설정 가능 */
+  #fm-box {
+	/* 추가 스타일이 필요하면 여기에 작성 */
+  }
+  
+  /* 내부 영역 (.inner) */
+  .form-box .inner {
+	/* 테두리나 배경색이 필요하면 여기에 */
+	padding: 20px 10px;
+	text-align: center; /* 가운데 정렬 */
+	box-sizing: border-box;
+  }
+  
+  /* 상단의 알림 박스 (타이머, etc.) 가 들어있는 div
+	 style="..."로 inline 스타일이 이미 있으므로, 보강할 것만 작성 */
+  .form-box .inner > div[style*="border:1.5px solid #000"] {
+	/* 필요 시 여백, 폰트 조정 가능 */
+	margin: 0 auto 20px auto; 
+	border-radius: 4px;
+  }
+  
+  /* 폼 상단 제목 (h1.form-top-title) */
+  .form-top-title {
+	font-size: 1.4rem;
+	font-weight: 700;
+	margin: 0.6em 0;
+	line-height: 1.4;
+	text-align: center;
+  }
+  .form-top-title[style*="color:red"] {
+	color: red; 
+	font-weight: 600; 
+	margin-bottom: 1em;
+  }
+  
+  /* 실제 폼 감싸는 박스 */
+  .form-box-inner {
+	width: 100%;
+	max-width: 600px;
+	margin: 0 auto;
+	/* 배경, 테두리 필요 시:
+	background: #fff;
+	border: 5px solid #f8f8f8; 
+	*/
+	padding: 10px;
+	box-sizing: border-box;
+	text-align: left; /* 테이블 정렬을 위해 */
+  }
+  
+  /* <form> 자체를 꾸밀 필요가 있으면 여기에 */
+  #form_e11 {
+	width: 100%;
+	margin: 0 auto;
+  }
+
+  #form_e12 {
+	width: 100%;
+	margin: 0 auto;
+  }
+  
+  /* 테이블 바깥 래퍼 */
+  .form-box-tb-out {
+	width: 100%;
+	margin: 0 auto;
+	box-sizing: border-box;
+  }
+  
+  /* 실제 입력 테이블 */
+  .form-box-tb {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 14px; 
+	color: #333;
+	line-height: 1.4;
+  }
+  .form-box-tb tr {
+	border-bottom: 1px solid #ddd;
+  }
+  .form-box-tb tr:last-child {
+	border-bottom: none; /* 마지막 줄은 테두리 제거 */
+  }
+  .form-box-tb th,
+  .form-box-tb td {
+	padding: 10px 8px;
+	vertical-align: middle;
+	text-align: left;
+  }
+  .form-box-tb th {
+	width: 30%; /* 적절히 조정 */
+	font-weight: 600;
+	background: #f9f9f9; /* 헤더 느낌 줄 때 */
+	box-sizing: border-box;
+  }
+  .form-box-tb td {
+	width: 70%; 
+	box-sizing: border-box;
+  }
+  
+  /* input, select, textarea 공통 스타일 */
+  .form-control {
+	width: 100%;
+	height: 38px;
+	padding: 6px 8px;
+	box-sizing: border-box;
+	border: 1px solid #ccc;
+	font-size: 14px;
+	color: #333;
+	font-family: inherit;
+	border-radius: 4px;
+  }
+  .form-control:focus {
+	outline: none;
+	border-color: #999;
+  }
+  
+  /* textarea.form-control : 높이를 별도 지정 */
+  .form-control[style*="min-height:100px"] {
+	height: auto;
+	min-height: 100px;
+	resize: none; /* 필요 시 조정 */
+	line-height: 1.5;
+  }
+  
+  /* submit 버튼 */
+  .submit-btn {
+	display: inline-block;
+	width: 100%;
+	height: 48px;
+	font-size: 16px;
+	font-weight: 600;
+	background: #164a7f; /* 주황색 */
+	color: #fff;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	margin: 1em 0 0 0;
+	transition: background 0.3s;
+  }
+  .submit-btn:hover:enabled {
+	background: #e96500;
+  }
+  .submit-btn:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+  }
+  
+  /* 개인정보보호정책 동의 영역 */
+  .form-agree-box {
+	margin-top: 10px;
+	font-size: 14px;
+	color: #333;
+  }
+  .form-info-agree {
+	margin: 0;
+	padding: 0;
+	line-height: 1.4;
+  }
+  .form-info-agree input[type="checkbox"] {
+	width: 20px;
+	height: 20px;
+	margin-right: 4px;
+	vertical-align: middle;
+  }
+  .form-info-agree label {
+	font-size: 13px; 
+	color: #000;
+	font-weight: 500;
+  }
+  .privacyBtn {
+	color: #000;
+	font-weight: 400; 
+	font-size: 13px; 
+	margin-left: 3px; 
+	cursor: pointer;
+  }
+  
+  /* (선택) 미디어쿼리로 반응형 조정 */
+  @media screen and (max-width: 480px) {
+	.form-top-title {
+	  font-size: 1.2rem;
+	}
+	.form-box-tb th,
+	.form-box-tb td {
+	  font-size: 13px; 
+	  padding: 8px 6px;
+	}
+	.submit-btn {
+	  font-size: 15px;
+	}
+  }
+  
+
+
+    
+    /* 개인정보처리방침 CSS */
+    #list_form .privacyBtn { cursor: pointer; color:#000;font-weight: 200; font-size: 13px; margin-top: -10px}
+    #list_form .privacyBtn:hover {color:#284E80;font-weight: 300; font-size: 13px; margin-top: -10px}
+    
+    #list_form #privacy {  position: fixed; width: 100%; height: 100%; left: 0; bottom: 0; z-index: 80; background-color: rgba(0, 0, 0, 0.6); visibility: hidden;     transform: translate(0, -50%);
+    }
+    #list_form #privacy > #privacyContent { position: absolute; width: 60%; height: 500px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); margin-left:20%;  top: 50%; margin-top: -250px;  }
+    #list_form #privacyContent > div { width: 100%; float: left; }
+    
+    #list_form #privacyContent > .titWrap { height: 45px; line-height: 45px; background-color: #F8F8F8; padding: 0 15px; color: #000; position: relative; display: flex; align-items: center; justify-content: space-between;}
+    
+    #list_form #privacyContent > .titWrap > .closeBtn { cursor: pointer;}
+    
+    #list_form #privacyContent > .titWrap > span { width: calc(100% - 35px); float: left; font-size: 15px; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    #list_form #privacyContent > .titWrap > i { font-size: 21px; position: absolute; cursor: pointer; right: 15px; top: 50%; margin-top: -15px !important; }
+    
+    #list_form #privacyContent > .conWrap { height: calc(100% - 45px); padding: 15px; background-color: #FFF; color: #000; overflow-y: auto; font-size: 13px; letter-spacing: -0.5px; }
+    
+    #list_form input[type="number"]::-webkit-outer-spin-button,
+    #list_form input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    
+    #list_form #privacy.blur {
+      top: 50%;
+      visibility: visible;
+      opacity: 1;
+      transition: 0.5s;
+    }
+    
+    
+    /* Form 양식 문구 */
+    #list_form .form-title {
+        text-align: center;
+        color: #000000;
+    }
+    
+    /* Count down CSS */
+    #list_form .countdown {
+        margin-bottom: 1rem;
+        color: #48b1dc;
+        font-size: 20px;
+    }
+    
+    
+    /* Input form CSS */
+    #list_form .form-group {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    #list_form .form-group input {
+        border: 0;
+        padding: 6px 8px;
+        width: 100%;
+        border: solid 1px #dddddd;
+        font-weight: 200;
+    }
+    
+    #list_form .form-row2 {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap:0.5rem;
+      color: #000;
+    }
+    
+    
+    #list_form .contents {
+      padding: 60px 0;
+    }
+    #list_form .contents span {
+      color: #3684d2;
+      font-weight: 600;
+      position: relative;
+      bottom: 3px;
+    }
+    
+    
+    
+    #list_form .sec00 {
+      text-align: center;
+      padding-top: 80px;
+    }
+    #list_form .sec00 p {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+	#list_form .wrap1 { width:100%;}
+	#list_form .wrap1 .contents { position:sticky; top:0; left:50%; margin-left:-720px;width:100%;text-align:center; }
+    
+    #list_form .box_02 {border-top: 2px solid #333;}
+    #list_form .box_02_1{padding:0px;}
+    #list_form .box_02_2{margin-top:30px;}
+    #list_form .box_02 .tg{border-spacing:0;width:100%;margin: 0 auto;background: #fff;}
+    #list_form .box_02 .tr_list{background:#172c3f;color:#fff;}
+    #list_form .box_02 .tg td{font-size:12px;font-weight:500;padding:7px 5px;overflow:hidden;word-break:normal;border-bottom: 1px solid #bdbdbd;letter-spacing:-0.75px;}
+    #list_form .box_02 .tg th{font-size:15px;font-weight:500;padding:5px;overflow:hidden;word-break:normal;letter-spacing:-0.5px;}
+    #list_form .box_02 .tg .tg-0pky{text-align:center;vertical-align:top;}
+    
+    #list_form .box_02 .tg .tg-0lax{
+      text-align:left;
+      vertical-align:top;
+      width:70px;
+      padding-left:10px;
+    }
+    
+    @media screen and (max-width:535px) {
+      #list_form .box_02 .tg .tg-0lax{
+        
+          width:140px;
+         
+      }
+      
+    }
+    
+    #list_form .box_02 .tg .tg-02ax{text-align:center;vertical-align:top;width:180px;}
+    #list_form .box_02 .tg .tg-03ax{text-align:right;vertical-align:top;width:80px;padding-right:10px;}
+    #list_form .box_02 .tg .tg-04ax{text-align:center;vertical-align:top;width:70px;}
+    #list_form .box_02 .submit_01{color:#616161;font-weight: 600;}
+    #list_form .box_02 .submit_02{color:#005bac;font-weight: 600;}
+    #list_form .box_02 .submit_03{color:#FF1744;font-weight: 600;}
+    
+    #list_form .box_02 .tg .db01{width:100px;}
+    #list_form .box_02 .tg .db02{width:100px;}
+    #list_form .box_02 .tg .db03{width:100px;}
+    #list_form .box_02 .tg .db04{width:100px;}
+    #list_form .box_02 .tg .db05{width:160px;}
+    #list_form .box_02 .tg .db06{width:70px;}
+    #list_form .box_02 .tg .db07{width:70px;}
+    /*1*/
+    
