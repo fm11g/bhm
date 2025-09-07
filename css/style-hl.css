@@ -1,3 +1,10 @@
+@font-face {
+    font-family: 'JalpulrineunHaruche';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-10-21@1.0/Jal_Haru.woff') format('woff');
+    font-weight: normal;
+    font-display: swap;
+}
+
 
    .cd_font{
     font-size:23px;
@@ -11,7 +18,8 @@
 
    .hero{ text-align:center; max-width:820px; margin:0 auto 28px; }
    .hero .headline{
-      font-weight:900; font-size:30px; line-height:1.2; letter-spacing:-.4px;
+     font-family: 'JalpulrineunHaruche';
+      font-weight:900; font-size:28px; line-height:1.2; letter-spacing:-.4px;
       color:#0f172a;padding:30px 0 10px;
     }
 
@@ -370,11 +378,13 @@
       display:flex; flex-direction:column; gap:12px; width:min(420px, 92%);
     }
     #lgStylerHero .feature{
+        font-family: 'JalpulrineunHaruche';
       position:relative; background:var(--glass);
       border:1px solid rgba(255,255,255,.14);
       border-radius:14px; padding:16px 22px; text-align:center;
       font-size:clamp(15px, 1.8vw, 18px); font-weight:800; letter-spacing:-.2px;
       box-shadow:var(--shadow);
+
     }
     #lgStylerHero .feature::before{
       content:""; position:absolute; left:10px; top:50%; transform:translateY(-50%);
@@ -586,6 +596,7 @@
 
     /* 라벨 */
     #applianceGuideMenu .label{
+      font-family: 'JalpulrineunHaruche';
       width:93.9%;
       min-height:38px;
       padding: 10px 12px;
@@ -784,7 +795,8 @@
       font-weight:600;
     }
     #eventList .points .value{
-      font-size:26px;
+       font-family: 'JalpulrineunHaruche';
+      font-size:24px;
       font-weight:900;
       letter-spacing:-.3px;
       line-height:1.2;
@@ -856,7 +868,7 @@
     @media screen and (max-width:840px) {
       
          #eventList .points .value{
-      font-size:20px;
+      font-size:19px;
      
     }
     }
@@ -864,7 +876,7 @@
      @media screen and (max-width:680px) {
       
          #eventList .points .value{
-      font-size:17px;
+      font-size:16px;
      
     }
     }
@@ -873,7 +885,7 @@
     @media (max-width:640px){
       #eventList .points .value{font-size:17px;}
     }
-
+/* 
     @media (max-width:580px){
     
       #eventList .points .value{font-size:15px;}
@@ -882,9 +894,9 @@
     @media (max-width:540px){
     
       #eventList .points .value{font-size:13px;}
-    }
+    } */
 
-    @media (max-width:512px){
+    @media (max-width:627px){
         #eventList .points .wrap{ grid-template-columns:1fr; gap:12px; }
       #eventList .points .col:not(:last-child)::after{ display:none; }
       #eventList .item .txt{ font-size:17px; }
@@ -1273,7 +1285,15 @@
     #reviewSection .grid{
       display:grid;
       gap:20px;
-      grid-template-columns: repeat(auto-fit, minmax(300px,1fr));
+      grid-template-columns: repeat(2, minmax(300px,1fr));
+    }
+
+    @media screen and (max-width:640px) {
+        #reviewSection .grid{
+      display:grid;
+      gap:20px;
+      grid-template-columns: repeat(1, minmax(300px,1fr));
+    }
     }
 
     #reviewSection .card{
@@ -1303,10 +1323,10 @@
     #reviewSection .content{ padding:20px; display:flex; flex-direction:column; gap:12px; }
 
     #reviewSection .label{ font-size:15px; font-weight:700; color:var(--ink); }
-    #reviewSection .highlight{ color:#795548; font-weight:900; font-size:20px; }
+    #reviewSection .highlight{ color:#795548; font-weight:900; font-size:20px; font-family: 'JalpulrineunHaruche';; }
     #reviewSection .stars{ color:#fbbf24; font-size:18px; letter-spacing:2px; }
 
-    #reviewSection .text{ font-size:15px; line-height:1.6; color:#374151; }
+    #reviewSection .text{ font-size:18px; line-height:1.6; color:#374151; }
     #reviewSection .author .name{ font-weight:700; color:var(--ink); font-size:15px; }
 
 
@@ -1673,6 +1693,7 @@
        ::before 대신 background + box-decoration-break을 사용.
        줄바꿈이 생겨도 각 줄에 하이라이트가 복제되어 폭에 맞게 채워집니다. */
     #eventList1 .marker{
+       font-family: 'JalpulrineunHaruche';
       position:relative;
       display:inline;
       padding:0 .08em;
@@ -1712,6 +1733,7 @@
 
     /* 안내 문구 */
     #applyListSection .info{
+      font-family: 'JalpulrineunHaruche';
       text-align:center;
       padding:14px 10px 0;
       font-size:22px;
