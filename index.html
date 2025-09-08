@@ -1489,7 +1489,36 @@
 		<script src="./js/personal.js"></script>
     <script src="./js/main.js"></script>
 
+<script>
+  (function () {
+    const sel1 = document.getElementById('db3');
+    const sel2 = document.getElementById('db4');
+    const hidden = document.getElementById('wishCombined');
 
+    const SEP = ', '; // 값 사이 구분자
+
+    function updateCombined() {
+      const v1 = (sel1 && sel1.value || '').trim();
+      const v2 = (sel2 && sel2.value || '').trim();
+      const parts = [];
+      if (v1) parts.push(v1);
+      if (v2) parts.push(v2);
+      hidden.value = parts.join(SEP); // 예: "[삼성]갤북4울트라, [LG]그램..."
+    }
+
+    // 변경 시마다 업데이트
+    [sel1, sel2].forEach(el => el && el.addEventListener('change', updateCombined));
+
+    // 초기값 동기화
+    updateCombined();
+
+    // 전송 직전에 한번 더 동기화 (안전)
+    const form = hidden.form || (sel1 && sel1.closest('form')) || (sel2 && sel2.closest('form'));
+    if (form) {
+      form.addEventListener('submit', updateCombined);
+    }
+  })();
+</script>
 
 </body>
 </html>
