@@ -37,7 +37,7 @@ fbq('track', 'PageView');
 src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 /></noscript>
 <!-- End Meta Pixel Code -->
- 
+
 
 <script>
   !function(f,b,e,v,n,t,s)
@@ -1537,6 +1537,19 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       form.addEventListener('submit', updateCombined);
     }
   })();
+</script>
+
+
+<script>
+document.getElementById('phone1').addEventListener('input', function() {
+  const raw = this.value.replace(/[^0-9]/g, ''); // 숫자만 추출
+  if(raw.length === 11 && raw.startsWith("010")) {
+    const dashed = raw.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+    document.getElementById('phone-dash').value = dashed; 
+  } else {
+    document.getElementById('phone-dash').value = "";
+  }
+});
 </script>
 
 </body>
