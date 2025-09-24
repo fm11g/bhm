@@ -77,6 +77,35 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 <!-- End Danggeun Market Code -->
 
 
+<style>
+/* 기본 tile */
+.tile {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+}
+
+/* soldout 효과 */
+.tile.soldout .thumb::before {
+  content: "마감 완료";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.65);
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 700;
+  z-index: 5;
+  text-align: center;
+}
+
+/* soldout 시 뱃지 숨김 */
+.tile.soldout .badge-stack .badge {
+  display: none !important;
+}
+</style>
 </head>
 <body>
 
@@ -89,7 +118,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
   <div class="inner">
     <div class="copy">
       <div class="eyebrow"><b class="blink">제품별 월 100대 선착순 한정!</b></div>
-      <h2 class="title">신청자 전원<br>최신 가전 <b style="color:#ffdaa9">전액 지원!</b></h2>
+      <h2 class="title"><span class="insert-location"></span> 거주자 한정!<br>최신 가전 <b style="color:#ffdaa9">전액 지원!</b></h2>
     </div>
     <div class="feature-list" role="list">
       <!-- ✅ 숫자 카운트가 적용되는 문구: 150만 / 100대 -->
@@ -132,7 +161,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 </section>
 
 
-
 <section id="applianceGuideMenu">
 
   <!-- ===== 제목 + 부제목 ===== -->
@@ -147,7 +175,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
   ========================== -->
 
 
-  <a class="tile soldout" href="#guide6">
+  <a class="tile soldout" href="#form1">
     <div class="thumb">
       <img src="https://lh3.googleusercontent.com/crdVuBpQ2U1pFmmfVNkxJnTQvJ6eFtlRi8CLLOKIAJWpsGqYt3DvNpTHlrpIRa3W2c37gYKVo5r1HpnAYzKouH3zrfZpoaxnXRFeJEcxUfw5SmAY0P_sVNs=w800" alt="가전 배너 6">
       <div class="brand-logo">
@@ -157,7 +185,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     <div class="label">아이패드 프로 11 + 애플 펜슬 Pro<br>+ 스마트 폴리오(블랙)</div>
   </a>
 
-   <a class="tile soldout" href="#guide4">
+   <a class="tile soldout" href="#form1">
     <div class="thumb">
       <img src="https://lh3.googleusercontent.com/uxipfYo3TemCpc06R4WsP4G0a36zNJOqDTgAz6y3N8_304dh70CcaEXpfwuRAQ70FJoZNZPYJ2Q-9OhuZLT6dXmabCwaVf_htn02Rd7c5RrU0PRxy-Ix3mM=w800" alt="가전 배너 4">
       <div class="brand-logo">
@@ -180,7 +208,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
   ========================== -->
 
 
-  <a class="tile" href="#guide1">
+  <a class="tile" href="#form1">
     <div class="thumb">
       <img src="https://lh3.googleusercontent.com/K-Q4r5-cbMsWl24kHE_h1_CDyYZ4yqwxVSk9fpOVDsvjsUufS9BDxYse-EpQJlXGh5L1gMMA558CpADMHfQoiC4d-6ibNkAkXdg9Y3C_pgL5CPnvZiD-vsM=w800" alt="가전 배너 1">
       <div class="brand-logo">
@@ -200,7 +228,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
 
 
-  <a class="tile" href="#guide6">
+  <a class="tile" href="#form1">
     <div class="thumb">
       <img src="https://lh3.googleusercontent.com/5xLfp1mweMayDj-yHViXe88FBJZ8b0c79Ga6xpbMrOw9H7kWJS64iyOIxqfEu0qIN3beE9YEc0Df4h3wuSNW7g9ABNv1wqvKh6cut5lhuHL51NNNsaUbqNk=w800" alt="가전 배너 6">
       <div class="brand-logo">
@@ -211,7 +239,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
   </a>
 
 
-    <a class="tile" href="#guide6">
+    <a class="tile" href="#form1">
     <div class="thumb">
       <img src="https://lh3.googleusercontent.com/OjdeuJ4CxNXdjWLfSH5Vk1FQwc2bHvFowl2RV5ZEpR0pFhb7LpyYjhgt8GGaMy9Eb5icGSm1t43uPMgWu3O6PKI9Un8ko_5BT8c4DN6pGlVSSHd7kBhriA=w800" alt="가전 배너 6">
       <div class="brand-logo">
@@ -223,7 +251,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
 
 
-  <a class="tile" href="#guide6">
+  <a class="tile" href="#form1">
     <div class="thumb">
       <img src="https://lh3.googleusercontent.com/o1Zlp2Dh3vpPuRTYc7IZPfsgICNmsuSk6fFnrrqYGu8GsUhOpNwd9nGPbwCILVRavRvbhvQKXc5Ip04dXvjT1ZxXBN8pYH5okONgdU11frKUCcUJE-REJ4o=w800" alt="가전 배너 6">
       <div class="brand-logo">
@@ -238,7 +266,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     <div class="label">삼성 75인치 QLED TV + 사운드바</div>
   </a>
 
-  <a class="tile" href="#guide6">
+  <a class="tile" href="#form1">
     <div class="thumb">
       <img src="https://lh3.googleusercontent.com/sTNUtcUd1-7qxqShbyqqnglK67mgXU8YCxvQf7uj4sTRJ-QpFkC5cFlaut0n6Zg7nt1Pp3kLwMqfDa6W76dJjOxD0DNFi65QBvcVSGUTaU2KzG-DhjKInQ=w800" alt="가전 배너 6">
       <div class="brand-logo">
@@ -264,7 +292,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     <div class="label">LG 스탠바이미GO(TV) + 공기청정기</div>
   </a> -->
 
- <a class="tile" href="#guide6">
+ <a class="tile" href="#form1">
     <div class="thumb">
       <img src="https://lh3.googleusercontent.com/o6pd1GzhTQq-wsmqbRhNfJ1OI1Ncv4eUDCq7jRDUoVEfWg4OPkFf4q-45zOl6_1NOY74qzUw2xpCVkfWNA1xjUpSbs-qOR_iusVMpigOtxuTSF8-aVdfhg=w800" alt="가전 배너 6">
       <div class="brand-logo">
@@ -274,7 +302,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     <div class="label">삼성 갤럭시북5 Pro 360 (16인치)</div>
   </a>
 
-  <a class="tile" href="#guide3">
+  <a class="tile" href="#form1">
     <div class="thumb">
       <img class="contain" src="https://lh3.googleusercontent.com/RRxWmA7c_1l2rnC8n1fLccTuaqRy7-bHdBN-9C-zUg_kRkXDMZ3XgYzPs5APPldnMAWggEhoG_XiV6UD3TkaXytqi7TBxJuqKor8z7t30Ph0Ka4UGrH0NQ=w800" alt="가전 배너 3">
       <div class="brand-logo">
@@ -290,7 +318,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
  
 
 
-  <a class="tile" href="#guide6">
+  <a class="tile" href="#form1">
     <div class="thumb">
       <img src="https://lh3.googleusercontent.com/F8BEA00ntrl_SDI8IziliqMs3oI8K3shY3uEiqNQhoJhccehwu_w3zzemiKdvOAqQkQgIQkV8t6_Po-fqJ4ZHdpq3i5r3SgpUtXdnfxHpHt3lqoIAg5oNQ=w800" alt="가전 배너 6">
       <div class="brand-logo">
@@ -300,7 +328,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     <div class="label">LG 17인치 그램 노트북</div>
   </a>
 
-  <a class="tile" href="#guide6">
+  <a class="tile" href="#form1">
     <div class="thumb">
       <img src="https://lh3.googleusercontent.com/ADEzQ8dOTmNKwegBpgnB3lYHpuDnMJzJhzZnnwAx2yxNG_NikkCWUK-d-CX6UwaiIWfPWcvVCzs5LSw1onxNgSbJOxOOVJD61LjoMKVD8l33gtZKfBeQUww=w800" alt="가전 배너 6">
       <div class="brand-logo">
@@ -316,7 +344,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
   <!-- =========================
        3) 냉장고 · 김치냉장고
   ========================== -->
-  <a class="tile" href="#guide6">
+  <a class="tile" href="#form1">
     <div class="thumb">
       <img src="https://lh3.googleusercontent.com/0ipslGUtMf_7s_iA8EqVoIDz3QrDyzzbKWgdGzOavCWiCJpGw6Gbvu7uXFrBOc30KjIuKQ7I83fgLruJdzs0vVcjpXNweE8_Qc2gpqZopbM2bEgaeSAI4g=w800" alt="가전 배너 6">
       <!-- <div class="brand-logo">
@@ -334,7 +362,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
 
 
-  <a class="tile" href="#guide6">
+  <a class="tile" href="#form1">
     <div class="thumb">
       <img src="https://lh3.googleusercontent.com/IVKi0q5x-eDG_CW59M1ZujqSfI6l7ioF_mC2Yh6qJrGykAKHEywkTNLLiORJvudxUj4jCGraep_iMPp4Zo-5u6C5OTG8xsARwS8jSjGQ1TY85yE-1aan8SU=w800" alt="가전 배너 6">
       <!-- <div class="brand-logo">
@@ -381,7 +409,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
   <!-- =========================
        6) 청소기
   ========================== -->
-  <a class="tile" href="#guide6">
+  <a class="tile" href="#form1">
     <div class="thumb">
       <img src="https://lh3.googleusercontent.com/CA7W6x-qB1-3vqwktt4QFkq_2O-xIYu4vuZDEulp-i-osfawRA8AS6PnBu-I_XxES6Y1pa05VwLu4nQmz_-1i297K1Pvd_O-XkzLdR6llOfVHTXWc-hCxw=w800" alt="가전 배너 6">
       <!-- <div class="brand-logo">
@@ -392,7 +420,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
   </a>
 
 
-  <a class="tile" href="#guide6">
+  <a class="tile" href="#form1">
     <div class="thumb">
       <img src="https://lh3.googleusercontent.com/ooWcYdUX4RHivr86e8lPOGHBpDb8ihjrm6SZz2YYlxEQjTYywHFLlqnlyn1APqblRDUiBtW-JIWgErQ50CkGHjSqqaAojJ5MjdmHldaDKP4zokUCMX8Jfw=w800" alt="가전 배너 6">
       <!-- <div class="brand-logo">
@@ -403,7 +431,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
   </a>
 
 
-  <a class="tile" href="#guide6">
+  <a class="tile" href="#form1">
     <div class="thumb">
       <img src="https://lh3.googleusercontent.com/dwgAvcYsYN3khFtvXBANMq_Y-ag2Xfx5oOm5DthPIRo4Xm1mkdM8XWEyLwWZT9uBodddTgASIXhsvxjcj05-eFe5zE6d2KSjXzpkJko1eCYBIL-BzqxySg=w800" alt="가전 배너 6">
       <!-- <div class="brand-logo">
@@ -440,7 +468,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
   </a>
 
 
-  <a class="tile" href="#guide6">
+  <a class="tile" href="#form1">
     <div class="thumb">
       <img src="https://lh3.googleusercontent.com/sgybYaPyPxNBlX5YPlbFxoo3w_RaUk9wS9e2PJNG4IcWGcPwCm91cLUrk6Cjw7q_OcK664IOA66bkP2QujVkL5YXky_InkQD0voSDkiPSSA8KUmQqSL-KQ=w800" alt="가전 배너 6">
       <div class="brand-logo">
@@ -464,7 +492,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
   <!-- =========================
        11) 가구 · 침대 · 매트리스 · 소파
   ========================== -->
-  <a class="tile" href="#guide6">
+  <a class="tile" href="#form1">
     <div class="thumb">
       <img src="https://lh3.googleusercontent.com/JuiUBJsNTATRtGWAiYNw8t6ewjE5R_EpTjzeBgXYWaZXr2yMWqRWMXvRatj79qSwT8r7npDElkjNKhsDatziW1gk3pVK3O1hmrDC9mrdXmVvEZ6BiwyrSr4=w800" alt="가전 배너 6">
       <div class="brand-logo">
@@ -492,6 +520,58 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 </section>
 
 
+  <!-- ===== Smooth Anchor Scroll (scoped) ===== -->
+  <script>
+    (function(){
+      const section = document.querySelector('#applianceGuideMenu');
+      if(!section) return;
+
+      // 고정 헤더 높이 보정값 (섹션 data-offset로 조절)
+      const getOffset = () => {
+        const val = section.getAttribute('data-offset');
+        const n = parseInt(val, 10);
+        return isNaN(n) ? 0 : n;
+      };
+
+      function smoothScrollTo(target) {
+        if (!target) return;
+        const headerOffset = getOffset();
+        const rect = target.getBoundingClientRect();
+        const y = window.pageYOffset + rect.top - headerOffset;
+
+        window.scrollTo({
+          top: y,
+          behavior: 'smooth'
+        });
+      }
+
+      // 섹션 내부의 # 해시 링크를 가로채어 부드럽게 이동
+      section.addEventListener('click', function(e){
+        const link = e.target.closest('a[href^=\"#\"]');
+        if(!link) return;
+
+        const href = link.getAttribute('href');
+        if(!href || href === '#') return;
+
+        const id = href.slice(1);
+        const target = document.getElementById(id);
+        if(target){
+          e.preventDefault();
+          smoothScrollTo(target);
+          // 해시 업데이트(뒤로가기 호환)
+          try{ history.pushState(null, '', href); }catch(_){}
+        }
+      });
+
+      // 페이지가 해시와 함께 로드될 때도 부드럽게 보정 스크롤
+      window.addEventListener('load', function(){
+        if(location.hash){
+          const target = document.getElementById(location.hash.slice(1));
+          if(target) setTimeout(()=>smoothScrollTo(target), 0);
+        }
+      });
+    })();
+  </script>
 
 <section id="eventList">
 
@@ -926,7 +1006,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
 </section>
 
-
 <section id="lgFaq" aria-label="FAQ – 자주 묻는 질문">
   <style>
     /* ================= Scope: #lgFaq only ================= */
@@ -1048,9 +1127,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
   </script>
 </section>
 
-
-
-
 <section id="eventList1">
 
 
@@ -1123,7 +1199,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
   <!-- ▼ 핵심 3문장 하이라이트 블록 (멀티라인 밑줄 유지) -->
   <div class="value-props" aria-label="핵심 가치 제안">
-    <div class="title"><span class="dot" aria-hidden="true"></span> 지금 신청해야 하는 이유</div>
+    <div class="title"><span class="dot" aria-hidden="true"></span> 지금 신청하시면 추가 혜택을 드립니다.</div>
     <div class="vp-list">
       <div class="vp-item">
         <div class="vp-icon">✓</div>
@@ -1182,9 +1258,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
 
 		<div id="form1"></div>
-
-
-    
 
 <section id="applyListSection">
   <style>
@@ -1382,6 +1455,29 @@ document.getElementById('phone1').addEventListener('input', function() {
   }
 });
 </script>
+
+
+<script>
+// ===== 원하는 문구 배열 =====
+const locations = ["강원도"];
+
+// 기본으로 적용할 문구 (배열 첫 번째)
+let currentLocation = locations[0];
+
+// 문구 삽입 함수
+function setLocationText(text){
+  document.querySelectorAll(".insert-location").forEach(el => {
+    el.textContent = text + " ";
+  });
+}
+
+// 초기 실행
+setLocationText(currentLocation);
+
+// 필요 시 언제든 변경 가능 (예시)
+// setLocationText("서울 강남구");
+</script>
+
 
 
 
