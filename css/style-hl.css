@@ -355,7 +355,8 @@
     }
 
     /* 제목/카피(고정) */
-    #lgStylerHero .copy{ grid-column:1 / 2; grid-row:1 / 2; align-self:center; justify-self:start; text-align:left; }
+    #lgStylerHero .copy{ grid-column:1 / 2; grid-row:1 / 2; align-self:center; justify-self:start; text-align:left;     line-height: 140%;
+ }
     #lgStylerHero .eyebrow{
       display:inline-block; padding:8px 14px; border-radius:999px;
       background:linear-gradient(180deg, var(--brand-red) 0%, var(--brand-red-2) 100%);
@@ -366,7 +367,7 @@
     @keyframes blink { 0%, 49%, 100% { opacity: 1; } 50%, 70% { opacity: 0; } }
 
     #lgStylerHero .title{
-      line-height:1.02; font-weight:900; font-size:50px;
+      line-height:140%; font-weight:900; font-size:50px;
       margin:0 0 14px 0; text-shadow:0 6px 18px rgba(0,0,0,.35);
     }
     @media screen and (max-width:530px) { #lgStylerHero .title{ font-size:45px; } }
@@ -514,7 +515,7 @@
     /* 그리드 */
     #applianceGuideMenu .grid{
       display:grid;
-      grid-template-columns: repeat(2, minmax(0,1fr));
+      grid-template-columns: repeat(3, minmax(0,1fr));
       gap: var(--gap);
       align-items:start;
     }
@@ -628,22 +629,25 @@
       #applianceGuideMenu .brand-logo{ width:38px; height:38px; }
     }
     @media screen and (max-width:840px){
-      #applianceGuideMenu .label{ width:89.7%; min-height:8px; }
+      #applianceGuideMenu .label{ width:89.7%; min-height:8px;font-size:9px; }
       #applianceGuideMenu .brand-logo{ width:38px; height:38px; }
     }
     @media screen and (max-width:540px){
-      #applianceGuideMenu .label{ width:88.7%; min-height:8px;font-size:10px; }
-      #applianceGuideMenu .brand-logo{ width:38px; height:38px; }
+      #applianceGuideMenu .label{ width:88.7%; min-height:8px;font-size:9px; }
+      #applianceGuideMenu .brand-logo{ width:21px; height:21px; }
     }
     @media screen and (max-width:480px){
       #applianceGuideMenu .label{ width:87.7%; min-height:8px; }
+      #applianceGuideMenu .brand-logo{ width:21px; height:21px; }
     }
     @media screen and (max-width:440px){
       #applianceGuideMenu .label{ width:87%; min-height:8px;font-size:8.5px; }
+      #applianceGuideMenu .brand-logo{ width:21px; height:21px; }
     }
     @media screen and (max-width:380px){
       #applianceGuideMenu .label{ width:85.4%; min-height:8px; }
       #applianceGuideMenu .brand-logo{ width:34px; height:34px; top:8px; left:8px; }
+      #applianceGuideMenu .brand-logo{ width:21px; height:21px; }
     }
 
     /* Hover 효과 */

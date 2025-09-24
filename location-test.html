@@ -37,6 +37,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 /></noscript>
 <!-- End Meta Pixel Code -->
 
+
 <script>
   !function(f,b,e,v,n,t,s)
   {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -54,6 +55,19 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 /></noscript>
 
 
+
+<script>
+  window.addEventListener('load', function () {
+    const script = document.createElement('script');
+    script.src = 'https://karrot-pixel.business.daangn.com/0.4/karrot-pixel.umd.js';
+    script.onload = function () {
+      window.karrotPixel.init('1742957843450700001');
+      window.karrotPixel.track('ViewPage');
+    };
+    document.head.appendChild(script);
+  });
+</script>
+
 <!-- Danggeun Market Code -->
 <script src="https://karrot-pixel.business.daangn.com/0.4/karrot-pixel.umd.js"></script>
 <script>
@@ -63,6 +77,35 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 <!-- End Danggeun Market Code -->
 
 
+<style>
+/* 기본 tile */
+.tile {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+}
+
+/* soldout 효과 */
+.tile.soldout .thumb::before {
+  content: "마감 완료";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.65);
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 700;
+  z-index: 5;
+  text-align: center;
+}
+
+/* soldout 시 뱃지 숨김 */
+.tile.soldout .badge-stack .badge {
+  display: none !important;
+}
+</style>
 </head>
 <body>
 
@@ -75,7 +118,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
   <div class="inner">
     <div class="copy">
       <div class="eyebrow"><b class="blink">제품별 월 100대 선착순 한정!</b></div>
-      <h2 class="title">신청자 전원<br>최신 가전 <b style="color:#ffdaa9">전액 지원!</b></h2>
+      <h2 class="title"><span class="insert-location"></span> 주민 한정!<br>최신 가전 <b style="color:#ffdaa9">전액 지원!</b></h2>
     </div>
     <div class="feature-list" role="list">
       <!-- ✅ 숫자 카운트가 적용되는 문구: 150만 / 100대 -->
@@ -116,7 +159,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
 
 </section>
-
 
 
 <section id="applianceGuideMenu">
@@ -1019,6 +1061,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         <div class="label">신청 자격</div>
         <div class="value"><span class="marker" data-marker>만 25세 ~ 70세 이하</span></div>
       </div>
+      
       <div class="col">
         <div class="label">혜택 인원</div>
         <div class="value"><span class="marker" data-marker>선착순 100명</span></div>
@@ -1191,9 +1234,9 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 		<script src="./js/personal.js"></script>
     <script src="./js/main.js"></script>
 
-    <script>
+ <script>
 $(function(){
-  $('input[name="entry.2134610496"]').val('당근');
+  $('input[name="entry.2134610496"]').val('메타');
 });
 </script>
 
@@ -1229,7 +1272,6 @@ $(function(){
   })();
 </script>
 
-
 <script>
 document.getElementById('phone1').addEventListener('input', function() {
   const raw = this.value.replace(/[^0-9]/g, ''); // 숫자만 추출
@@ -1241,6 +1283,31 @@ document.getElementById('phone1').addEventListener('input', function() {
   }
 });
 </script>
+
+
+<script>
+// ===== 원하는 문구 배열 =====
+const locations = ["강원도 양양"];
+
+// 기본으로 적용할 문구 (배열 첫 번째)
+let currentLocation = locations[0];
+
+// 문구 삽입 함수
+function setLocationText(text){
+  document.querySelectorAll(".insert-location").forEach(el => {
+    el.textContent = text + " ";
+  });
+}
+
+// 초기 실행
+setLocationText(currentLocation);
+
+// 필요 시 언제든 변경 가능 (예시)
+// setLocationText("서울 강남구");
+</script>
+
+
+
 
 </body>
 </html>
