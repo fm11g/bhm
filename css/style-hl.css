@@ -370,7 +370,7 @@
       line-height:140%; font-weight:900; font-size:50px;
       margin:0 0 14px 0; text-shadow:0 6px 18px rgba(0,0,0,.35);
     }
-    @media screen and (max-width:530px) { #lgStylerHero .title{ font-size:45px; } }
+    @media screen and (max-width:530px) { #lgStylerHero .title{ font-size:43px; } }
     @media screen and (max-width:420px) { #lgStylerHero .title{ font-size:35px; } }
 
     /* 리스트(고정) */
