@@ -131,10 +131,140 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
 </section>
 
-<section class="ecs-slider" aria-label="Live Server Drag Card Slider">
-  
 
-  <div class="ecs-wrap">
+
+
+
+
+
+<!--최적화 코드 -->
+<section class="ecs-slider" aria-label="Finite List Drag Card Slider">
+  <style>
+    /*
+      ====================================
+      CSS: 디자인 및 반응형 설정 (변경 없음)
+      ====================================
+    */
+    .ecs-slider{
+      --ink:#0f172a;
+      --accent:#e73700;
+      --bg:#f6f7fb;
+      --cardW: 400px; 
+      --gap: 18px;
+      --radius: 18px;
+      --shadow: 0 10px 24px rgba(15,23,42,.08); 
+      --fadeDur: 700ms;
+      --autoMs: 3800; 
+      --ease: cubic-bezier(.22,.61,.36,1); 
+      --progress: 0; 
+      
+      font-family: "Pretendard","Noto Sans KR",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+      background: var(--bg);
+      position: relative;
+    }
+
+    .ecs-slider .ecs-wrap{margin:0 auto;padding:56px 20px}
+    .ecs-slider .ecs-head{
+        display:flex;
+        align-items:center; 
+        justify-content:space-between;
+        margin-bottom:18px;
+    }
+    .ecs-slider .ecs-title{
+      font-size:clamp(18px,2.2vw,24px);line-height:1.3;color:var(--ink);
+      font-weight:800;position:relative;padding-bottom:0; 
+      margin-bottom:10px; 
+      letter-spacing:-.02em
+    }
+    .ecs-slider .ecs-title:after{content:"";position:absolute;left:0;bottom:-10px;width:36px;height:4px;border-radius:2px;background:var(--accent)}
+
+    .ecs-slider .ecs-viewport{
+      position:relative;
+      overflow: hidden; 
+      padding:10px 8px;
+      --sidePad:max(20px,(100% - 1000px)/2);
+      padding-left:var(--gap); 
+      padding-right:var(--sidePad);
+      contain:layout paint size;border-radius:20px;
+      min-height:calc(var(--cardW) + 20px); 
+      transform:translateY(8px);
+      transition:opacity var(--fadeDur) var(--ease),transform var(--fadeDur) var(--ease);
+      touch-action: pan-y pinch-zoom; 
+      user-select: none; 
+    }
+    .ecs-slider .ecs-viewport.is-dragging {
+        cursor: grabbing; 
+    }
+
+    .ecs-slider.ecs-mounted .ecs-viewport{opacity:1;transform:none}
+
+    .ecs-slider .ecs-track{
+      display:flex;gap:var(--gap);
+      will-change: transform;
+      transition:transform 500ms cubic-bezier(.16, 1, .3, 1); 
+    }
+
+    /* 카드 */
+    .ecs-slider .ecs-card{
+      position:relative;
+      flex:0 0 var(--cardW);
+      height:var(--cardW); 
+      border-radius:var(--radius);overflow:hidden;background:#fff;
+      box-shadow:var(--shadow); 
+      transform:translateZ(0);cursor:grab; 
+      transition: box-shadow 360ms var(--ease); 
+      isolation:isolate
+    }
+    .ecs-slider .ecs-card.ecs-active{
+        box-shadow: 0 24px 60px rgba(13,18,30,.18); 
+    }
+    .ecs-slider .ecs-logo{position:absolute;top:16px;left:16px;z-index:3;width:40px;height:40px;border-radius:10px;overflow:hidden;background:transparent;box-shadow:0 2px 6px rgba(15,23,42,.1);display:grid;place-items:center;pointer-events:none;}
+    .ecs-slider .ecs-logo img{width:70%;height:70%;object-fit:contain;display:block;}
+    .ecs-slider .ecs-media{position:absolute;inset:0}
+    .ecs-slider .ecs-media img{width:100%;height:100%;object-fit:contain;display:block;transform:scale(1.02);transition:transform 600ms var(--ease),filter 600ms var(--ease)}
+    .ecs-slider .ecs-card:hover .ecs-media img,.ecs-slider .ecs-card.ecs-active .ecs-media img{transform:scale(1.05);filter:saturate(1.04)}
+    .ecs-slider .ecs-grad{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 35%,rgba(0,0,0,.78) 95%);z-index:1}
+    .ecs-slider .ecs-body{position:absolute;left:16px;right:16px;bottom:14px;z-index:2;color:#fff;transform:translateY(0);opacity:.98;transition:opacity 380ms cubic-bezier(.15,.7,.25,1.05);}
+    .ecs-slider .ecs-title2{font-size:clamp(12px,2vw,16px);line-height:1.2;margin:0;font-weight:800;letter-spacing:-.01em}
+    .ecs-slider .ecs-card:not(.ecs-active) .ecs-body{opacity: 0.8;} 
+
+    .ecs-slider .ecs-gauge{
+        width: clamp(120px, 15vw, 180px); 
+        height: 6px; 
+        background: #e2e8f0; 
+        border-radius: 3px;
+        overflow: hidden;
+        margin-top: 10px;
+    }
+    .ecs-slider .ecs-progress-bar{
+        width: 100%;
+        height: 100%;
+        background: var(--accent); 
+        transform: scaleX(var(--progress)); 
+        transform-origin: left center;
+        transition: transform 380ms var(--ease);
+    }
+
+    /* 반응형 */
+    @media (max-width:1100px){.ecs-slider{--cardW:320px;}}
+    @media (max-width:820px){
+        .ecs-slider{
+            --cardW:260px;
+            --gap:14px;
+        }
+        .ecs-slider .ecs-wrap{padding:44px 16px}
+    }
+    @media (max-width:420px){
+        .ecs-slider{
+            --cardW: clamp(180px, 85vw - 32px, 300px); 
+        }
+        .ecs-slider .ecs-gauge {
+             width: 80px; 
+        }
+    }
+  </style>
+
+ <div class="ecs-wrap">
     
     <div class="ecs-head">
         <h2 class="ecs-title">프리미엄 브랜드 TV</h2>
@@ -199,7 +329,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     
   </div>
 
-    <script>
+  <script>
     (function(){
       var root = (function(){
         var currentScript = document.currentScript;
@@ -220,15 +350,23 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       var gauge       = root.querySelector('.ecs-gauge');
       var gaugeBar    = root.querySelector('.ecs-progress-bar'); 
 
-      var idx = 0;
+      var idx = 0; 
       var timer = null;
-      var userInteractedAt = 0;
+      // var userInteractedAt = 0; // ✅ 제거: 지연 로직에 사용되던 변수
       var offset = 0; 
       var isMoving = false; 
       var animationFrameId = null; 
+      
+      var autoSpeed = 0.05; 
+      var lastTimestamp = 0;
+      var isAutoPlaying = false; 
+      var autoRafId = null;
+
 
       function setActive(i){
-        cards.forEach(function(c,k){ c.classList.toggle('ecs-active', k===i); });
+        cards.forEach(function(c,k){ 
+            c.classList.toggle('ecs-active', k===i); 
+        });
         
         if(cards.length > 1 && gauge && gaugeBar){
             var progressRatio = i / (cards.length - 1);
@@ -240,7 +378,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       function dims(){
         var cs = getComputedStyle(root);
         var cardW   = parseFloat(cs.getPropertyValue('--cardW')) || 400;
-        
         return {
           cardW:   cardW,
           gap:     parseFloat(cs.getPropertyValue('--gap')) || 18,
@@ -254,91 +391,68 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         if (cards.length === 0) return 0;
         
         var d = dims();
-        var lastCard = cards[cards.length - 1];
+        var totalContentWidth = (d.cardW + d.gap) * cards.length - d.gap;
         
-        var centerOffset = (d.vp - d.cardW) / 2;
-        var maxScroll = lastCard.offsetLeft - centerOffset + d.sidePadL;
+        var maxScroll = totalContentWidth - d.vp + d.sidePadL;
         
         return Math.max(0, maxScroll); 
       }
       
-      function nearestIndexFromOffset(x){
-        var closestIndex = 0;
-        var minDiff = Infinity;
-        
-        for(var i = 0; i < cards.length; i++){
-            var cardPos = cards[i].offsetLeft; 
-            
-            if (i === cards.length - 1) {
-                var d = dims();
-                var centerOffset = (d.vp - d.cardW) / 2; 
-                cardPos = cardPos - centerOffset + d.sidePadL; 
-            }
-            
-            var diff = Math.abs(x - cardPos);
-            
-            if(diff < minDiff){
-                minDiff = diff;
-                closestIndex = i;
-            }
-        }
-        
-        return closestIndex;
-      }
-
-
+      
       function applyTransform(x, ms){
-        x = Math.max(0, Math.min(x, maxOffset())); 
+        var m = maxOffset();
+        
+        x = Math.max(0, Math.min(x, m)); 
         offset = x;
         
         var translateX = -x;
 
-        track.style.transition = 'transform '+ms+'ms cubic-bezier(.15,.7,.25,1.05)';
-        track.style.transform  = 'translate3d('+(translateX)+'px,0,0)';
-      }
-
-      function snapToIndex(n, user){
-        if(user === void 0) user = false;
-        if(isMoving) return;
-        
-        var last = cards.length-1;
-        var newIdx = Math.max(0, Math.min(n, last));
-        
-        if (newIdx === idx && !user) return;
-        if (newIdx === idx && user) return;
-
-        idx = newIdx;
-        setActive(idx);
-        
-        var targetX = cards[newIdx].offsetLeft;
-        
-        if (newIdx === last) {
-             var d = dims();
-             var centerOffset = (d.vp - d.cardW) / 2;
-             targetX = cards[newIdx].offsetLeft - centerOffset + d.sidePadL; 
+        if (ms > 0) {
+            track.style.transition = 'transform '+ms+'ms cubic-bezier(.16, 1, .3, 1)';
+        } else {
+            track.style.transition = 'none'; 
         }
-
-        var finalOffset = Math.max(0, Math.min(targetX, maxOffset()));
-
-        isMoving = true;
-        applyTransform(finalOffset, 380);
         
-        setTimeout(function() { isMoving = false; }, 380); 
+        track.style.transform  = 'translate3d('+(translateX)+'px,0,0)';
         
-        if(user){ userInteractedAt = performance.now(); restartAuto(); }
+        updateActiveCardIndex(offset);
+        
+        // ✅ 목록 끝에 도달하면 시작 위치로 이동 (부드러운 순환)
+        if (offset >= m && isAutoPlaying) {
+             // 1초 동안 부드럽게 시작 위치로 이동
+            applyTransform(0, 1000); 
+        }
+      }
+      
+      
+      function updateActiveCardIndex(currentOffset){
+          var d = dims();
+          var cardCenter = d.cardW / 2;
+          
+          for(var i = 0; i < cards.length; i++){
+              var cardStart = cards[i].offsetLeft - d.sidePadL;
+              
+              if(currentOffset >= cardStart - cardCenter){
+                  idx = i;
+              } else {
+                  break;
+              }
+          }
+          setActive(idx);
       }
 
-      /* ===== 드래그/스와이프 로직 (최적화) ===== */
+
+      /* ===== 드래그/스와이프 로직 (유한 목록) ===== */
       var supportsPointer = typeof window.PointerEvent !== 'undefined';
-      var startX=0, baseOffset=0, currOffset=0, dragging=false;
+      var startX=0, startY=0, baseOffset=0, currOffset=0, dragging=false;
       var lastT=0, lastX=0, velocity=0, startTime=0;
       var capturedPointerId = null;
+      var isScrollPrevented = false; 
 
       function resist(x){
         var m = maxOffset();
-        // ✅ 수정: 되돌아오려는 복원력(저항) 계수를 0.35에서 0.25로 감소
-        if(x < 0) return x * 0.25;
-        if(x > m) return m + (x - m)*0.25;
+        if(x < 0) return x * 0.35;
+        if(x > m) return m + (x - m)*0.35;
         return x;
       }
       
@@ -346,15 +460,26 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         if(!dragging) return;
         var translateX = -currOffset;
         track.style.transform = 'translate3d('+(translateX)+'px,0,0)';
+        updateActiveCardIndex(currOffset); 
         animationFrameId = requestAnimationFrame(updateTrackPosition);
       }
 
-      function onDown(clientX, pointerId){
+      function onDown(clientX, clientY, pointerId){ 
         if(isMoving) return;
-        dragging=true; startX=clientX; baseOffset=offset; currOffset=offset; 
-        lastX=clientX; lastT=performance.now(); velocity=0; startTime=performance.now();
+        stopAuto(); // 드래그 시작 시 자동 재생 중지
+        
+        dragging=true; 
+        startX=clientX; 
+        startY=clientY;
+        baseOffset=offset; 
+        currOffset=offset; 
+        lastX=clientX; 
+        lastT=performance.now(); 
+        velocity=0; 
+        startTime=performance.now(); 
+        isScrollPrevented=false; 
         track.style.transition='none'; 
-        userInteractedAt = performance.now();
+        // userInteractedAt = performance.now(); // ✅ 제거
         viewport.classList.add('is-dragging'); 
         
         if (supportsPointer && pointerId !== undefined) {
@@ -366,20 +491,28 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         updateTrackPosition(); 
       }
       
-      function onMove(clientX){
+      function onMove(clientX, clientY, e){ 
         if(!dragging) return;
         var now = performance.now();
         var dx = startX - clientX; 
+        var dy = startY - clientY; 
         
-        currOffset = resist(baseOffset + dx);
-        
-        var dt = now - lastT;
-        if (dt > 0) {
-            velocity = (clientX - lastX) / dt; 
+        if (!isScrollPrevented && Math.abs(dx) > Math.abs(dy)) { 
+            e.preventDefault(); 
+            isScrollPrevented = true; 
         }
-        
-        lastX = clientX; 
-        lastT = now;
+
+        if(isScrollPrevented || Math.abs(dx) > 10 || Math.abs(dy) > 10){
+            currOffset = resist(baseOffset + dx); 
+            
+            var dt = now - lastT;
+            if (dt > 0) {
+                velocity = (clientX - lastX) / dt; 
+            }
+            
+            lastX = clientX; 
+            lastT = now;
+        }
       }
       
       function onUp(pointerId){
@@ -398,8 +531,15 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         var targetOffset;
         
         if (dragDuration < 200) { 
-            // ✅ 수정: 관성 값 1800에서 1500으로 감소 (너무 많이 밀려나가는 현상 완화)
-            var inertia = velocity * 1500; 
+            var inertia = velocity * 1200; 
+            
+            var d = dims();
+            var maxInertiaDistance = 2 * (d.cardW + d.gap); 
+            
+            if (Math.abs(inertia) > maxInertiaDistance) {
+                inertia = Math.sign(inertia) * maxInertiaDistance;
+            }
+            
             targetOffset = currOffset - inertia;
         } else {
             targetOffset = currOffset;
@@ -407,61 +547,89 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
         targetOffset = Math.max(0, Math.min(targetOffset, m));
         
-        var newIdx = nearestIndexFromOffset(targetOffset);
+        offset = targetOffset;
         
-        var snapTargetX = cards[newIdx].offsetLeft;
+        applyTransform(offset, 500); 
         
-        if (newIdx === cards.length - 1) {
-             var d = dims();
-             var centerOffset = (d.vp - d.cardW) / 2;
-             snapTargetX = cards[newIdx].offsetLeft - centerOffset + d.sidePadL; 
-        }
-        
-        snapTargetX = Math.max(0, Math.min(snapTargetX, m));
-        
-        offset = snapTargetX;
-        applyTransform(offset, 380); 
-        
-        idx = newIdx; 
-        setActive(idx);
+        updateActiveCardIndex(offset);
         restartAuto();
         
         isMoving = true;
-        setTimeout(function() { isMoving = false; }, 380);
+        setTimeout(function() { isMoving = false; }, 500);
       }
       
-      var passiveOpts = {passive:true};
+      var activeOpts = {passive:false};
+      var passiveOpts = {passive:true}; 
+
       if(supportsPointer){
         viewport.addEventListener('pointerdown', function(e){ 
           if(e.button !== 0 && !e.isPrimary) return;
-          onDown(e.clientX, e.pointerId); 
+          onDown(e.clientX, e.clientY, e.pointerId); 
         }, passiveOpts); 
-        viewport.addEventListener('pointermove', function(e){ onMove(e.clientX); }, passiveOpts);
+        viewport.addEventListener('pointermove', function(e){ 
+            if(!dragging) return; 
+            onMove(e.clientX, e.clientY, e); 
+        }, activeOpts);
         window.addEventListener('pointerup', function(e){ onUp(e.pointerId); }, passiveOpts);
         window.addEventListener('pointercancel', function(e){ onUp(e.pointerId); }, passiveOpts);
       }else{
-        viewport.addEventListener('touchstart', function(e){ if(!e.touches||!e.touches.length)return; onDown(e.touches[0].clientX); }, passiveOpts);
-        viewport.addEventListener('touchmove',  function(e){ if(!e.touches||!e.touches.length)return; onMove(e.touches[0].clientX); }, passiveOpts);
+        viewport.addEventListener('touchstart', function(e){ 
+            if(!e.touches||!e.touches.length)return; 
+            onDown(e.touches[0].clientX, e.touches[0].clientY); 
+        }, passiveOpts);
+        viewport.addEventListener('touchmove',  function(e){ 
+            if(!e.touches||!e.touches.length)return; 
+            onMove(e.touches[0].clientX, e.touches[0].clientY, e); 
+        }, activeOpts); 
         window.addEventListener('touchend',   function(){ onUp(); }, passiveOpts);
         
-        viewport.addEventListener('mousedown', function(e){ onDown(e.clientX); }, passiveOpts);
-        window.addEventListener('mousemove',   function(e){ onMove(e.clientX); }, passiveOpts);
+        viewport.addEventListener('mousedown', function(e){ onDown(e.clientX, e.clientY); }, passiveOpts); 
+        window.addEventListener('mousemove',   function(e){ 
+            if(!dragging) return;
+            onMove(e.clientX, e.clientY, e); 
+        }, activeOpts); 
         window.addEventListener('mouseup',     function(){ onUp(); }, passiveOpts);
       }
       
-      /* ===== 자동 재생 로직 ===== */
+      /* ===== 자동 재생 로직 (requestAnimationFrame 기반 부드러운 이동) ===== */
+      
+      function autoMove(timestamp){
+          if (!lastTimestamp) {
+              lastTimestamp = timestamp;
+              autoRafId = requestAnimationFrame(autoMove);
+              return;
+          }
+          
+          var deltaTime = timestamp - lastTimestamp;
+          
+          if (deltaTime > 100) deltaTime = 0; 
+          
+          var distance = autoSpeed * deltaTime;
+          
+          var nextOffset = offset + distance;
+          
+          // applyTransform 내부에서 maxOffset 체크 및 순환 로직 처리
+          applyTransform(nextOffset, 0); 
+          
+          lastTimestamp = timestamp;
+          
+          if (isAutoPlaying) {
+             autoRafId = requestAnimationFrame(autoMove);
+          }
+      }
       
       function startAuto(){
-        if(timer) return;
-        var cs = getComputedStyle(root);
-        var interval = parseInt(cs.getPropertyValue('--autoMs')) || 3800; 
-        timer = setInterval(function(){
-          if(performance.now() - userInteractedAt < 6000) return;
-          var last = cards.length-1;
-          if(idx < last) snapToIndex(idx+1); else snapToIndex(0);
-        }, interval);
+        if(isAutoPlaying) return;
+        isAutoPlaying = true;
+        lastTimestamp = 0; 
+        autoRafId = requestAnimationFrame(autoMove);
       }
-      function stopAuto(){ clearInterval(timer); timer=null; }
+      
+      function stopAuto(){ 
+        if (autoRafId) cancelAnimationFrame(autoRafId);
+        isAutoPlaying = false; 
+        autoRafId = null; 
+      }
       function restartAuto(){ stopAuto(); startAuto(); }
 
 
@@ -469,10 +637,10 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         requestAnimationFrame(function(){
           root.classList.add('ecs-mounted');
           
-          var initialOffset = cards[0].offsetLeft; 
+          var initialOffset = 0; 
           
-          applyTransform(Math.max(0, initialOffset), 0); 
-          setActive(0);
+          applyTransform(initialOffset, 0); 
+          updateActiveCardIndex(initialOffset); 
           startAuto();
         });
       });
@@ -483,29 +651,161 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         rAF = requestAnimationFrame(function(){
           var newMaxOffset = maxOffset();
           
-          var ni = nearestIndexFromOffset(offset); 
-          var snapTargetX = cards[ni].offsetLeft;
-          
-          if (ni === cards.length - 1) {
-              var d = dims();
-              var centerOffset = (d.vp - d.cardW) / 2;
-              snapTargetX = cards[ni].offsetLeft - centerOffset + d.sidePadL;
-          }
-          
-          offset = Math.max(0, Math.min(snapTargetX, newMaxOffset));
+          offset = Math.max(0, Math.min(offset, newMaxOffset));
 
           applyTransform(offset, 0);
-          if(ni!==idx){ idx=ni; setActive(idx); }
+          updateActiveCardIndex(offset);
+          restartAuto(); 
         });
       });
-
-      cards.forEach(function(c,i){ c.addEventListener('click', function(){ snapToIndex(i, true); }); });
+      
+      // ✅ 호버/클릭 시 자동 재생 멈춤 로직
+      var handleInteraction = function(e){
+          if (e.type === 'click' || e.type === 'mouseenter') {
+              stopAuto();
+          } else if (e.type === 'mouseleave' && !dragging && !isMoving) {
+              // ✅ 호버가 풀리면 즉시 자동 이동 재개
+              restartAuto();
+          }
+      };
+      viewport.addEventListener('click', handleInteraction);
+      viewport.addEventListener('mouseenter', handleInteraction);
+      viewport.addEventListener('mouseleave', handleInteraction);
+      
     })();
   </script>
 </section>
 
-<section class="ecs-slider" aria-label="Live Server Drag Card Slider">
 
+
+
+<!--최적화 코드 -->
+
+<section class="ecs-slider" aria-label="Finite List Drag Card Slider">
+  <style>
+    /*
+      ====================================
+      CSS: 디자인 및 반응형 설정 (변경 없음)
+      ====================================
+    */
+    .ecs-slider{
+      --ink:#0f172a;
+      --accent:#e73700;
+      --bg:#f6f7fb;
+      --cardW: 400px; 
+      --gap: 18px;
+      --radius: 18px;
+      --shadow: 0 10px 24px rgba(15,23,42,.08); 
+      --fadeDur: 700ms;
+      --autoMs: 3800; 
+      --ease: cubic-bezier(.22,.61,.36,1); 
+      --progress: 0; 
+      
+      font-family: "Pretendard","Noto Sans KR",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+      background: var(--bg);
+      position: relative;
+    }
+
+    .ecs-slider .ecs-wrap{margin:0 auto;padding:56px 20px}
+    .ecs-slider .ecs-head{
+        display:flex;
+        align-items:center; 
+        justify-content:space-between;
+        margin-bottom:18px;
+    }
+    .ecs-slider .ecs-title{
+      font-size:clamp(18px,2.2vw,24px);line-height:1.3;color:var(--ink);
+      font-weight:800;position:relative;padding-bottom:0; 
+      margin-bottom:10px; 
+      letter-spacing:-.02em
+    }
+    .ecs-slider .ecs-title:after{content:"";position:absolute;left:0;bottom:-10px;width:36px;height:4px;border-radius:2px;background:var(--accent)}
+
+    .ecs-slider .ecs-viewport{
+      position:relative;
+      overflow: hidden; 
+      padding:10px 8px;
+      --sidePad:max(20px,(100% - 1000px)/2);
+      padding-left:var(--gap); 
+      padding-right:var(--sidePad);
+      contain:layout paint size;border-radius:20px;
+      min-height:calc(var(--cardW) + 20px); 
+      transform:translateY(8px);
+      transition:opacity var(--fadeDur) var(--ease),transform var(--fadeDur) var(--ease);
+      touch-action: pan-y pinch-zoom; 
+      user-select: none; 
+    }
+    .ecs-slider .ecs-viewport.is-dragging {
+        cursor: grabbing; 
+    }
+
+    .ecs-slider.ecs-mounted .ecs-viewport{opacity:1;transform:none}
+
+    .ecs-slider .ecs-track{
+      display:flex;gap:var(--gap);
+      will-change: transform;
+      transition:transform 500ms cubic-bezier(.16, 1, .3, 1); 
+    }
+
+    /* 카드 */
+    .ecs-slider .ecs-card{
+      position:relative;
+      flex:0 0 var(--cardW);
+      height:var(--cardW); 
+      border-radius:var(--radius);overflow:hidden;background:#fff;
+      box-shadow:var(--shadow); 
+      transform:translateZ(0);cursor:grab; 
+      transition: box-shadow 360ms var(--ease); 
+      isolation:isolate
+    }
+    .ecs-slider .ecs-card.ecs-active{
+        box-shadow: 0 24px 60px rgba(13,18,30,.18); 
+    }
+    .ecs-slider .ecs-logo{position:absolute;top:16px;left:16px;z-index:3;width:40px;height:40px;border-radius:10px;overflow:hidden;background:transparent;box-shadow:0 2px 6px rgba(15,23,42,.1);display:grid;place-items:center;pointer-events:none;}
+    .ecs-slider .ecs-logo img{width:70%;height:70%;object-fit:contain;display:block;}
+    .ecs-slider .ecs-media{position:absolute;inset:0}
+    .ecs-slider .ecs-media img{width:100%;height:100%;object-fit:contain;display:block;transform:scale(1.02);transition:transform 600ms var(--ease),filter 600ms var(--ease)}
+    .ecs-slider .ecs-card:hover .ecs-media img,.ecs-slider .ecs-card.ecs-active .ecs-media img{transform:scale(1.05);filter:saturate(1.04)}
+    .ecs-slider .ecs-grad{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 35%,rgba(0,0,0,.78) 95%);z-index:1}
+    .ecs-slider .ecs-body{position:absolute;left:16px;right:16px;bottom:14px;z-index:2;color:#fff;transform:translateY(0);opacity:.98;transition:opacity 380ms cubic-bezier(.15,.7,.25,1.05);}
+    .ecs-slider .ecs-title2{font-size:clamp(12px,2vw,16px);line-height:1.2;margin:0;font-weight:800;letter-spacing:-.01em}
+    .ecs-slider .ecs-card:not(.ecs-active) .ecs-body{opacity: 0.8;} 
+
+    .ecs-slider .ecs-gauge{
+        width: clamp(120px, 15vw, 180px); 
+        height: 6px; 
+        background: #e2e8f0; 
+        border-radius: 3px;
+        overflow: hidden;
+        margin-top: 10px;
+    }
+    .ecs-slider .ecs-progress-bar{
+        width: 100%;
+        height: 100%;
+        background: var(--accent); 
+        transform: scaleX(var(--progress)); 
+        transform-origin: left center;
+        transition: transform 380ms var(--ease);
+    }
+
+    /* 반응형 */
+    @media (max-width:1100px){.ecs-slider{--cardW:320px;}}
+    @media (max-width:820px){
+        .ecs-slider{
+            --cardW:260px;
+            --gap:14px;
+        }
+        .ecs-slider .ecs-wrap{padding:44px 16px}
+    }
+    @media (max-width:420px){
+        .ecs-slider{
+            --cardW: clamp(180px, 85vw - 32px, 300px); 
+        }
+        .ecs-slider .ecs-gauge {
+             width: 80px; 
+        }
+    }
+  </style>
 
   <div class="ecs-wrap">
     
@@ -604,380 +904,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     
   </div>
 
-    <script>
-    (function(){
-      var root = (function(){
-        var currentScript = document.currentScript;
-        if (currentScript && currentScript.parentElement && currentScript.parentElement.classList.contains('ecs-slider')) {
-          return currentScript.parentElement;
-        }
-        var uninit = document.querySelector('.ecs-slider:not([data-ecs-ready])');
-        return uninit;
-      })();
-
-      if(!root || root.hasAttribute('data-ecs-ready')) return;
-      root.setAttribute('data-ecs-ready','');
-
-      var viewport    = root.querySelector('.ecs-viewport');
-      var track       = root.querySelector('.ecs-track');
-      var cards       = Array.prototype.slice.call(root.querySelectorAll('[data-ecs-slide]'));
-      
-      var gauge       = root.querySelector('.ecs-gauge');
-      var gaugeBar    = root.querySelector('.ecs-progress-bar'); 
-
-      var idx = 0;
-      var timer = null;
-      var userInteractedAt = 0;
-      var offset = 0; 
-      var isMoving = false; 
-      var animationFrameId = null; 
-
-      function setActive(i){
-        cards.forEach(function(c,k){ c.classList.toggle('ecs-active', k===i); });
-        
-        if(cards.length > 1 && gauge && gaugeBar){
-            var progressRatio = i / (cards.length - 1);
-            root.style.setProperty('--progress', progressRatio);
-            gauge.setAttribute('aria-valuenow', i + 1);
-        }
-      }
-
-      function dims(){
-        var cs = getComputedStyle(root);
-        var cardW   = parseFloat(cs.getPropertyValue('--cardW')) || 400;
-        
-        return {
-          cardW:   cardW,
-          gap:     parseFloat(cs.getPropertyValue('--gap')) || 18,
-          vp:      viewport.clientWidth,
-          sidePadR: parseFloat(getComputedStyle(viewport).paddingRight) || 20, 
-          sidePadL: parseFloat(getComputedStyle(viewport).paddingLeft) || 18, 
-        };
-      }
-      
-      function maxOffset(){
-        if (cards.length === 0) return 0;
-        
-        var d = dims();
-        var lastCard = cards[cards.length - 1];
-        
-        var centerOffset = (d.vp - d.cardW) / 2;
-        var maxScroll = lastCard.offsetLeft - centerOffset + d.sidePadL;
-        
-        return Math.max(0, maxScroll); 
-      }
-      
-      function nearestIndexFromOffset(x){
-        var closestIndex = 0;
-        var minDiff = Infinity;
-        
-        for(var i = 0; i < cards.length; i++){
-            var cardPos = cards[i].offsetLeft; 
-            
-            if (i === cards.length - 1) {
-                var d = dims();
-                var centerOffset = (d.vp - d.cardW) / 2; 
-                cardPos = cardPos - centerOffset + d.sidePadL; 
-            }
-            
-            var diff = Math.abs(x - cardPos);
-            
-            if(diff < minDiff){
-                minDiff = diff;
-                closestIndex = i;
-            }
-        }
-        
-        return closestIndex;
-      }
-
-
-      function applyTransform(x, ms){
-        x = Math.max(0, Math.min(x, maxOffset())); 
-        offset = x;
-        
-        var translateX = -x;
-
-        track.style.transition = 'transform '+ms+'ms cubic-bezier(.15,.7,.25,1.05)';
-        track.style.transform  = 'translate3d('+(translateX)+'px,0,0)';
-      }
-
-      function snapToIndex(n, user){
-        if(user === void 0) user = false;
-        if(isMoving) return;
-        
-        var last = cards.length-1;
-        var newIdx = Math.max(0, Math.min(n, last));
-        
-        if (newIdx === idx && !user) return;
-        if (newIdx === idx && user) return;
-
-        idx = newIdx;
-        setActive(idx);
-        
-        var targetX = cards[newIdx].offsetLeft;
-        
-        if (newIdx === last) {
-             var d = dims();
-             var centerOffset = (d.vp - d.cardW) / 2;
-             targetX = cards[newIdx].offsetLeft - centerOffset + d.sidePadL; 
-        }
-
-        var finalOffset = Math.max(0, Math.min(targetX, maxOffset()));
-
-        isMoving = true;
-        applyTransform(finalOffset, 380);
-        
-        setTimeout(function() { isMoving = false; }, 380); 
-        
-        if(user){ userInteractedAt = performance.now(); restartAuto(); }
-      }
-
-      /* ===== 드래그/스와이프 로직 (최적화) ===== */
-      var supportsPointer = typeof window.PointerEvent !== 'undefined';
-      var startX=0, baseOffset=0, currOffset=0, dragging=false;
-      var lastT=0, lastX=0, velocity=0, startTime=0;
-      var capturedPointerId = null;
-
-      function resist(x){
-        var m = maxOffset();
-        // ✅ 수정: 되돌아오려는 복원력(저항) 계수를 0.35에서 0.25로 감소
-        if(x < 0) return x * 0.25;
-        if(x > m) return m + (x - m)*0.25;
-        return x;
-      }
-      
-      function updateTrackPosition(){
-        if(!dragging) return;
-        var translateX = -currOffset;
-        track.style.transform = 'translate3d('+(translateX)+'px,0,0)';
-        animationFrameId = requestAnimationFrame(updateTrackPosition);
-      }
-
-      function onDown(clientX, pointerId){
-        if(isMoving) return;
-        dragging=true; startX=clientX; baseOffset=offset; currOffset=offset; 
-        lastX=clientX; lastT=performance.now(); velocity=0; startTime=performance.now();
-        track.style.transition='none'; 
-        userInteractedAt = performance.now();
-        viewport.classList.add('is-dragging'); 
-        
-        if (supportsPointer && pointerId !== undefined) {
-          viewport.setPointerCapture(pointerId);
-          capturedPointerId = pointerId;
-        }
-
-        cancelAnimationFrame(animationFrameId);
-        updateTrackPosition(); 
-      }
-      
-      function onMove(clientX){
-        if(!dragging) return;
-        var now = performance.now();
-        var dx = startX - clientX; 
-        
-        currOffset = resist(baseOffset + dx);
-        
-        var dt = now - lastT;
-        if (dt > 0) {
-            velocity = (clientX - lastX) / dt; 
-        }
-        
-        lastX = clientX; 
-        lastT = now;
-      }
-      
-      function onUp(pointerId){
-        if(!dragging) return; 
-        dragging=false;
-        cancelAnimationFrame(animationFrameId);
-        viewport.classList.remove('is-dragging');
-
-        if (supportsPointer && capturedPointerId !== null) {
-          try { viewport.releasePointerCapture(capturedPointerId); } catch(e) {}
-          capturedPointerId = null;
-        }
-
-        var m = maxOffset();
-        var dragDuration = performance.now() - startTime;
-        var targetOffset;
-        
-        if (dragDuration < 200) { 
-            // ✅ 수정: 관성 값 1800에서 1500으로 감소 (너무 많이 밀려나가는 현상 완화)
-            var inertia = velocity * 1500; 
-            targetOffset = currOffset - inertia;
-        } else {
-            targetOffset = currOffset;
-        }
-
-        targetOffset = Math.max(0, Math.min(targetOffset, m));
-        
-        var newIdx = nearestIndexFromOffset(targetOffset);
-        
-        var snapTargetX = cards[newIdx].offsetLeft;
-        
-        if (newIdx === cards.length - 1) {
-             var d = dims();
-             var centerOffset = (d.vp - d.cardW) / 2;
-             snapTargetX = cards[newIdx].offsetLeft - centerOffset + d.sidePadL; 
-        }
-        
-        snapTargetX = Math.max(0, Math.min(snapTargetX, m));
-        
-        offset = snapTargetX;
-        applyTransform(offset, 380); 
-        
-        idx = newIdx; 
-        setActive(idx);
-        restartAuto();
-        
-        isMoving = true;
-        setTimeout(function() { isMoving = false; }, 380);
-      }
-      
-      var passiveOpts = {passive:true};
-      if(supportsPointer){
-        viewport.addEventListener('pointerdown', function(e){ 
-          if(e.button !== 0 && !e.isPrimary) return;
-          onDown(e.clientX, e.pointerId); 
-        }, passiveOpts); 
-        viewport.addEventListener('pointermove', function(e){ onMove(e.clientX); }, passiveOpts);
-        window.addEventListener('pointerup', function(e){ onUp(e.pointerId); }, passiveOpts);
-        window.addEventListener('pointercancel', function(e){ onUp(e.pointerId); }, passiveOpts);
-      }else{
-        viewport.addEventListener('touchstart', function(e){ if(!e.touches||!e.touches.length)return; onDown(e.touches[0].clientX); }, passiveOpts);
-        viewport.addEventListener('touchmove',  function(e){ if(!e.touches||!e.touches.length)return; onMove(e.touches[0].clientX); }, passiveOpts);
-        window.addEventListener('touchend',   function(){ onUp(); }, passiveOpts);
-        
-        viewport.addEventListener('mousedown', function(e){ onDown(e.clientX); }, passiveOpts);
-        window.addEventListener('mousemove',   function(e){ onMove(e.clientX); }, passiveOpts);
-        window.addEventListener('mouseup',     function(){ onUp(); }, passiveOpts);
-      }
-      
-      /* ===== 자동 재생 로직 ===== */
-      
-      function startAuto(){
-        if(timer) return;
-        var cs = getComputedStyle(root);
-        var interval = parseInt(cs.getPropertyValue('--autoMs')) || 3800; 
-        timer = setInterval(function(){
-          if(performance.now() - userInteractedAt < 6000) return;
-          var last = cards.length-1;
-          if(idx < last) snapToIndex(idx+1); else snapToIndex(0);
-        }, interval);
-      }
-      function stopAuto(){ clearInterval(timer); timer=null; }
-      function restartAuto(){ stopAuto(); startAuto(); }
-
-
-      document.addEventListener('DOMContentLoaded', function(){
-        requestAnimationFrame(function(){
-          root.classList.add('ecs-mounted');
-          
-          var initialOffset = cards[0].offsetLeft; 
-          
-          applyTransform(Math.max(0, initialOffset), 0); 
-          setActive(0);
-          startAuto();
-        });
-      });
-
-      var rAF=null;
-      window.addEventListener('resize', function(){
-        cancelAnimationFrame(rAF);
-        rAF = requestAnimationFrame(function(){
-          var newMaxOffset = maxOffset();
-          
-          var ni = nearestIndexFromOffset(offset); 
-          var snapTargetX = cards[ni].offsetLeft;
-          
-          if (ni === cards.length - 1) {
-              var d = dims();
-              var centerOffset = (d.vp - d.cardW) / 2;
-              snapTargetX = cards[ni].offsetLeft - centerOffset + d.sidePadL;
-          }
-          
-          offset = Math.max(0, Math.min(snapTargetX, newMaxOffset));
-
-          applyTransform(offset, 0);
-          if(ni!==idx){ idx=ni; setActive(idx); }
-        });
-      });
-
-      cards.forEach(function(c,i){ c.addEventListener('click', function(){ snapToIndex(i, true); }); });
-    })();
-  </script>
-</section>
-
-<section class="ecs-slider" aria-label="Live Server Drag Card Slider">
- 
-
-  <div class="ecs-wrap">
-    
-    <div class="ecs-head">
-        <h2 class="ecs-title">세탁기/건조기</h2>
-        <div class="ecs-gauge" role="progressbar" aria-valuenow="1" aria-valuemin="1" aria-valuemax="6">
-            <div class="ecs-progress-bar"></div>
-        </div>
-    </div>
-
-    <div class="ecs-viewport">
-      <div class="ecs-track">
-        <article class="ecs-card ecs-active" data-ecs-slide>
-          <div class="ecs-logo">
-            <img src="./img/lg-logo.png" alt="Dota 2 Logo">
-          </div>
-          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/LJZgHf6E3TH4Cn0NbVn9q4mzRlsfXqu38xkLgz_TWnwbIAtv5rIZyFwmFh-vitn_eUD97c_Ohn2mIS7F1WC61JK_X_FIYzPPyiBYrugxiFkfgNvBMH-hNIM=w800" alt="Dota 2"></div>
-          <div class="ecs-grad"></div>
-          <div class="ecs-body"><h3 class="ecs-title2">LG 오브제 세탁기(21㎏) + 건조기(19㎏)</h3></div>
-        </article>
-        <article class="ecs-card" data-ecs-slide>
-          <div class="ecs-logo">
-            <img src="./img/lg-logo.png" alt="The Witcher 3 Logo">
-          </div>
-          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/CxqVMP4v37Jkklf7AmMejWbD0nuIM-UI_uLeorTtmKXZVNv8uMzMSVelkBjBP_3PmBfJLoJm3nMCGjYIdZihZ4aYzMPFsMKZ0Froul9lHLgdRRdtUmFy=w800" alt="The Witcher 3"></div>
-          <div class="ecs-grad"></div>
-          <div class="ecs-body"><h3 class="ecs-title2">LG 오브제 건조기 (25㎏)</h3></div>
-        </article>
- <article class="ecs-card" data-ecs-slide>
-          <div class="ecs-logo">
-            <img src="./img/lg-logo.png" alt="The Witcher 3 Logo">
-          </div>
-          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/KbY6GupXn7AkVg2nCy5wfQz0xscERNyGS540hZUvic20yo2ccgXLO9ypj81H7VXlGDHiRJkgQ5kWl0IyYDaqV5nHWgTVhzR1iGkZpijRNwBuKVqP0j5u=w800" alt="The Witcher 3"></div>
-          <div class="ecs-grad"></div>
-          <div class="ecs-body"><h3 class="ecs-title2">LG 오브제 세탁기(25㎏)+건조기(20㎏)</h3></div>
-        </article>
-
-      <article class="ecs-card" data-ecs-slide>
-          <div class="ecs-logo">
-            <img src="./img/samsung-logo.svg" alt="The Witcher 3 Logo">
-          </div>
-          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/Cjt00XGQH0qOouDRI4Tp2eeaPKYrd7ey-_pxbKe0cXboR26DtKyV23JqfI6FQoN6Y06jaN_5FZQtx8W2Xm6Wsepd_Wu6GXR_iYUEMkVBFV8YTtehYBbrUw=w800" alt="The Witcher 3"></div>
-          <div class="ecs-grad"></div>
-          <div class="ecs-body"><h3 class="ecs-title2">삼성 그랑데 세탁기 + 건조기</h3></div>
-        </article>
-       <article class="ecs-card" data-ecs-slide>
-          <div class="ecs-logo">
-            <img src="./img/samsung-logo.svg" alt="The Witcher 3 Logo">
-          </div>
-          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/0Geq40f7zxmKR_C2H0MlxHqQ7xCWMKhd-t658jazDMfvGGmTra9CaFIoTLrJ6EZLGZr6KSsi2q-Bz5BpwJ5NnDYzvUXqlGHKmxSqEgLPBySVu7N8PA451Q=w800" alt="The Witcher 3"></div>
-          <div class="ecs-grad"></div>
-          <div class="ecs-body"><h3 class="ecs-title2">삼성 그랑데 세탁기(25㎏) + 건조기(20㎏)</h3></div>
-        </article>
-         <article class="ecs-card" data-ecs-slide>
-          <div class="ecs-logo">
-            <img src="./img/samsung-logo.svg" alt="The Witcher 3 Logo">
-          </div>
-          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/S4sM-WTUGDkOC8Yx7io1i4RUeXNJiXgR8aa_l3po17BhTke26oU5Wo1ns0_hYMcZ8UpH7U4o3TxF3oYUTRxjGjnf1ZlCF843o4juweW5OLaIg7L0I1IXxg=w800" alt="The Witcher 3"></div>
-          <div class="ecs-grad"></div>
-          <div class="ecs-body"><h3 class="ecs-title2">삼성 원바디 그랑데 세탁기 + 건조기</h3></div>
-        </article>
-       
-      </div>
-
-      </div>
-    
-  </div>
   <script>
     (function(){
       var root = (function(){
@@ -999,15 +925,23 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       var gauge       = root.querySelector('.ecs-gauge');
       var gaugeBar    = root.querySelector('.ecs-progress-bar'); 
 
-      var idx = 0;
+      var idx = 0; 
       var timer = null;
-      var userInteractedAt = 0;
+      // var userInteractedAt = 0; // ✅ 제거: 지연 로직에 사용되던 변수
       var offset = 0; 
       var isMoving = false; 
       var animationFrameId = null; 
+      
+      var autoSpeed = 0.05; 
+      var lastTimestamp = 0;
+      var isAutoPlaying = false; 
+      var autoRafId = null;
+
 
       function setActive(i){
-        cards.forEach(function(c,k){ c.classList.toggle('ecs-active', k===i); });
+        cards.forEach(function(c,k){ 
+            c.classList.toggle('ecs-active', k===i); 
+        });
         
         if(cards.length > 1 && gauge && gaugeBar){
             var progressRatio = i / (cards.length - 1);
@@ -1019,7 +953,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       function dims(){
         var cs = getComputedStyle(root);
         var cardW   = parseFloat(cs.getPropertyValue('--cardW')) || 400;
-        
         return {
           cardW:   cardW,
           gap:     parseFloat(cs.getPropertyValue('--gap')) || 18,
@@ -1033,91 +966,68 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         if (cards.length === 0) return 0;
         
         var d = dims();
-        var lastCard = cards[cards.length - 1];
+        var totalContentWidth = (d.cardW + d.gap) * cards.length - d.gap;
         
-        var centerOffset = (d.vp - d.cardW) / 2;
-        var maxScroll = lastCard.offsetLeft - centerOffset + d.sidePadL;
+        var maxScroll = totalContentWidth - d.vp + d.sidePadL;
         
         return Math.max(0, maxScroll); 
       }
       
-      function nearestIndexFromOffset(x){
-        var closestIndex = 0;
-        var minDiff = Infinity;
-        
-        for(var i = 0; i < cards.length; i++){
-            var cardPos = cards[i].offsetLeft; 
-            
-            if (i === cards.length - 1) {
-                var d = dims();
-                var centerOffset = (d.vp - d.cardW) / 2; 
-                cardPos = cardPos - centerOffset + d.sidePadL; 
-            }
-            
-            var diff = Math.abs(x - cardPos);
-            
-            if(diff < minDiff){
-                minDiff = diff;
-                closestIndex = i;
-            }
-        }
-        
-        return closestIndex;
-      }
-
-
+      
       function applyTransform(x, ms){
-        x = Math.max(0, Math.min(x, maxOffset())); 
+        var m = maxOffset();
+        
+        x = Math.max(0, Math.min(x, m)); 
         offset = x;
         
         var translateX = -x;
 
-        track.style.transition = 'transform '+ms+'ms cubic-bezier(.15,.7,.25,1.05)';
-        track.style.transform  = 'translate3d('+(translateX)+'px,0,0)';
-      }
-
-      function snapToIndex(n, user){
-        if(user === void 0) user = false;
-        if(isMoving) return;
-        
-        var last = cards.length-1;
-        var newIdx = Math.max(0, Math.min(n, last));
-        
-        if (newIdx === idx && !user) return;
-        if (newIdx === idx && user) return;
-
-        idx = newIdx;
-        setActive(idx);
-        
-        var targetX = cards[newIdx].offsetLeft;
-        
-        if (newIdx === last) {
-             var d = dims();
-             var centerOffset = (d.vp - d.cardW) / 2;
-             targetX = cards[newIdx].offsetLeft - centerOffset + d.sidePadL; 
+        if (ms > 0) {
+            track.style.transition = 'transform '+ms+'ms cubic-bezier(.16, 1, .3, 1)';
+        } else {
+            track.style.transition = 'none'; 
         }
-
-        var finalOffset = Math.max(0, Math.min(targetX, maxOffset()));
-
-        isMoving = true;
-        applyTransform(finalOffset, 380);
         
-        setTimeout(function() { isMoving = false; }, 380); 
+        track.style.transform  = 'translate3d('+(translateX)+'px,0,0)';
         
-        if(user){ userInteractedAt = performance.now(); restartAuto(); }
+        updateActiveCardIndex(offset);
+        
+        // ✅ 목록 끝에 도달하면 시작 위치로 이동 (부드러운 순환)
+        if (offset >= m && isAutoPlaying) {
+             // 1초 동안 부드럽게 시작 위치로 이동
+            applyTransform(0, 1000); 
+        }
+      }
+      
+      
+      function updateActiveCardIndex(currentOffset){
+          var d = dims();
+          var cardCenter = d.cardW / 2;
+          
+          for(var i = 0; i < cards.length; i++){
+              var cardStart = cards[i].offsetLeft - d.sidePadL;
+              
+              if(currentOffset >= cardStart - cardCenter){
+                  idx = i;
+              } else {
+                  break;
+              }
+          }
+          setActive(idx);
       }
 
-      /* ===== 드래그/스와이프 로직 (최적화) ===== */
+
+      /* ===== 드래그/스와이프 로직 (유한 목록) ===== */
       var supportsPointer = typeof window.PointerEvent !== 'undefined';
-      var startX=0, baseOffset=0, currOffset=0, dragging=false;
+      var startX=0, startY=0, baseOffset=0, currOffset=0, dragging=false;
       var lastT=0, lastX=0, velocity=0, startTime=0;
       var capturedPointerId = null;
+      var isScrollPrevented = false; 
 
       function resist(x){
         var m = maxOffset();
-        // ✅ 수정: 되돌아오려는 복원력(저항) 계수를 0.35에서 0.25로 감소
-        if(x < 0) return x * 0.25;
-        if(x > m) return m + (x - m)*0.25;
+        if(x < 0) return x * 0.35;
+        if(x > m) return m + (x - m)*0.35;
         return x;
       }
       
@@ -1125,15 +1035,26 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         if(!dragging) return;
         var translateX = -currOffset;
         track.style.transform = 'translate3d('+(translateX)+'px,0,0)';
+        updateActiveCardIndex(currOffset); 
         animationFrameId = requestAnimationFrame(updateTrackPosition);
       }
 
-      function onDown(clientX, pointerId){
+      function onDown(clientX, clientY, pointerId){ 
         if(isMoving) return;
-        dragging=true; startX=clientX; baseOffset=offset; currOffset=offset; 
-        lastX=clientX; lastT=performance.now(); velocity=0; startTime=performance.now();
+        stopAuto(); // 드래그 시작 시 자동 재생 중지
+        
+        dragging=true; 
+        startX=clientX; 
+        startY=clientY;
+        baseOffset=offset; 
+        currOffset=offset; 
+        lastX=clientX; 
+        lastT=performance.now(); 
+        velocity=0; 
+        startTime=performance.now(); 
+        isScrollPrevented=false; 
         track.style.transition='none'; 
-        userInteractedAt = performance.now();
+        // userInteractedAt = performance.now(); // ✅ 제거
         viewport.classList.add('is-dragging'); 
         
         if (supportsPointer && pointerId !== undefined) {
@@ -1145,20 +1066,28 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         updateTrackPosition(); 
       }
       
-      function onMove(clientX){
+      function onMove(clientX, clientY, e){ 
         if(!dragging) return;
         var now = performance.now();
         var dx = startX - clientX; 
+        var dy = startY - clientY; 
         
-        currOffset = resist(baseOffset + dx);
-        
-        var dt = now - lastT;
-        if (dt > 0) {
-            velocity = (clientX - lastX) / dt; 
+        if (!isScrollPrevented && Math.abs(dx) > Math.abs(dy)) { 
+            e.preventDefault(); 
+            isScrollPrevented = true; 
         }
-        
-        lastX = clientX; 
-        lastT = now;
+
+        if(isScrollPrevented || Math.abs(dx) > 10 || Math.abs(dy) > 10){
+            currOffset = resist(baseOffset + dx); 
+            
+            var dt = now - lastT;
+            if (dt > 0) {
+                velocity = (clientX - lastX) / dt; 
+            }
+            
+            lastX = clientX; 
+            lastT = now;
+        }
       }
       
       function onUp(pointerId){
@@ -1177,8 +1106,15 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         var targetOffset;
         
         if (dragDuration < 200) { 
-            // ✅ 수정: 관성 값 1800에서 1500으로 감소 (너무 많이 밀려나가는 현상 완화)
-            var inertia = velocity * 1500; 
+            var inertia = velocity * 1200; 
+            
+            var d = dims();
+            var maxInertiaDistance = 2 * (d.cardW + d.gap); 
+            
+            if (Math.abs(inertia) > maxInertiaDistance) {
+                inertia = Math.sign(inertia) * maxInertiaDistance;
+            }
+            
             targetOffset = currOffset - inertia;
         } else {
             targetOffset = currOffset;
@@ -1186,61 +1122,89 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
         targetOffset = Math.max(0, Math.min(targetOffset, m));
         
-        var newIdx = nearestIndexFromOffset(targetOffset);
+        offset = targetOffset;
         
-        var snapTargetX = cards[newIdx].offsetLeft;
+        applyTransform(offset, 500); 
         
-        if (newIdx === cards.length - 1) {
-             var d = dims();
-             var centerOffset = (d.vp - d.cardW) / 2;
-             snapTargetX = cards[newIdx].offsetLeft - centerOffset + d.sidePadL; 
-        }
-        
-        snapTargetX = Math.max(0, Math.min(snapTargetX, m));
-        
-        offset = snapTargetX;
-        applyTransform(offset, 380); 
-        
-        idx = newIdx; 
-        setActive(idx);
+        updateActiveCardIndex(offset);
         restartAuto();
         
         isMoving = true;
-        setTimeout(function() { isMoving = false; }, 380);
+        setTimeout(function() { isMoving = false; }, 500);
       }
       
-      var passiveOpts = {passive:true};
+      var activeOpts = {passive:false};
+      var passiveOpts = {passive:true}; 
+
       if(supportsPointer){
         viewport.addEventListener('pointerdown', function(e){ 
           if(e.button !== 0 && !e.isPrimary) return;
-          onDown(e.clientX, e.pointerId); 
+          onDown(e.clientX, e.clientY, e.pointerId); 
         }, passiveOpts); 
-        viewport.addEventListener('pointermove', function(e){ onMove(e.clientX); }, passiveOpts);
+        viewport.addEventListener('pointermove', function(e){ 
+            if(!dragging) return; 
+            onMove(e.clientX, e.clientY, e); 
+        }, activeOpts);
         window.addEventListener('pointerup', function(e){ onUp(e.pointerId); }, passiveOpts);
         window.addEventListener('pointercancel', function(e){ onUp(e.pointerId); }, passiveOpts);
       }else{
-        viewport.addEventListener('touchstart', function(e){ if(!e.touches||!e.touches.length)return; onDown(e.touches[0].clientX); }, passiveOpts);
-        viewport.addEventListener('touchmove',  function(e){ if(!e.touches||!e.touches.length)return; onMove(e.touches[0].clientX); }, passiveOpts);
+        viewport.addEventListener('touchstart', function(e){ 
+            if(!e.touches||!e.touches.length)return; 
+            onDown(e.touches[0].clientX, e.touches[0].clientY); 
+        }, passiveOpts);
+        viewport.addEventListener('touchmove',  function(e){ 
+            if(!e.touches||!e.touches.length)return; 
+            onMove(e.touches[0].clientX, e.touches[0].clientY, e); 
+        }, activeOpts); 
         window.addEventListener('touchend',   function(){ onUp(); }, passiveOpts);
         
-        viewport.addEventListener('mousedown', function(e){ onDown(e.clientX); }, passiveOpts);
-        window.addEventListener('mousemove',   function(e){ onMove(e.clientX); }, passiveOpts);
+        viewport.addEventListener('mousedown', function(e){ onDown(e.clientX, e.clientY); }, passiveOpts); 
+        window.addEventListener('mousemove',   function(e){ 
+            if(!dragging) return;
+            onMove(e.clientX, e.clientY, e); 
+        }, activeOpts); 
         window.addEventListener('mouseup',     function(){ onUp(); }, passiveOpts);
       }
       
-      /* ===== 자동 재생 로직 ===== */
+      /* ===== 자동 재생 로직 (requestAnimationFrame 기반 부드러운 이동) ===== */
+      
+      function autoMove(timestamp){
+          if (!lastTimestamp) {
+              lastTimestamp = timestamp;
+              autoRafId = requestAnimationFrame(autoMove);
+              return;
+          }
+          
+          var deltaTime = timestamp - lastTimestamp;
+          
+          if (deltaTime > 100) deltaTime = 0; 
+          
+          var distance = autoSpeed * deltaTime;
+          
+          var nextOffset = offset + distance;
+          
+          // applyTransform 내부에서 maxOffset 체크 및 순환 로직 처리
+          applyTransform(nextOffset, 0); 
+          
+          lastTimestamp = timestamp;
+          
+          if (isAutoPlaying) {
+             autoRafId = requestAnimationFrame(autoMove);
+          }
+      }
       
       function startAuto(){
-        if(timer) return;
-        var cs = getComputedStyle(root);
-        var interval = parseInt(cs.getPropertyValue('--autoMs')) || 3800; 
-        timer = setInterval(function(){
-          if(performance.now() - userInteractedAt < 6000) return;
-          var last = cards.length-1;
-          if(idx < last) snapToIndex(idx+1); else snapToIndex(0);
-        }, interval);
+        if(isAutoPlaying) return;
+        isAutoPlaying = true;
+        lastTimestamp = 0; 
+        autoRafId = requestAnimationFrame(autoMove);
       }
-      function stopAuto(){ clearInterval(timer); timer=null; }
+      
+      function stopAuto(){ 
+        if (autoRafId) cancelAnimationFrame(autoRafId);
+        isAutoPlaying = false; 
+        autoRafId = null; 
+      }
       function restartAuto(){ stopAuto(); startAuto(); }
 
 
@@ -1248,10 +1212,10 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         requestAnimationFrame(function(){
           root.classList.add('ecs-mounted');
           
-          var initialOffset = cards[0].offsetLeft; 
+          var initialOffset = 0; 
           
-          applyTransform(Math.max(0, initialOffset), 0); 
-          setActive(0);
+          applyTransform(initialOffset, 0); 
+          updateActiveCardIndex(initialOffset); 
           startAuto();
         });
       });
@@ -1262,27 +1226,30 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         rAF = requestAnimationFrame(function(){
           var newMaxOffset = maxOffset();
           
-          var ni = nearestIndexFromOffset(offset); 
-          var snapTargetX = cards[ni].offsetLeft;
-          
-          if (ni === cards.length - 1) {
-              var d = dims();
-              var centerOffset = (d.vp - d.cardW) / 2;
-              snapTargetX = cards[ni].offsetLeft - centerOffset + d.sidePadL;
-          }
-          
-          offset = Math.max(0, Math.min(snapTargetX, newMaxOffset));
+          offset = Math.max(0, Math.min(offset, newMaxOffset));
 
           applyTransform(offset, 0);
-          if(ni!==idx){ idx=ni; setActive(idx); }
+          updateActiveCardIndex(offset);
+          restartAuto(); 
         });
       });
-
-      cards.forEach(function(c,i){ c.addEventListener('click', function(){ snapToIndex(i, true); }); });
+      
+      // ✅ 호버/클릭 시 자동 재생 멈춤 로직
+      var handleInteraction = function(e){
+          if (e.type === 'click' || e.type === 'mouseenter') {
+              stopAuto();
+          } else if (e.type === 'mouseleave' && !dragging && !isMoving) {
+              // ✅ 호버가 풀리면 즉시 자동 이동 재개
+              restartAuto();
+          }
+      };
+      viewport.addEventListener('click', handleInteraction);
+      viewport.addEventListener('mouseenter', handleInteraction);
+      viewport.addEventListener('mouseleave', handleInteraction);
+      
     })();
   </script>
 </section>
-
 
 
 <section class="ecs-slider" aria-label="Finite List Drag Card Slider">
@@ -1301,7 +1268,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       --radius: 18px;
       --shadow: 0 10px 24px rgba(15,23,42,.08); 
       --fadeDur: 700ms;
-      --autoMs: 3800; /* 이 변수는 JS에서 속도 기준으로 사용됩니다. */
+      --autoMs: 3800; 
       --ease: cubic-bezier(.22,.61,.36,1); 
       --progress: 0; 
       
@@ -1345,7 +1312,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
     .ecs-slider.ecs-mounted .ecs-viewport{opacity:1;transform:none}
 
-    /* 트랙: 부드러운 이동 시 transition: none, 드래그 관성 시 transition: 500ms */
     .ecs-slider .ecs-track{
       display:flex;gap:var(--gap);
       will-change: transform;
@@ -1412,6 +1378,546 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     }
   </style>
 
+ <div class="ecs-wrap">
+    
+    <div class="ecs-head">
+        <h2 class="ecs-title">세탁기/건조기</h2>
+        <div class="ecs-gauge" role="progressbar" aria-valuenow="1" aria-valuemin="1" aria-valuemax="6">
+            <div class="ecs-progress-bar"></div>
+        </div>
+    </div>
+
+    <div class="ecs-viewport">
+      <div class="ecs-track">
+        <article class="ecs-card ecs-active" data-ecs-slide>
+          <div class="ecs-logo">
+            <img src="./img/lg-logo.png" alt="Dota 2 Logo">
+          </div>
+          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/LJZgHf6E3TH4Cn0NbVn9q4mzRlsfXqu38xkLgz_TWnwbIAtv5rIZyFwmFh-vitn_eUD97c_Ohn2mIS7F1WC61JK_X_FIYzPPyiBYrugxiFkfgNvBMH-hNIM=w800" alt="Dota 2"></div>
+          <div class="ecs-grad"></div>
+          <div class="ecs-body"><h3 class="ecs-title2">LG 오브제 세탁기(21㎏) + 건조기(19㎏)</h3></div>
+        </article>
+        <article class="ecs-card" data-ecs-slide>
+          <div class="ecs-logo">
+            <img src="./img/lg-logo.png" alt="The Witcher 3 Logo">
+          </div>
+          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/CxqVMP4v37Jkklf7AmMejWbD0nuIM-UI_uLeorTtmKXZVNv8uMzMSVelkBjBP_3PmBfJLoJm3nMCGjYIdZihZ4aYzMPFsMKZ0Froul9lHLgdRRdtUmFy=w800" alt="The Witcher 3"></div>
+          <div class="ecs-grad"></div>
+          <div class="ecs-body"><h3 class="ecs-title2">LG 오브제 건조기 (25㎏)</h3></div>
+        </article>
+ <article class="ecs-card" data-ecs-slide>
+          <div class="ecs-logo">
+            <img src="./img/lg-logo.png" alt="The Witcher 3 Logo">
+          </div>
+          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/KbY6GupXn7AkVg2nCy5wfQz0xscERNyGS540hZUvic20yo2ccgXLO9ypj81H7VXlGDHiRJkgQ5kWl0IyYDaqV5nHWgTVhzR1iGkZpijRNwBuKVqP0j5u=w800" alt="The Witcher 3"></div>
+          <div class="ecs-grad"></div>
+          <div class="ecs-body"><h3 class="ecs-title2">LG 오브제 세탁기(25㎏)+건조기(20㎏)</h3></div>
+        </article>
+
+      <article class="ecs-card" data-ecs-slide>
+          <div class="ecs-logo">
+            <img src="./img/samsung-logo.svg" alt="The Witcher 3 Logo">
+          </div>
+          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/Cjt00XGQH0qOouDRI4Tp2eeaPKYrd7ey-_pxbKe0cXboR26DtKyV23JqfI6FQoN6Y06jaN_5FZQtx8W2Xm6Wsepd_Wu6GXR_iYUEMkVBFV8YTtehYBbrUw=w800" alt="The Witcher 3"></div>
+          <div class="ecs-grad"></div>
+          <div class="ecs-body"><h3 class="ecs-title2">삼성 그랑데 세탁기 + 건조기</h3></div>
+        </article>
+       <article class="ecs-card" data-ecs-slide>
+          <div class="ecs-logo">
+            <img src="./img/samsung-logo.svg" alt="The Witcher 3 Logo">
+          </div>
+          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/0Geq40f7zxmKR_C2H0MlxHqQ7xCWMKhd-t658jazDMfvGGmTra9CaFIoTLrJ6EZLGZr6KSsi2q-Bz5BpwJ5NnDYzvUXqlGHKmxSqEgLPBySVu7N8PA451Q=w800" alt="The Witcher 3"></div>
+          <div class="ecs-grad"></div>
+          <div class="ecs-body"><h3 class="ecs-title2">삼성 그랑데 세탁기(25㎏) + 건조기(20㎏)</h3></div>
+        </article>
+         <article class="ecs-card" data-ecs-slide>
+          <div class="ecs-logo">
+            <img src="./img/samsung-logo.svg" alt="The Witcher 3 Logo">
+          </div>
+          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/S4sM-WTUGDkOC8Yx7io1i4RUeXNJiXgR8aa_l3po17BhTke26oU5Wo1ns0_hYMcZ8UpH7U4o3TxF3oYUTRxjGjnf1ZlCF843o4juweW5OLaIg7L0I1IXxg=w800" alt="The Witcher 3"></div>
+          <div class="ecs-grad"></div>
+          <div class="ecs-body"><h3 class="ecs-title2">삼성 원바디 그랑데 세탁기 + 건조기</h3></div>
+        </article>
+       
+      </div>
+
+      </div>
+    
+  </div>
+
+  <script>
+    (function(){
+      var root = (function(){
+        var currentScript = document.currentScript;
+        if (currentScript && currentScript.parentElement && currentScript.parentElement.classList.contains('ecs-slider')) {
+          return currentScript.parentElement;
+        }
+        var uninit = document.querySelector('.ecs-slider:not([data-ecs-ready])');
+        return uninit;
+      })();
+
+      if(!root || root.hasAttribute('data-ecs-ready')) return;
+      root.setAttribute('data-ecs-ready','');
+
+      var viewport    = root.querySelector('.ecs-viewport');
+      var track       = root.querySelector('.ecs-track');
+      var cards       = Array.prototype.slice.call(root.querySelectorAll('[data-ecs-slide]'));
+      
+      var gauge       = root.querySelector('.ecs-gauge');
+      var gaugeBar    = root.querySelector('.ecs-progress-bar'); 
+
+      var idx = 0; 
+      var timer = null;
+      // var userInteractedAt = 0; // ✅ 제거: 지연 로직에 사용되던 변수
+      var offset = 0; 
+      var isMoving = false; 
+      var animationFrameId = null; 
+      
+      var autoSpeed = 0.05; 
+      var lastTimestamp = 0;
+      var isAutoPlaying = false; 
+      var autoRafId = null;
+
+
+      function setActive(i){
+        cards.forEach(function(c,k){ 
+            c.classList.toggle('ecs-active', k===i); 
+        });
+        
+        if(cards.length > 1 && gauge && gaugeBar){
+            var progressRatio = i / (cards.length - 1);
+            root.style.setProperty('--progress', progressRatio);
+            gauge.setAttribute('aria-valuenow', i + 1);
+        }
+      }
+
+      function dims(){
+        var cs = getComputedStyle(root);
+        var cardW   = parseFloat(cs.getPropertyValue('--cardW')) || 400;
+        return {
+          cardW:   cardW,
+          gap:     parseFloat(cs.getPropertyValue('--gap')) || 18,
+          vp:      viewport.clientWidth,
+          sidePadR: parseFloat(getComputedStyle(viewport).paddingRight) || 20, 
+          sidePadL: parseFloat(getComputedStyle(viewport).paddingLeft) || 18, 
+        };
+      }
+      
+      function maxOffset(){
+        if (cards.length === 0) return 0;
+        
+        var d = dims();
+        var totalContentWidth = (d.cardW + d.gap) * cards.length - d.gap;
+        
+        var maxScroll = totalContentWidth - d.vp + d.sidePadL;
+        
+        return Math.max(0, maxScroll); 
+      }
+      
+      
+      function applyTransform(x, ms){
+        var m = maxOffset();
+        
+        x = Math.max(0, Math.min(x, m)); 
+        offset = x;
+        
+        var translateX = -x;
+
+        if (ms > 0) {
+            track.style.transition = 'transform '+ms+'ms cubic-bezier(.16, 1, .3, 1)';
+        } else {
+            track.style.transition = 'none'; 
+        }
+        
+        track.style.transform  = 'translate3d('+(translateX)+'px,0,0)';
+        
+        updateActiveCardIndex(offset);
+        
+        // ✅ 목록 끝에 도달하면 시작 위치로 이동 (부드러운 순환)
+        if (offset >= m && isAutoPlaying) {
+             // 1초 동안 부드럽게 시작 위치로 이동
+            applyTransform(0, 1000); 
+        }
+      }
+      
+      
+      function updateActiveCardIndex(currentOffset){
+          var d = dims();
+          var cardCenter = d.cardW / 2;
+          
+          for(var i = 0; i < cards.length; i++){
+              var cardStart = cards[i].offsetLeft - d.sidePadL;
+              
+              if(currentOffset >= cardStart - cardCenter){
+                  idx = i;
+              } else {
+                  break;
+              }
+          }
+          setActive(idx);
+      }
+
+
+      /* ===== 드래그/스와이프 로직 (유한 목록) ===== */
+      var supportsPointer = typeof window.PointerEvent !== 'undefined';
+      var startX=0, startY=0, baseOffset=0, currOffset=0, dragging=false;
+      var lastT=0, lastX=0, velocity=0, startTime=0;
+      var capturedPointerId = null;
+      var isScrollPrevented = false; 
+
+      function resist(x){
+        var m = maxOffset();
+        if(x < 0) return x * 0.35;
+        if(x > m) return m + (x - m)*0.35;
+        return x;
+      }
+      
+      function updateTrackPosition(){
+        if(!dragging) return;
+        var translateX = -currOffset;
+        track.style.transform = 'translate3d('+(translateX)+'px,0,0)';
+        updateActiveCardIndex(currOffset); 
+        animationFrameId = requestAnimationFrame(updateTrackPosition);
+      }
+
+      function onDown(clientX, clientY, pointerId){ 
+        if(isMoving) return;
+        stopAuto(); // 드래그 시작 시 자동 재생 중지
+        
+        dragging=true; 
+        startX=clientX; 
+        startY=clientY;
+        baseOffset=offset; 
+        currOffset=offset; 
+        lastX=clientX; 
+        lastT=performance.now(); 
+        velocity=0; 
+        startTime=performance.now(); 
+        isScrollPrevented=false; 
+        track.style.transition='none'; 
+        // userInteractedAt = performance.now(); // ✅ 제거
+        viewport.classList.add('is-dragging'); 
+        
+        if (supportsPointer && pointerId !== undefined) {
+          viewport.setPointerCapture(pointerId);
+          capturedPointerId = pointerId;
+        }
+
+        cancelAnimationFrame(animationFrameId);
+        updateTrackPosition(); 
+      }
+      
+      function onMove(clientX, clientY, e){ 
+        if(!dragging) return;
+        var now = performance.now();
+        var dx = startX - clientX; 
+        var dy = startY - clientY; 
+        
+        if (!isScrollPrevented && Math.abs(dx) > Math.abs(dy)) { 
+            e.preventDefault(); 
+            isScrollPrevented = true; 
+        }
+
+        if(isScrollPrevented || Math.abs(dx) > 10 || Math.abs(dy) > 10){
+            currOffset = resist(baseOffset + dx); 
+            
+            var dt = now - lastT;
+            if (dt > 0) {
+                velocity = (clientX - lastX) / dt; 
+            }
+            
+            lastX = clientX; 
+            lastT = now;
+        }
+      }
+      
+      function onUp(pointerId){
+        if(!dragging) return; 
+        dragging=false;
+        cancelAnimationFrame(animationFrameId);
+        viewport.classList.remove('is-dragging');
+
+        if (supportsPointer && capturedPointerId !== null) {
+          try { viewport.releasePointerCapture(capturedPointerId); } catch(e) {}
+          capturedPointerId = null;
+        }
+
+        var m = maxOffset();
+        var dragDuration = performance.now() - startTime;
+        var targetOffset;
+        
+        if (dragDuration < 200) { 
+            var inertia = velocity * 1200; 
+            
+            var d = dims();
+            var maxInertiaDistance = 2 * (d.cardW + d.gap); 
+            
+            if (Math.abs(inertia) > maxInertiaDistance) {
+                inertia = Math.sign(inertia) * maxInertiaDistance;
+            }
+            
+            targetOffset = currOffset - inertia;
+        } else {
+            targetOffset = currOffset;
+        }
+
+        targetOffset = Math.max(0, Math.min(targetOffset, m));
+        
+        offset = targetOffset;
+        
+        applyTransform(offset, 500); 
+        
+        updateActiveCardIndex(offset);
+        restartAuto();
+        
+        isMoving = true;
+        setTimeout(function() { isMoving = false; }, 500);
+      }
+      
+      var activeOpts = {passive:false};
+      var passiveOpts = {passive:true}; 
+
+      if(supportsPointer){
+        viewport.addEventListener('pointerdown', function(e){ 
+          if(e.button !== 0 && !e.isPrimary) return;
+          onDown(e.clientX, e.clientY, e.pointerId); 
+        }, passiveOpts); 
+        viewport.addEventListener('pointermove', function(e){ 
+            if(!dragging) return; 
+            onMove(e.clientX, e.clientY, e); 
+        }, activeOpts);
+        window.addEventListener('pointerup', function(e){ onUp(e.pointerId); }, passiveOpts);
+        window.addEventListener('pointercancel', function(e){ onUp(e.pointerId); }, passiveOpts);
+      }else{
+        viewport.addEventListener('touchstart', function(e){ 
+            if(!e.touches||!e.touches.length)return; 
+            onDown(e.touches[0].clientX, e.touches[0].clientY); 
+        }, passiveOpts);
+        viewport.addEventListener('touchmove',  function(e){ 
+            if(!e.touches||!e.touches.length)return; 
+            onMove(e.touches[0].clientX, e.touches[0].clientY, e); 
+        }, activeOpts); 
+        window.addEventListener('touchend',   function(){ onUp(); }, passiveOpts);
+        
+        viewport.addEventListener('mousedown', function(e){ onDown(e.clientX, e.clientY); }, passiveOpts); 
+        window.addEventListener('mousemove',   function(e){ 
+            if(!dragging) return;
+            onMove(e.clientX, e.clientY, e); 
+        }, activeOpts); 
+        window.addEventListener('mouseup',     function(){ onUp(); }, passiveOpts);
+      }
+      
+      /* ===== 자동 재생 로직 (requestAnimationFrame 기반 부드러운 이동) ===== */
+      
+      function autoMove(timestamp){
+          if (!lastTimestamp) {
+              lastTimestamp = timestamp;
+              autoRafId = requestAnimationFrame(autoMove);
+              return;
+          }
+          
+          var deltaTime = timestamp - lastTimestamp;
+          
+          if (deltaTime > 100) deltaTime = 0; 
+          
+          var distance = autoSpeed * deltaTime;
+          
+          var nextOffset = offset + distance;
+          
+          // applyTransform 내부에서 maxOffset 체크 및 순환 로직 처리
+          applyTransform(nextOffset, 0); 
+          
+          lastTimestamp = timestamp;
+          
+          if (isAutoPlaying) {
+             autoRafId = requestAnimationFrame(autoMove);
+          }
+      }
+      
+      function startAuto(){
+        if(isAutoPlaying) return;
+        isAutoPlaying = true;
+        lastTimestamp = 0; 
+        autoRafId = requestAnimationFrame(autoMove);
+      }
+      
+      function stopAuto(){ 
+        if (autoRafId) cancelAnimationFrame(autoRafId);
+        isAutoPlaying = false; 
+        autoRafId = null; 
+      }
+      function restartAuto(){ stopAuto(); startAuto(); }
+
+
+      document.addEventListener('DOMContentLoaded', function(){
+        requestAnimationFrame(function(){
+          root.classList.add('ecs-mounted');
+          
+          var initialOffset = 0; 
+          
+          applyTransform(initialOffset, 0); 
+          updateActiveCardIndex(initialOffset); 
+          startAuto();
+        });
+      });
+
+      var rAF=null;
+      window.addEventListener('resize', function(){
+        cancelAnimationFrame(rAF);
+        rAF = requestAnimationFrame(function(){
+          var newMaxOffset = maxOffset();
+          
+          offset = Math.max(0, Math.min(offset, newMaxOffset));
+
+          applyTransform(offset, 0);
+          updateActiveCardIndex(offset);
+          restartAuto(); 
+        });
+      });
+      
+      // ✅ 호버/클릭 시 자동 재생 멈춤 로직
+      var handleInteraction = function(e){
+          if (e.type === 'click' || e.type === 'mouseenter') {
+              stopAuto();
+          } else if (e.type === 'mouseleave' && !dragging && !isMoving) {
+              // ✅ 호버가 풀리면 즉시 자동 이동 재개
+              restartAuto();
+          }
+      };
+      viewport.addEventListener('click', handleInteraction);
+      viewport.addEventListener('mouseenter', handleInteraction);
+      viewport.addEventListener('mouseleave', handleInteraction);
+      
+    })();
+  </script>
+</section>
+
+
+<section class="ecs-slider" aria-label="Finite List Drag Card Slider">
+  <style>
+    /*
+      ====================================
+      CSS: 디자인 및 반응형 설정 (변경 없음)
+      ====================================
+    */
+    .ecs-slider{
+      --ink:#0f172a;
+      --accent:#e73700;
+      --bg:#f6f7fb;
+      --cardW: 400px; 
+      --gap: 18px;
+      --radius: 18px;
+      --shadow: 0 10px 24px rgba(15,23,42,.08); 
+      --fadeDur: 700ms;
+      --autoMs: 3800; 
+      --ease: cubic-bezier(.22,.61,.36,1); 
+      --progress: 0; 
+      
+      font-family: "Pretendard","Noto Sans KR",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+      background: var(--bg);
+      position: relative;
+    }
+
+    .ecs-slider .ecs-wrap{margin:0 auto;padding:56px 20px}
+    .ecs-slider .ecs-head{
+        display:flex;
+        align-items:center; 
+        justify-content:space-between;
+        margin-bottom:18px;
+    }
+    .ecs-slider .ecs-title{
+      font-size:clamp(18px,2.2vw,24px);line-height:1.3;color:var(--ink);
+      font-weight:800;position:relative;padding-bottom:0; 
+      margin-bottom:10px; 
+      letter-spacing:-.02em
+    }
+    .ecs-slider .ecs-title:after{content:"";position:absolute;left:0;bottom:-10px;width:36px;height:4px;border-radius:2px;background:var(--accent)}
+
+    .ecs-slider .ecs-viewport{
+      position:relative;
+      overflow: hidden; 
+      padding:10px 8px;
+      --sidePad:max(20px,(100% - 1000px)/2);
+      padding-left:var(--gap); 
+      padding-right:var(--sidePad);
+      contain:layout paint size;border-radius:20px;
+      min-height:calc(var(--cardW) + 20px); 
+      transform:translateY(8px);
+      transition:opacity var(--fadeDur) var(--ease),transform var(--fadeDur) var(--ease);
+      touch-action: pan-y pinch-zoom; 
+      user-select: none; 
+    }
+    .ecs-slider .ecs-viewport.is-dragging {
+        cursor: grabbing; 
+    }
+
+    .ecs-slider.ecs-mounted .ecs-viewport{opacity:1;transform:none}
+
+    .ecs-slider .ecs-track{
+      display:flex;gap:var(--gap);
+      will-change: transform;
+      transition:transform 500ms cubic-bezier(.16, 1, .3, 1); 
+    }
+
+    /* 카드 */
+    .ecs-slider .ecs-card{
+      position:relative;
+      flex:0 0 var(--cardW);
+      height:var(--cardW); 
+      border-radius:var(--radius);overflow:hidden;background:#fff;
+      box-shadow:var(--shadow); 
+      transform:translateZ(0);cursor:grab; 
+      transition: box-shadow 360ms var(--ease); 
+      isolation:isolate
+    }
+    .ecs-slider .ecs-card.ecs-active{
+        box-shadow: 0 24px 60px rgba(13,18,30,.18); 
+    }
+    .ecs-slider .ecs-logo{position:absolute;top:16px;left:16px;z-index:3;width:40px;height:40px;border-radius:10px;overflow:hidden;background:transparent;box-shadow:0 2px 6px rgba(15,23,42,.1);display:grid;place-items:center;pointer-events:none;}
+    .ecs-slider .ecs-logo img{width:70%;height:70%;object-fit:contain;display:block;}
+    .ecs-slider .ecs-media{position:absolute;inset:0}
+    .ecs-slider .ecs-media img{width:100%;height:100%;object-fit:contain;display:block;transform:scale(1.02);transition:transform 600ms var(--ease),filter 600ms var(--ease)}
+    .ecs-slider .ecs-card:hover .ecs-media img,.ecs-slider .ecs-card.ecs-active .ecs-media img{transform:scale(1.05);filter:saturate(1.04)}
+    .ecs-slider .ecs-grad{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 35%,rgba(0,0,0,.78) 95%);z-index:1}
+    .ecs-slider .ecs-body{position:absolute;left:16px;right:16px;bottom:14px;z-index:2;color:#fff;transform:translateY(0);opacity:.98;transition:opacity 380ms cubic-bezier(.15,.7,.25,1.05);}
+    .ecs-slider .ecs-title2{font-size:clamp(12px,2vw,16px);line-height:1.2;margin:0;font-weight:800;letter-spacing:-.01em}
+    .ecs-slider .ecs-card:not(.ecs-active) .ecs-body{opacity: 0.8;} 
+
+    .ecs-slider .ecs-gauge{
+        width: clamp(120px, 15vw, 180px); 
+        height: 6px; 
+        background: #e2e8f0; 
+        border-radius: 3px;
+        overflow: hidden;
+        margin-top: 10px;
+    }
+    .ecs-slider .ecs-progress-bar{
+        width: 100%;
+        height: 100%;
+        background: var(--accent); 
+        transform: scaleX(var(--progress)); 
+        transform-origin: left center;
+        transition: transform 380ms var(--ease);
+    }
+
+    /* 반응형 */
+    @media (max-width:1100px){.ecs-slider{--cardW:320px;}}
+    @media (max-width:820px){
+        .ecs-slider{
+            --cardW:260px;
+            --gap:14px;
+        }
+        .ecs-slider .ecs-wrap{padding:44px 16px}
+    }
+    @media (max-width:420px){
+        .ecs-slider{
+            --cardW: clamp(180px, 85vw - 32px, 300px); 
+        }
+        .ecs-slider .ecs-gauge {
+             width: 80px; 
+        }
+    }
+  </style>
 
   <div class="ecs-wrap">
     
@@ -1530,11 +2036,11 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
       var idx = 0; 
       var timer = null;
+      // var userInteractedAt = 0; // ✅ 제거: 지연 로직에 사용되던 변수
       var offset = 0; 
       var isMoving = false; 
       var animationFrameId = null; 
       
-      // ✅ 컨베이어 벨트 속도: 0.05px/ms (초당 50px)
       var autoSpeed = 0.05; 
       var lastTimestamp = 0;
       var isAutoPlaying = false; 
@@ -1546,9 +2052,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
             c.classList.toggle('ecs-active', k===i); 
         });
         
-        // 게이지 진행도 업데이트 (자동 이동 시에도 대략적인 위치 표시)
         if(cards.length > 1 && gauge && gaugeBar){
-            // 현재 활성화된 카드 인덱스 기준으로 진행도를 표시
             var progressRatio = i / (cards.length - 1);
             root.style.setProperty('--progress', progressRatio);
             gauge.setAttribute('aria-valuenow', i + 1);
@@ -1582,17 +2086,14 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       function applyTransform(x, ms){
         var m = maxOffset();
         
-        // 오프셋 제한
         x = Math.max(0, Math.min(x, m)); 
         offset = x;
         
         var translateX = -x;
 
         if (ms > 0) {
-            // 드래그/관성/부드러운 루프 시에만 transition 사용
             track.style.transition = 'transform '+ms+'ms cubic-bezier(.16, 1, .3, 1)';
         } else {
-            // 부드러운 자동 이동 (컨베이어 벨트) 시에는 transition을 끔
             track.style.transition = 'none'; 
         }
         
@@ -1600,9 +2101,9 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         
         updateActiveCardIndex(offset);
         
-        // ✅ 목록 끝에 도달하면 시작 위치로 부드러운 이동 (컨베이어 벨트 루프)
+        // ✅ 목록 끝에 도달하면 시작 위치로 이동 (부드러운 순환)
         if (offset >= m && isAutoPlaying) {
-             // 1초 동안 부드럽게 시작 위치(0)으로 이동 후, autoMove가 다음 프레임부터 다시 흐름을 이어받음
+             // 1초 동안 부드럽게 시작 위치로 이동
             applyTransform(0, 1000); 
         }
       }
@@ -1662,6 +2163,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         startTime=performance.now(); 
         isScrollPrevented=false; 
         track.style.transition='none'; 
+        // userInteractedAt = performance.now(); // ✅ 제거
         viewport.classList.add('is-dragging'); 
         
         if (supportsPointer && pointerId !== undefined) {
@@ -1731,7 +2233,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         
         offset = targetOffset;
         
-        // 관성 이동 시에는 부드러운 transition 적용 (500ms)
         applyTransform(offset, 500); 
         
         updateActiveCardIndex(offset);
@@ -1785,15 +2286,13 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
           
           var deltaTime = timestamp - lastTimestamp;
           
-          // deltaTime이 너무 크면 건너뛰어 속도 폭발 방지 (예: 100ms 이상)
           if (deltaTime > 100) deltaTime = 0; 
           
-          // ✅ 경과 시간에 속도를 곱하여 이동할 거리 계산
           var distance = autoSpeed * deltaTime;
           
           var nextOffset = offset + distance;
           
-          // applyTransform(nextOffset, 0)을 사용하여 transition 없이 즉시 이동
+          // applyTransform 내부에서 maxOffset 체크 및 순환 로직 처리
           applyTransform(nextOffset, 0); 
           
           lastTimestamp = timestamp;
@@ -1806,7 +2305,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       function startAuto(){
         if(isAutoPlaying) return;
         isAutoPlaying = true;
-        lastTimestamp = 0; // 시작 시 타임스탬프 초기화
+        lastTimestamp = 0; 
         autoRafId = requestAnimationFrame(autoMove);
       }
       
@@ -1822,7 +2321,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         requestAnimationFrame(function(){
           root.classList.add('ecs-mounted');
           
-          var initialOffset = 0; // 시작 위치 0
+          var initialOffset = 0; 
           
           applyTransform(initialOffset, 0); 
           updateActiveCardIndex(initialOffset); 
@@ -1840,16 +2339,16 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
           applyTransform(offset, 0);
           updateActiveCardIndex(offset);
-          restartAuto(); // 속도 계산에 영향을 줄 수 있으므로 재시작
+          restartAuto(); 
         });
       });
       
-      // ✅ 호버/클릭 시 자동 재생 멈춤 및 즉시 재개 로직
+      // ✅ 호버/클릭 시 자동 재생 멈춤 로직
       var handleInteraction = function(e){
           if (e.type === 'click' || e.type === 'mouseenter') {
               stopAuto();
           } else if (e.type === 'mouseleave' && !dragging && !isMoving) {
-              // 마우스가 풀리고 드래그/관성 이동 중이 아니면 즉시 자동 이동 재개
+              // ✅ 호버가 풀리면 즉시 자동 이동 재개
               restartAuto();
           }
       };
@@ -1877,7 +2376,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       --radius: 18px;
       --shadow: 0 10px 24px rgba(15,23,42,.08); 
       --fadeDur: 700ms;
-      --autoMs: 3800; /* 이 변수는 JS에서 속도 기준으로 사용됩니다. */
+      --autoMs: 3800; 
       --ease: cubic-bezier(.22,.61,.36,1); 
       --progress: 0; 
       
@@ -1921,7 +2420,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
     .ecs-slider.ecs-mounted .ecs-viewport{opacity:1;transform:none}
 
-    /* 트랙: 부드러운 이동 시 transition: none, 드래그 관성 시 transition: 500ms */
     .ecs-slider .ecs-track{
       display:flex;gap:var(--gap);
       will-change: transform;
@@ -2079,11 +2577,11 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
       var idx = 0; 
       var timer = null;
+      // var userInteractedAt = 0; // ✅ 제거: 지연 로직에 사용되던 변수
       var offset = 0; 
       var isMoving = false; 
       var animationFrameId = null; 
       
-      // ✅ 컨베이어 벨트 속도: 0.05px/ms (초당 50px)
       var autoSpeed = 0.05; 
       var lastTimestamp = 0;
       var isAutoPlaying = false; 
@@ -2095,9 +2593,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
             c.classList.toggle('ecs-active', k===i); 
         });
         
-        // 게이지 진행도 업데이트 (자동 이동 시에도 대략적인 위치 표시)
         if(cards.length > 1 && gauge && gaugeBar){
-            // 현재 활성화된 카드 인덱스 기준으로 진행도를 표시
             var progressRatio = i / (cards.length - 1);
             root.style.setProperty('--progress', progressRatio);
             gauge.setAttribute('aria-valuenow', i + 1);
@@ -2131,17 +2627,14 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       function applyTransform(x, ms){
         var m = maxOffset();
         
-        // 오프셋 제한
         x = Math.max(0, Math.min(x, m)); 
         offset = x;
         
         var translateX = -x;
 
         if (ms > 0) {
-            // 드래그/관성/부드러운 루프 시에만 transition 사용
             track.style.transition = 'transform '+ms+'ms cubic-bezier(.16, 1, .3, 1)';
         } else {
-            // 부드러운 자동 이동 (컨베이어 벨트) 시에는 transition을 끔
             track.style.transition = 'none'; 
         }
         
@@ -2149,9 +2642,9 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         
         updateActiveCardIndex(offset);
         
-        // ✅ 목록 끝에 도달하면 시작 위치로 부드러운 이동 (컨베이어 벨트 루프)
+        // ✅ 목록 끝에 도달하면 시작 위치로 이동 (부드러운 순환)
         if (offset >= m && isAutoPlaying) {
-             // 1초 동안 부드럽게 시작 위치(0)으로 이동 후, autoMove가 다음 프레임부터 다시 흐름을 이어받음
+             // 1초 동안 부드럽게 시작 위치로 이동
             applyTransform(0, 1000); 
         }
       }
@@ -2211,6 +2704,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         startTime=performance.now(); 
         isScrollPrevented=false; 
         track.style.transition='none'; 
+        // userInteractedAt = performance.now(); // ✅ 제거
         viewport.classList.add('is-dragging'); 
         
         if (supportsPointer && pointerId !== undefined) {
@@ -2280,7 +2774,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         
         offset = targetOffset;
         
-        // 관성 이동 시에는 부드러운 transition 적용 (500ms)
         applyTransform(offset, 500); 
         
         updateActiveCardIndex(offset);
@@ -2334,15 +2827,13 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
           
           var deltaTime = timestamp - lastTimestamp;
           
-          // deltaTime이 너무 크면 건너뛰어 속도 폭발 방지 (예: 100ms 이상)
           if (deltaTime > 100) deltaTime = 0; 
           
-          // ✅ 경과 시간에 속도를 곱하여 이동할 거리 계산
           var distance = autoSpeed * deltaTime;
           
           var nextOffset = offset + distance;
           
-          // applyTransform(nextOffset, 0)을 사용하여 transition 없이 즉시 이동
+          // applyTransform 내부에서 maxOffset 체크 및 순환 로직 처리
           applyTransform(nextOffset, 0); 
           
           lastTimestamp = timestamp;
@@ -2355,7 +2846,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       function startAuto(){
         if(isAutoPlaying) return;
         isAutoPlaying = true;
-        lastTimestamp = 0; // 시작 시 타임스탬프 초기화
+        lastTimestamp = 0; 
         autoRafId = requestAnimationFrame(autoMove);
       }
       
@@ -2371,7 +2862,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         requestAnimationFrame(function(){
           root.classList.add('ecs-mounted');
           
-          var initialOffset = 0; // 시작 위치 0
+          var initialOffset = 0; 
           
           applyTransform(initialOffset, 0); 
           updateActiveCardIndex(initialOffset); 
@@ -2389,16 +2880,16 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
           applyTransform(offset, 0);
           updateActiveCardIndex(offset);
-          restartAuto(); // 속도 계산에 영향을 줄 수 있으므로 재시작
+          restartAuto(); 
         });
       });
       
-      // ✅ 호버/클릭 시 자동 재생 멈춤 및 즉시 재개 로직
+      // ✅ 호버/클릭 시 자동 재생 멈춤 로직
       var handleInteraction = function(e){
           if (e.type === 'click' || e.type === 'mouseenter') {
               stopAuto();
           } else if (e.type === 'mouseleave' && !dragging && !isMoving) {
-              // 마우스가 풀리고 드래그/관성 이동 중이 아니면 즉시 자동 이동 재개
+              // ✅ 호버가 풀리면 즉시 자동 이동 재개
               restartAuto();
           }
       };
