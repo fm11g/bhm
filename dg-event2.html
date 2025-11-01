@@ -1860,7 +1860,139 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 </section>
 
 <section class="ecs-slider" aria-label="Finite List Drag Card Slider">
+  <style>
+    /*
+      ====================================
+      CSS: 디자인 및 반응형 설정
+      ====================================
+      * 이전 코드에서 사용된 CSS 스타일을 그대로 유지합니다.
+      * iOS 스크롤 버그 방지 및 반응형 카드 크기 설정이 포함되어 있습니다.
+    */
+    .ecs-slider{
+      --ink:#0f172a;
+      --accent:#e73700;
+      --bg:#f6f7fb;
+      --cardW: 400px; 
+      --gap: 18px;
+      --radius: 18px;
+      --shadow: 0 10px 24px rgba(15,23,42,.08); 
+      --fadeDur: 700ms;
+      --autoMs: 3800; 
+      --ease: cubic-bezier(.22,.61,.36,1); 
+      --progress: 0; 
+      
+      font-family: "Pretendard","Noto Sans KR",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+      background: var(--bg);
+      position: relative;
+    }
 
+    .ecs-slider .ecs-wrap{margin:0 auto;padding:56px 20px}
+    .ecs-slider .ecs-head{
+        display:flex;
+        align-items:center; 
+        justify-content:space-between;
+        margin-bottom:18px;
+    }
+    .ecs-slider .ecs-title{
+      font-size:clamp(18px,2.2vw,24px);line-height:1.3;color:var(--ink);
+      font-weight:800;position:relative;padding-bottom:0; 
+      margin-bottom:10px; 
+      letter-spacing:-.02em
+    }
+    .ecs-slider .ecs-title:after{content:"";position:absolute;left:0;bottom:-10px;width:36px;height:4px;border-radius:2px;background:var(--accent)}
+
+    .ecs-slider .ecs-viewport{
+      position:relative;
+      overflow: hidden; 
+      padding:10px 8px;
+      --sidePad:max(20px,(100% - 1000px)/2);
+      
+      padding-left:var(--gap); 
+      padding-right:var(--sidePad);
+      
+      contain:layout paint size;border-radius:20px;
+      /* 이전 보완: min-height 대신 height를 사용하여 높이를 확실하게 보장 */
+      height:calc(var(--cardW) + 20px); 
+      
+      transition:opacity var(--fadeDur) var(--ease),transform var(--fadeDur) var(--ease);
+      touch-action: pan-y pinch-zoom; 
+      user-select: none; 
+      
+      box-sizing: border-box; 
+    }
+    .ecs-slider .ecs-viewport.is-dragging {
+        cursor: grabbing; 
+    }
+
+    .ecs-slider.ecs-mounted .ecs-viewport{opacity:1;}
+
+    .ecs-slider .ecs-track{
+      display:flex;gap:var(--gap);
+      will-change: transform;
+      transition:transform 500ms cubic-bezier(.16, 1, .3, 1); 
+    }
+
+    /* 카드 */
+    .ecs-slider .ecs-card{
+      position:relative;
+      flex:0 0 var(--cardW);
+      height:var(--cardW); 
+      border-radius:var(--radius);overflow:hidden;background:#fff;
+      box-shadow:var(--shadow); 
+      transform:translateZ(0);cursor:grab; 
+      transition: box-shadow 360ms var(--ease); 
+      isolation:isolate
+    }
+    .ecs-slider .ecs-card.ecs-active{
+        box-shadow: 0 24px 60px rgba(13,18,30,.18); 
+    }
+    .ecs-slider .ecs-logo{position:absolute;top:16px;left:16px;z-index:3;width:40px;height:40px;border-radius:10px;overflow:hidden;background:transparent;box-shadow:0 2px 6px rgba(15,23,42,.1);display:grid;place-items:center;pointer-events:none;}
+    .ecs-slider .ecs-logo img{width:70%;height:70%;object-fit:contain;display:block;}
+    .ecs-slider .ecs-media{position:absolute;inset:0}
+    .ecs-slider .ecs-media img{width:100%;height:100%;object-fit:contain;display:block;transform:scale(1.02);transition:transform 600ms var(--ease),filter 600ms var(--ease)}
+    .ecs-slider .ecs-card:hover .ecs-media img,.ecs-slider .ecs-card.ecs-active .ecs-media img{transform:scale(1.05);filter:saturate(1.04)}
+    .ecs-slider .ecs-grad{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 35%,rgba(0,0,0,.78) 95%);z-index:1}
+    .ecs-slider .ecs-body{position:absolute;left:16px;right:16px;bottom:14px;z-index:2;color:#fff;transform:translateY(0);opacity:.98;transition:opacity 380ms cubic-bezier(.15,.7,.25,1.05);}
+    .ecs-slider .ecs-title2{font-size:clamp(12px,2vw,16px);line-height:1.2;margin:0;font-weight:800;letter-spacing:-.01em}
+    .ecs-slider .ecs-card:not(.ecs-active) .ecs-body{opacity: 0.8;} 
+
+    .ecs-slider .ecs-gauge{
+        width: clamp(120px, 15vw, 180px); 
+        height: 6px; 
+        background: #e2e8f0; 
+        border-radius: 3px;
+        overflow: hidden;
+        margin-top: 10px;
+    }
+    .ecs-slider .ecs-progress-bar{
+        width: 100%;
+        height: 100%;
+        background: var(--accent); 
+        transform: scaleX(var(--progress)); 
+        transform-origin: left center;
+        transition: transform 380ms var(--ease);
+    }
+
+    /* 반응형 */
+    @media (max-width:1100px){.ecs-slider{--cardW:320px;}}
+    @media (max-width:820px){
+        .ecs-slider{
+            --cardW:260px;
+            --gap:14px;
+        }
+        .ecs-slider .ecs-wrap{padding:44px 16px}
+    }
+    @media (max-width:420px){
+        .ecs-slider{
+            /* 모바일에서 1.5개 카드 노출 */
+            --cardW: calc((100% - var(--gap) * 2) / 1.5); 
+            --gap: 14px;
+        }
+        .ecs-slider .ecs-gauge {
+             width: 80px; 
+        }
+    }
+  </style>
 
   <div class="ecs-wrap">
     
@@ -1876,50 +2008,50 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       <div class="ecs-track">
         <article class="ecs-card ecs-active" data-ecs-slide>
           <div class="ecs-logo">
-            <img src="./img/apple-logo.png" alt="Dota 2 Logo">
+            <img src="./img/apple-logo.png" alt="애플 로고">
           </div>
-          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/uxipfYo3TemCpc06R4WsP4G0a36zNJOqDTgAz6y3N8_304dh70CcaEXpfwuRAQ70FJoZNZPYJ2Q-9OhuZLT6dXmabCwaVf_htn02Rd7c5RrU0PRxy-Ix3mM=w800" alt="Dota 2"></div>
+          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/uxipfYo3TemCpc06R4WsP4G0a36zNJOqDTgAz6y3N8_304dh70CcaEXpfwuRAQ70FJoZNZPYJ2Q-9OhuZLT6dXmabCwaVf_htn02Rd7c5RrU0PRxy-Ix3mM=w800" alt="애플 맥북 PRO 14 노트북"></div>
           <div class="ecs-grad"></div>
           <div class="ecs-body"><h3 class="ecs-title2">애플 맥북 PRO 14 노트북</h3></div>
         </article>
         <article class="ecs-card" data-ecs-slide>
           <div class="ecs-logo">
-            <img src="./img/samsung-logo.svg" alt="The Witcher 3 Logo">
+            <img src="./img/samsung-logo.svg" alt="삼성 로고">
           </div>
-          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/o6pd1GzhTQq-wsmqbRhNfJ1OI1Ncv4eUDCq7jRDUoVEfWg4OPkFf4q-45zOl6_1NOY74qzUw2xpCVkfWNA1xjUpSbs-qOR_iusVMpigOtxuTSF8-aVdfhg=w800" alt="The Witcher 3"></div>
+          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/o6pd1GzhTQq-wsmqbRhNfJ1OI1Ncv4eUDCq7jRDUoVEfWg4OPkFf4q-45zOl6_1NOY74qzUw2xpCVkfWNA1xjUpSbs-qOR_iusVMpigOtxuTSF8-aVdfhg=w800" alt="삼성 갤럭시북5 Pro 360"></div>
           <div class="ecs-grad"></div>
           <div class="ecs-body"><h3 class="ecs-title2">삼성 갤럭시북5 Pro 360 (16인치)</h3></div>
         </article>
         <article class="ecs-card" data-ecs-slide>
           <div class="ecs-logo">
-            <img src="./img/lg-logo.png" alt="The Witcher 3 Logo">
+            <img src="./img/lg-logo.png" alt="LG 로고">
           </div>
-          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/F8BEA00ntrl_SDI8IziliqMs3oI8K3shY3uEiqNQhoJhccehwu_w3zzemiKdvOAqQkQgIQkV8t6_Po-fqJ4ZHdpq3i5r3SgpUtXdnfxHpHt3lqoIAg5oNQ=w800" alt="The Witcher 3"></div>
+          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/F8BEA00ntrl_SDI8IziliqMs3oI8K3shY3uEiqNQhoJhccehwu_w3zzemiKdvOAqQkQgIQkV8t6_Po-fqJ4ZHdpq3i5r3SgpUtXdnfxHpHt3lqoIAg5oNQ=w800" alt="LG 17인치 그램 노트북"></div>
           <div class="ecs-grad"></div>
           <div class="ecs-body"><h3 class="ecs-title2">LG 17인치 그램 노트북</h3></div>
         </article>
 
       <article class="ecs-card" data-ecs-slide>
           <div class="ecs-logo">
-            <img src="./img/apple-logo.png" alt="The Witcher 3 Logo">
+            <img src="./img/apple-logo.png" alt="애플 로고">
           </div>
-          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/6gJPXZmfl5hD-VwLODnt22gFmYUMuUlAkXREw91rYQum12xbQYcSBXlV-0QdeZI3B-lIupTCFSgbaVhG37Y6AcSfrve2o8R3WFDNj7JSlbxBU8yhHVa9TF4=w800" alt="The Witcher 3"></div>
+          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/6gJPXZmfl5hD-VwLODnt22gFmYUMuUlAkXREw91rYQum12xbQYcSBXlV-0QdeZI3B-lIupTCFSgbaVhG37Y6AcSfrve2o8R3WFDNj7JSlbxBU8yhHVa9TF4=w800" alt="애플 맥북 에어 13인치"></div>
           <div class="ecs-grad"></div>
           <div class="ecs-body"><h3 class="ecs-title2">애플 맥북 에어 13인치(M4) + 매직마우스 + 노트북가방</h3></div>
         </article>
        <article class="ecs-card" data-ecs-slide>
           <div class="ecs-logo">
-            <img src="./img/msi-logo.png" alt="The Witcher 3 Logo">
+            <img src="./img/msi-logo.png" alt="MSI 로고">
           </div>
-          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/ADEzQ8dOTmNKwegBpgnB3lYHpuDnMJzJhzZnnwAx2yxNG_NikkCWUK-d-CX6UwaiIWfPWcvVCzs5LSw1onxNgSbJOxOOVJD61LjoMKVD8l33gtZKfBeQUww=w800" alt="The Witcher 3"></div>
+          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/ADEzQ8dOTmNKwegBpgnB3lYHpuDnMJzJhzZnnwAx2yxNG_NikkCWUK-d-CX6UwaiIWfPWcvVCzs5LSw1onxNgSbJOxOOVJD61LjoMKVD8l33gtZKfBeQUww=w800" alt="MSI 게이밍 노트북"></div>
           <div class="ecs-grad"></div>
           <div class="ecs-body"><h3 class="ecs-title2">MSI 게이밍 노트북(17.3″)</h3></div>
         </article>
          <article class="ecs-card" data-ecs-slide>
           <div class="ecs-logo">
-            <img src="./img/apple-logo.png" alt="The Witcher 3 Logo">
+            <img src="./img/apple-logo.png" alt="애플 로고">
           </div>
-          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/v-nGVoe8bWQlrKEIdhB8GLnAZYiptNcak8km72HAoEoj7oFCWWXK7CQTCsOSca1zuHZUaGN-rc_0q8RWXGtsrblUMOdJW9VftRnEbTW8FD9y5hIVjOBHYQ=w800" alt="The Witcher 3"></div>
+          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/v-nGVoe8bWQlrKEIdhB8GLnAZYiptNcak8km72HAoEoj7oFCWWXK7CQTCsOSca1zuHZUaGN-rc_0q8RWXGtsrblUMOdJW9VftRnEbTW8FD9y5hIVjOBHYQ=w800" alt="애플 아이패드 에어 11인치"></div>
           <div class="ecs-grad"></div>
           <div class="ecs-body"><h3 class="ecs-title2">애플 아이패드 에어 11인치(M3)</h3></div>
         </article>
@@ -1953,7 +2085,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
       var idx = 0; 
       var timer = null;
-      // var userInteractedAt = 0; // ✅ 제거: 지연 로직에 사용되던 변수
       var offset = 0; 
       var isMoving = false; 
       var animationFrameId = null; 
@@ -1988,13 +2119,15 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         };
       }
       
+      // ✅ 기능: 마지막 카드가 뷰포트 왼쪽 끝에 닿도록 maxOffset 계산 (순환 모드)
       function maxOffset(){
         if (cards.length === 0) return 0;
         
         var d = dims();
         var totalContentWidth = (d.cardW + d.gap) * cards.length - d.gap;
         
-        var maxScroll = totalContentWidth - d.vp + d.sidePadL;
+        // 뷰포트 너비 - 왼쪽 패딩 = 실제로 보이는 영역
+        var maxScroll = totalContentWidth - d.vp + d.sidePadL; 
         
         return Math.max(0, maxScroll); 
       }
@@ -2018,7 +2151,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         
         updateActiveCardIndex(offset);
         
-        // ✅ 목록 끝에 도달하면 시작 위치로 이동 (부드러운 순환)
+        // ✅ 기능: 마지막에 도달하면 시작 위치로 이동 (부드러운 순환)
         if (offset >= m && isAutoPlaying) {
              // 1초 동안 부드럽게 시작 위치로 이동
             applyTransform(0, 1000); 
@@ -2043,7 +2176,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       }
 
 
-      /* ===== 드래그/스와이프 로직 (유한 목록) ===== */
+      /* ===== 드래그/스와이프 로직 ===== */
       var supportsPointer = typeof window.PointerEvent !== 'undefined';
       var startX=0, startY=0, baseOffset=0, currOffset=0, dragging=false;
       var lastT=0, lastX=0, velocity=0, startTime=0;
@@ -2080,7 +2213,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         startTime=performance.now(); 
         isScrollPrevented=false; 
         track.style.transition='none'; 
-        // userInteractedAt = performance.now(); // ✅ 제거
         viewport.classList.add('is-dragging'); 
         
         if (supportsPointer && pointerId !== undefined) {
@@ -2098,6 +2230,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         var dx = startX - clientX; 
         var dy = startY - clientY; 
         
+        // ✅ 모바일 스와이프: 수평 이동이 수직 이동보다 클 때 기본 스크롤 동작 방지 (iOS 슬라이드 이슈 대응)
         if (!isScrollPrevented && Math.abs(dx) > Math.abs(dy)) { 
             e.preventDefault(); 
             isScrollPrevented = true; 
@@ -2131,6 +2264,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         var dragDuration = performance.now() - startTime;
         var targetOffset;
         
+        // 관성 이동 계산
         if (dragDuration < 200) { 
             var inertia = velocity * 1200; 
             
@@ -2192,7 +2326,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         window.addEventListener('mouseup',     function(){ onUp(); }, passiveOpts);
       }
       
-      /* ===== 자동 재생 로직 (requestAnimationFrame 기반 부드러운 이동) ===== */
+      /* ===== 자동 재생 로직 (순환 모드) ===== */
       
       function autoMove(timestamp){
           if (!lastTimestamp) {
@@ -2209,7 +2343,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
           
           var nextOffset = offset + distance;
           
-          // applyTransform 내부에서 maxOffset 체크 및 순환 로직 처리
+          // applyTransform 내부에서 순환 로직 처리
           applyTransform(nextOffset, 0); 
           
           lastTimestamp = timestamp;
@@ -2231,6 +2365,8 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         isAutoPlaying = false; 
         autoRafId = null; 
       }
+      
+      // ✅ 기능: 호버/드래그 후 즉시 자동 재생 재개
       function restartAuto(){ stopAuto(); startAuto(); }
 
 
@@ -2240,32 +2376,34 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
           
           var initialOffset = 0; 
           
+          // 초기화 후 자동 재생 시작
           applyTransform(initialOffset, 0); 
           updateActiveCardIndex(initialOffset); 
           startAuto();
         });
       });
 
-      var rAF=null;
+      // 리사이즈 시 오프셋 재계산 (디바운싱 적용)
+      var resizeTimeout;
       window.addEventListener('resize', function(){
-        cancelAnimationFrame(rAF);
-        rAF = requestAnimationFrame(function(){
-          var newMaxOffset = maxOffset();
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(function() {
+             var newMaxOffset = maxOffset();
           
-          offset = Math.max(0, Math.min(offset, newMaxOffset));
+            offset = Math.max(0, Math.min(offset, newMaxOffset));
 
-          applyTransform(offset, 0);
-          updateActiveCardIndex(offset);
-          restartAuto(); 
-        });
+            applyTransform(offset, 0);
+            updateActiveCardIndex(offset);
+            restartAuto(); 
+        }, 100); 
       });
       
-      // ✅ 호버/클릭 시 자동 재생 멈춤 로직
+      // ✅ 기능: 호버/클릭 시 자동 재생 멈춤 및 재개 로직
       var handleInteraction = function(e){
           if (e.type === 'click' || e.type === 'mouseenter') {
-              stopAuto();
+              stopAuto(); // 호버 진입 시 자동 재생 중지
           } else if (e.type === 'mouseleave' && !dragging && !isMoving) {
-              // ✅ 호버가 풀리면 즉시 자동 이동 재개
+              // 호버 해제 시, 드래그나 애니메이션 중이 아닐 경우 즉시 재개
               restartAuto();
           }
       };
@@ -2280,8 +2418,8 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 <section class="ecs-slider" aria-label="Finite List Drag Card Slider">
   <style>
     /*
-      ====================================
-      CSS: 디자인 및 반응형 설정
+      ====================================ㄴ
+      CSS: 디자인 및 반응형 설정 (유지 및 재확인)
       ====================================
     */
     .ecs-slider{
@@ -2323,26 +2461,23 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       padding:10px 8px;
       --sidePad:max(20px,(100% - 1000px)/2);
       
-      /* ✅ 보완: 패딩을 --gap 변수에 의존하게 하여 반응형 일관성 확보 */
       padding-left:var(--gap); 
       padding-right:var(--sidePad);
       
       contain:layout paint size;border-radius:20px;
-      min-height:calc(var(--cardW) + 20px); 
+      /* ✅ 모바일 오류 방지: min-height 대신 height를 사용하여 높이를 확보 */
+      height:calc(var(--cardW) + 20px); 
       
-      /* ⚠️ 초기 로드 시 깜빡임/지연 방지를 위해 transform:translateY(8px) 제거 */
       transition:opacity var(--fadeDur) var(--ease),transform var(--fadeDur) var(--ease);
       touch-action: pan-y pinch-zoom; 
       user-select: none; 
       
-      /* ✅ 추가: 레이아웃 꼬임 방지를 위해 Box Sizing 명시 */
       box-sizing: border-box; 
     }
     .ecs-slider .ecs-viewport.is-dragging {
         cursor: grabbing; 
     }
 
-    /* ✅ 수정: ecs-mounted가 되면 opacity만 처리 (transform 제거) */
     .ecs-slider.ecs-mounted .ecs-viewport{opacity:1;}
 
     .ecs-slider .ecs-track{
@@ -2531,14 +2666,25 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         };
       }
       
+      // ✅ 보완: 마지막 슬라이드가 화면 중앙에 오도록 maxOffset 로직 수정
       function maxOffset(){
         if (cards.length === 0) return 0;
         
         var d = dims();
-        var totalContentWidth = (d.cardW + d.gap) * cards.length - d.gap;
         
-        var maxScroll = totalContentWidth - d.vp + d.sidePadL;
+        // 1. 뷰포트 내 카드가 시작하는 위치 (왼쪽 패딩)
+        var contentStart = d.sidePadL; 
         
+        // 2. 마지막 카드의 시작 위치 (트랙 시작점으로부터의 거리)
+        var lastCardStartFromTrack = (d.cardW + d.gap) * (cards.length - 1);
+
+        // 3. 화면 중앙까지의 여백 = (뷰포트 너비 / 2) - (카드 너비 / 2)
+        var centerSpace = (d.vp / 2) - (d.cardW / 2);
+
+        // 4. 최대 스크롤 = (마지막 카드 시작 위치) - (중앙 정렬을 위한 여백) + (콘텐츠 시작 패딩)
+        var maxScroll = lastCardStartFromTrack - centerSpace + contentStart;
+        
+        // 트랙이 뷰포트 자체보다 짧을 경우를 대비
         return Math.max(0, maxScroll); 
       }
       
@@ -2561,11 +2707,10 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         
         updateActiveCardIndex(offset);
         
-        // 목록 끝에 도달하면 시작 위치로 이동 (부드러운 순환)
-        if (offset >= m && isAutoPlaying) {
-             // 1초 동안 부드럽게 시작 위치로 이동
-            applyTransform(0, 1000); 
-        }
+        // ❌ 기능: 순환 로직 제거 (유한 슬라이더 유지)
+        // if (offset >= m && isAutoPlaying) {
+        //     applyTransform(0, 1000); 
+        // }
       }
       
       
@@ -2586,7 +2731,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       }
 
 
-      /* ===== 드래그/스와이프 로직 (유한 목록) ===== */
+      /* ===== 드래그/스와이프 로직 (유지) ===== */
       var supportsPointer = typeof window.PointerEvent !== 'undefined';
       var startX=0, startY=0, baseOffset=0, currOffset=0, dragging=false;
       var lastT=0, lastX=0, velocity=0, startTime=0;
@@ -2610,7 +2755,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
       function onDown(clientX, clientY, pointerId){ 
         if(isMoving) return;
-        stopAuto(); // 드래그 시작 시 자동 재생 중지
+        stopAuto(); 
         
         dragging=true; 
         startX=clientX; 
@@ -2640,6 +2785,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         var dx = startX - clientX; 
         var dy = startY - clientY; 
         
+        // ✅ 모바일 스와이프: 수평 이동이 수직 이동보다 클 때 기본 스크롤 동작 방지 (iOS 슬라이드 이슈 대응)
         if (!isScrollPrevented && Math.abs(dx) > Math.abs(dy)) { 
             e.preventDefault(); 
             isScrollPrevented = true; 
@@ -2734,7 +2880,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         window.addEventListener('mouseup',     function(){ onUp(); }, passiveOpts);
       }
       
-      /* ===== 자동 재생 로직 (requestAnimationFrame 기반 부드러운 이동) ===== */
+      /* ===== 자동 재생 로직 (유한 목록) ===== */
       
       function autoMove(timestamp){
           if (!lastTimestamp) {
@@ -2751,7 +2897,14 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
           
           var nextOffset = offset + distance;
           
-          // applyTransform 내부에서 maxOffset 체크 및 순환 로직 처리
+          var m = maxOffset(); 
+
+          if (nextOffset >= m) {
+              // ✅ 보완: 마지막 카드 중앙에서 멈추도록 설정
+              nextOffset = m;
+              stopAuto(); 
+          }
+          
           applyTransform(nextOffset, 0); 
           
           lastTimestamp = timestamp;
@@ -2763,6 +2916,9 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       
       function startAuto(){
         if(isAutoPlaying) return;
+        // 마지막 카드가 이미 중앙에 있다면 재생 시작하지 않음
+        if(offset >= maxOffset()) return; 
+        
         isAutoPlaying = true;
         lastTimestamp = 0; 
         autoRafId = requestAnimationFrame(autoMove);
@@ -2773,6 +2929,8 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         isAutoPlaying = false; 
         autoRafId = null; 
       }
+      
+      // ✅ 기능: 호버/드래그 후 즉시 자동 재생 재개
       function restartAuto(){ stopAuto(); startAuto(); }
 
 
@@ -2782,16 +2940,14 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
           
           var initialOffset = 0; 
           
-          // ✅ 보강: 초기 로드 시 뷰포트 크기를 확실히 계산한 후 변환 적용
-          setTimeout(function() {
-            applyTransform(initialOffset, 0); 
-            updateActiveCardIndex(initialOffset); 
-            startAuto();
-          }, 0); 
+          // 초기화 후 자동 재생 시작
+          applyTransform(initialOffset, 0); 
+          updateActiveCardIndex(initialOffset); 
+          startAuto();
         });
       });
 
-      // ✅ 보강: 모바일 환경에서 잦은 리사이즈 이벤트에 대응하기 위해 디바운싱 적용
+      // 리사이즈 시 오프셋 재계산 (디바운싱 적용)
       var resizeTimeout;
       window.addEventListener('resize', function(){
         clearTimeout(resizeTimeout);
@@ -2802,16 +2958,21 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
             applyTransform(offset, 0);
             updateActiveCardIndex(offset);
-            restartAuto(); 
-        }, 100); // 100ms 지연 후 실행
+            // 마지막 위치에 있을 경우 재생 재개 방지
+            if (offset < newMaxOffset) { 
+                restartAuto();
+            } else {
+                stopAuto();
+            }
+        }, 100); 
       });
       
-      // 호버/클릭 시 자동 재생 멈춤 로직
+      // ✅ 기능: 호버/클릭 시 자동 재생 멈춤 및 재개 로직
       var handleInteraction = function(e){
           if (e.type === 'click' || e.type === 'mouseenter') {
-              stopAuto();
+              stopAuto(); // 호버 진입 시 자동 재생 중지
           } else if (e.type === 'mouseleave' && !dragging && !isMoving) {
-              // 호버가 풀리면 즉시 자동 이동 재개
+              // 호버 해제 시, 드래그나 애니메이션 중이 아닐 경우 즉시 재개
               restartAuto();
           }
       };
@@ -2822,6 +2983,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     })();
   </script>
 </section>
+
 <section id="eventList">
 
   <!-- 상단 헤더 -->
