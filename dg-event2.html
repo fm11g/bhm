@@ -2278,7 +2278,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 </section>
 
 <section class="ecs-slider" aria-label="Finite List Drag Card Slider">
- <style>
+  <style>
     /*
       ====================================
       CSS: 디자인 및 반응형 설정
@@ -2322,20 +2322,28 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       overflow: hidden; 
       padding:10px 8px;
       --sidePad:max(20px,(100% - 1000px)/2);
+      
+      /* ✅ 보완: 패딩을 --gap 변수에 의존하게 하여 반응형 일관성 확보 */
       padding-left:var(--gap); 
       padding-right:var(--sidePad);
+      
       contain:layout paint size;border-radius:20px;
       min-height:calc(var(--cardW) + 20px); 
-      transform:translateY(8px);
+      
+      /* ⚠️ 초기 로드 시 깜빡임/지연 방지를 위해 transform:translateY(8px) 제거 */
       transition:opacity var(--fadeDur) var(--ease),transform var(--fadeDur) var(--ease);
       touch-action: pan-y pinch-zoom; 
       user-select: none; 
+      
+      /* ✅ 추가: 레이아웃 꼬임 방지를 위해 Box Sizing 명시 */
+      box-sizing: border-box; 
     }
     .ecs-slider .ecs-viewport.is-dragging {
         cursor: grabbing; 
     }
 
-    .ecs-slider.ecs-mounted .ecs-viewport{opacity:1;transform:none}
+    /* ✅ 수정: ecs-mounted가 되면 opacity만 처리 (transform 제거) */
+    .ecs-slider.ecs-mounted .ecs-viewport{opacity:1;}
 
     .ecs-slider .ecs-track{
       display:flex;gap:var(--gap);
@@ -2395,7 +2403,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     }
     @media (max-width:420px){
         .ecs-slider{
-            /* ✅ 수정: 모바일에서 카드가 1.5개 보이도록 설정 */
+            /* 모바일에서 1.5개 카드 노출 */
             --cardW: calc((100% - var(--gap) * 2) / 1.5); 
             --gap: 14px;
         }
@@ -2489,7 +2497,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
       var idx = 0; 
       var timer = null;
-      // var userInteractedAt = 0; // ✅ 제거: 지연 로직에 사용되던 변수
       var offset = 0; 
       var isMoving = false; 
       var animationFrameId = null; 
@@ -2554,7 +2561,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         
         updateActiveCardIndex(offset);
         
-        // ✅ 목록 끝에 도달하면 시작 위치로 이동 (부드러운 순환)
+        // 목록 끝에 도달하면 시작 위치로 이동 (부드러운 순환)
         if (offset >= m && isAutoPlaying) {
              // 1초 동안 부드럽게 시작 위치로 이동
             applyTransform(0, 1000); 
@@ -2616,7 +2623,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         startTime=performance.now(); 
         isScrollPrevented=false; 
         track.style.transition='none'; 
-        // userInteractedAt = performance.now(); // ✅ 제거
         viewport.classList.add('is-dragging'); 
         
         if (supportsPointer && pointerId !== undefined) {
@@ -2776,32 +2782,36 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
           
           var initialOffset = 0; 
           
-          applyTransform(initialOffset, 0); 
-          updateActiveCardIndex(initialOffset); 
-          startAuto();
+          // ✅ 보강: 초기 로드 시 뷰포트 크기를 확실히 계산한 후 변환 적용
+          setTimeout(function() {
+            applyTransform(initialOffset, 0); 
+            updateActiveCardIndex(initialOffset); 
+            startAuto();
+          }, 0); 
         });
       });
 
-      var rAF=null;
+      // ✅ 보강: 모바일 환경에서 잦은 리사이즈 이벤트에 대응하기 위해 디바운싱 적용
+      var resizeTimeout;
       window.addEventListener('resize', function(){
-        cancelAnimationFrame(rAF);
-        rAF = requestAnimationFrame(function(){
-          var newMaxOffset = maxOffset();
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(function() {
+             var newMaxOffset = maxOffset();
           
-          offset = Math.max(0, Math.min(offset, newMaxOffset));
+            offset = Math.max(0, Math.min(offset, newMaxOffset));
 
-          applyTransform(offset, 0);
-          updateActiveCardIndex(offset);
-          restartAuto(); 
-        });
+            applyTransform(offset, 0);
+            updateActiveCardIndex(offset);
+            restartAuto(); 
+        }, 100); // 100ms 지연 후 실행
       });
       
-      // ✅ 호버/클릭 시 자동 재생 멈춤 로직
+      // 호버/클릭 시 자동 재생 멈춤 로직
       var handleInteraction = function(e){
           if (e.type === 'click' || e.type === 'mouseenter') {
               stopAuto();
           } else if (e.type === 'mouseleave' && !dragging && !isMoving) {
-              // ✅ 호버가 풀리면 즉시 자동 이동 재개
+              // 호버가 풀리면 즉시 자동 이동 재개
               restartAuto();
           }
       };
