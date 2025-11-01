@@ -2448,7 +2448,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       min-height:calc(var(--cardW) + 20px); 
       transform:translateY(8px);
       transition:opacity var(--fadeDur) var(--ease),transform var(--fadeDur) var(--ease);
-      /* ✅ 유지: 세로 스크롤 방지 */
+      /* ✅ 유지: 세로 스크롤 방지 (브라우저 정책에 따라 JS 추가 필요) */
       touch-action: pan-y pinch-zoom; 
       user-select: none; 
     }
@@ -2776,9 +2776,11 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
       /* ===== 드래그/스와이프 로직 (개선) ===== */
       var supportsPointer = typeof window.PointerEvent !== 'undefined';
-      var startX=0, baseOffset=0, currOffset=0, dragging=false;
+      // ✅ 추가된 변수: Y축 시작 위치와 스크롤 방지 여부 플래그
+      var startX=0, startY=0, baseOffset=0, currOffset=0, dragging=false;
       var lastT=0, lastX=0, velocity=0, startTime=0;
       var capturedPointerId = null;
+      var isScrollPrevented = false; // 스크롤 방지 플래그
 
       function resist(x){
         var m = maxOffset();
@@ -2795,10 +2797,18 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         animationFrameId = requestAnimationFrame(updateTrackPosition);
       }
 
-      function onDown(clientX, pointerId){
+      function onDown(clientX, clientY, pointerId){ // ✅ clientY 파라미터 추가
         if(isMoving) return;
-        dragging=true; startX=clientX; baseOffset=offset; currOffset=offset; 
-        lastX=startX; lastT=performance.now(); velocity=0; startTime=performance.now(); 
+        dragging=true; 
+        startX=clientX; 
+        startY=clientY; // ✅ Y축 시작 위치 기록
+        baseOffset=offset; 
+        currOffset=offset; 
+        lastX=startX; 
+        lastT=performance.now(); 
+        velocity=0; 
+        startTime=performance.now(); 
+        isScrollPrevented=false; // ✅ 플래그 초기화
         track.style.transition='none'; 
         userInteractedAt = performance.now();
         viewport.classList.add('is-dragging'); 
@@ -2812,20 +2822,31 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         updateTrackPosition(); 
       }
       
-      function onMove(clientX){
+      function onMove(clientX, clientY, e){ // ✅ clientY, e 파라미터 추가
         if(!dragging) return;
         var now = performance.now();
         var dx = startX - clientX; 
+        var dy = startY - clientY; // ✅ 수직 이동 거리 계산
         
-        currOffset = resist(baseOffset + dx);
-        
-        var dt = now - lastT;
-        if (dt > 0) {
-            velocity = (clientX - lastX) / dt; 
+        // **스크롤 차단 로직**: 수평 이동 거리가 수직 이동 거리보다 크면
+        // (즉, 좌우 드래그를 하려는 의도가 명확하면) 스크롤을 차단합니다.
+        if (!isScrollPrevented && Math.abs(dx) > Math.abs(dy)) { 
+            e.preventDefault(); // ✅ 기본 동작(스크롤) 차단
+            isScrollPrevented = true; // 플래그 설정
         }
-        
-        lastX = clientX; 
-        lastT = now;
+
+        // 스크롤이 차단되었거나, 아직 드래그 방향이 결정되지 않았다면 슬라이더를 움직임
+        if(isScrollPrevented || Math.abs(dx) > 10 || Math.abs(dy) > 10){
+            currOffset = resist(baseOffset + dx);
+            
+            var dt = now - lastT;
+            if (dt > 0) {
+                velocity = (clientX - lastX) / dt; 
+            }
+            
+            lastX = clientX; 
+            lastT = now;
+        }
       }
       
       function onUp(pointerId){
@@ -2886,22 +2907,33 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         setTimeout(function() { isMoving = false; }, 500);
       }
       
-      var passiveOpts = {passive:true};
+      // ✅ passive: false로 변경하여 onMove에서 preventDefault() 호출 허용
+      var activeOpts = {passive:false};
+      var passiveOpts = {passive:true}; 
+
       if(supportsPointer){
         viewport.addEventListener('pointerdown', function(e){ 
           if(e.button !== 0 && !e.isPrimary) return;
-          onDown(e.clientX, e.pointerId); 
+          onDown(e.clientX, e.clientY, e.pointerId); // ✅ clientY 전달
         }, passiveOpts); 
-        viewport.addEventListener('pointermove', function(e){ onMove(e.clientX); }, passiveOpts);
+        // ✅ onMove는 passive: false로 변경하여 preventDefault 허용
+        viewport.addEventListener('pointermove', function(e){ onMove(e.clientX, e.clientY, e); }, activeOpts);
         window.addEventListener('pointerup', function(e){ onUp(e.pointerId); }, passiveOpts);
         window.addEventListener('pointercancel', function(e){ onUp(e.pointerId); }, passiveOpts);
       }else{
-        viewport.addEventListener('touchstart', function(e){ if(!e.touches||!e.touches.length)return; onDown(e.touches[0].clientX); }, passiveOpts);
-        viewport.addEventListener('touchmove',  function(e){ if(!e.touches||!e.touches.length)return; onMove(e.touches[0].clientX); }, passiveOpts);
+        viewport.addEventListener('touchstart', function(e){ 
+            if(!e.touches||!e.touches.length)return; 
+            onDown(e.touches[0].clientX, e.touches[0].clientY); // ✅ clientY 전달
+        }, passiveOpts);
+        // ✅ onMove는 passive: false로 변경하여 preventDefault 허용
+        viewport.addEventListener('touchmove',  function(e){ 
+            if(!e.touches||!e.touches.length)return; 
+            onMove(e.touches[0].clientX, e.touches[0].clientY, e); // ✅ clientY, e 전달
+        }, activeOpts); 
         window.addEventListener('touchend',   function(){ onUp(); }, passiveOpts);
         
-        viewport.addEventListener('mousedown', function(e){ onDown(e.clientX); }, passiveOpts);
-        window.addEventListener('mousemove',   function(e){ onMove(e.clientX); }, passiveOpts);
+        viewport.addEventListener('mousedown', function(e){ onDown(e.clientX, e.clientY); }, passiveOpts); // ✅ clientY 전달
+        window.addEventListener('mousemove',   function(e){ onMove(e.clientX, e.clientY, e); }, passiveOpts); // ✅ clientY, e 전달
         window.addEventListener('mouseup',     function(){ onUp(); }, passiveOpts);
       }
       
