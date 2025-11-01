@@ -1283,9 +1283,15 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
   </script>
 </section>
 
-<section class="ecs-slider" aria-label="Live Server Drag Card Slider">
+
+
+<section class="ecs-slider" aria-label="Finite List Drag Card Slider">
   <style>
-    /* ========= Scope: .ecs-slider only (전역 충돌 없음) ========= */
+    /*
+      ====================================
+      CSS: 디자인 및 반응형 설정 (변경 없음)
+      ====================================
+    */
     .ecs-slider{
       --ink:#0f172a;
       --accent:#e73700;
@@ -1295,9 +1301,8 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       --radius: 18px;
       --shadow: 0 10px 24px rgba(15,23,42,.08); 
       --fadeDur: 700ms;
-      --autoMs: 3800;
+      --autoMs: 3800; /* 이 변수는 JS에서 속도 기준으로 사용됩니다. */
       --ease: cubic-bezier(.22,.61,.36,1); 
-      /* ✅ 추가: 게이지 진행도를 위한 변수 */
       --progress: 0; 
       
       font-family: "Pretendard","Noto Sans KR",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
@@ -1320,21 +1325,18 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     }
     .ecs-slider .ecs-title:after{content:"";position:absolute;left:0;bottom:-10px;width:36px;height:4px;border-radius:2px;background:var(--accent)}
 
-    /* 뷰포트 */
     .ecs-slider .ecs-viewport{
       position:relative;
       overflow: hidden; 
-      
       padding:10px 8px;
       --sidePad:max(20px,(100% - 1000px)/2);
       padding-left:var(--gap); 
       padding-right:var(--sidePad);
-      
       contain:layout paint size;border-radius:20px;
       min-height:calc(var(--cardW) + 20px); 
       transform:translateY(8px);
       transition:opacity var(--fadeDur) var(--ease),transform var(--fadeDur) var(--ease);
-      touch-action: pan-y; 
+      touch-action: pan-y pinch-zoom; 
       user-select: none; 
     }
     .ecs-slider .ecs-viewport.is-dragging {
@@ -1343,11 +1345,11 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
     .ecs-slider.ecs-mounted .ecs-viewport{opacity:1;transform:none}
 
-    /* 트랙 */
+    /* 트랙: 부드러운 이동 시 transition: none, 드래그 관성 시 transition: 500ms */
     .ecs-slider .ecs-track{
       display:flex;gap:var(--gap);
       will-change: transform;
-      transition:transform 380ms cubic-bezier(.15,.7,.25,1.05); 
+      transition:transform 500ms cubic-bezier(.16, 1, .3, 1); 
     }
 
     /* 카드 */
@@ -1364,68 +1366,29 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     .ecs-slider .ecs-card.ecs-active{
         box-shadow: 0 24px 60px rgba(13,18,30,.18); 
     }
-
-    /* 로고 */
-    .ecs-slider .ecs-logo{
-        position:absolute;
-        top:16px; 
-        left:16px; 
-        z-index:3; 
-        width:40px; 
-        height:40px; 
-        border-radius:10px; 
-        overflow:hidden;
-        background:transparent; 
-        box-shadow:0 2px 6px rgba(15,23,42,.1);
-        display:grid; 
-        place-items:center;
-        pointer-events:none; 
-    }
-    .ecs-slider .ecs-logo img{
-        width:70%; 
-        height:70%;
-        object-fit:contain; 
-        display:block;
-    }
-
-    /* 이미지 레이어 */
+    .ecs-slider .ecs-logo{position:absolute;top:16px;left:16px;z-index:3;width:40px;height:40px;border-radius:10px;overflow:hidden;background:transparent;box-shadow:0 2px 6px rgba(15,23,42,.1);display:grid;place-items:center;pointer-events:none;}
+    .ecs-slider .ecs-logo img{width:70%;height:70%;object-fit:contain;display:block;}
     .ecs-slider .ecs-media{position:absolute;inset:0}
-    .ecs-slider .ecs-media img{
-      width:100%;height:100%;object-fit:contain;display:block;
-      transform:scale(1.02);
-      transition:transform 600ms var(--ease),filter 600ms var(--ease)
-    }
-    .ecs-slider .ecs-card:hover .ecs-media img,
-    .ecs-slider .ecs-card.ecs-active .ecs-media img{transform:scale(1.05);filter:saturate(1.04)}
-
-    /* 오버레이 */
+    .ecs-slider .ecs-media img{width:100%;height:100%;object-fit:contain;display:block;transform:scale(1.02);transition:transform 600ms var(--ease),filter 600ms var(--ease)}
+    .ecs-slider .ecs-card:hover .ecs-media img,.ecs-slider .ecs-card.ecs-active .ecs-media img{transform:scale(1.05);filter:saturate(1.04)}
     .ecs-slider .ecs-grad{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 35%,rgba(0,0,0,.78) 95%);z-index:1}
-
-    /* 텍스트 */
-    .ecs-slider .ecs-body{
-      position:absolute;left:16px;right:16px;bottom:14px;z-index:2;color:#fff;
-      transform:translateY(0); 
-      opacity:.98;
-      transition:opacity 380ms cubic-bezier(.15,.7,.25,1.05);
-    }
+    .ecs-slider .ecs-body{position:absolute;left:16px;right:16px;bottom:14px;z-index:2;color:#fff;transform:translateY(0);opacity:.98;transition:opacity 380ms cubic-bezier(.15,.7,.25,1.05);}
     .ecs-slider .ecs-title2{font-size:clamp(12px,2vw,16px);line-height:1.2;margin:0;font-weight:800;letter-spacing:-.01em}
     .ecs-slider .ecs-card:not(.ecs-active) .ecs-body{opacity: 0.8;} 
 
-    /* ✅ 추가: 게이지 컨테이너 (Track) */
     .ecs-slider .ecs-gauge{
-        width: clamp(120px, 15vw, 180px); /* 게이지 바 전체 너비 */
-        height: 6px; /* 게이지 바 높이 */
-        background: #e2e8f0; /* 배경색 */
+        width: clamp(120px, 15vw, 180px); 
+        height: 6px; 
+        background: #e2e8f0; 
         border-radius: 3px;
         overflow: hidden;
         margin-top: 10px;
     }
-    /* ✅ 추가: 진행 표시줄 (Progress) */
     .ecs-slider .ecs-progress-bar{
         width: 100%;
         height: 100%;
-        background: var(--accent); /* 강조색 */
-        transform: scaleX(var(--progress)); /* JavaScript로 제어 */
+        background: var(--accent); 
+        transform: scaleX(var(--progress)); 
         transform-origin: left center;
         transition: transform 380ms var(--ease);
     }
@@ -1444,10 +1407,11 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
             --cardW: clamp(180px, 85vw - 32px, 300px); 
         }
         .ecs-slider .ecs-gauge {
-             width: 80px; /* 모바일에서 게이지 바 너비 축소 */
+             width: 80px; 
         }
     }
   </style>
+
 
   <div class="ecs-wrap">
     
@@ -1543,7 +1507,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     
   </div>
 
-    <script>
+  <script>
     (function(){
       var root = (function(){
         var currentScript = document.currentScript;
@@ -1564,17 +1528,27 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       var gauge       = root.querySelector('.ecs-gauge');
       var gaugeBar    = root.querySelector('.ecs-progress-bar'); 
 
-      var idx = 0;
+      var idx = 0; 
       var timer = null;
-      var userInteractedAt = 0;
       var offset = 0; 
       var isMoving = false; 
       var animationFrameId = null; 
+      
+      // ✅ 컨베이어 벨트 속도: 0.05px/ms (초당 50px)
+      var autoSpeed = 0.05; 
+      var lastTimestamp = 0;
+      var isAutoPlaying = false; 
+      var autoRafId = null;
+
 
       function setActive(i){
-        cards.forEach(function(c,k){ c.classList.toggle('ecs-active', k===i); });
+        cards.forEach(function(c,k){ 
+            c.classList.toggle('ecs-active', k===i); 
+        });
         
+        // 게이지 진행도 업데이트 (자동 이동 시에도 대략적인 위치 표시)
         if(cards.length > 1 && gauge && gaugeBar){
+            // 현재 활성화된 카드 인덱스 기준으로 진행도를 표시
             var progressRatio = i / (cards.length - 1);
             root.style.setProperty('--progress', progressRatio);
             gauge.setAttribute('aria-valuenow', i + 1);
@@ -1584,7 +1558,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       function dims(){
         var cs = getComputedStyle(root);
         var cardW   = parseFloat(cs.getPropertyValue('--cardW')) || 400;
-        
         return {
           cardW:   cardW,
           gap:     parseFloat(cs.getPropertyValue('--gap')) || 18,
@@ -1598,91 +1571,71 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         if (cards.length === 0) return 0;
         
         var d = dims();
-        var lastCard = cards[cards.length - 1];
+        var totalContentWidth = (d.cardW + d.gap) * cards.length - d.gap;
         
-        var centerOffset = (d.vp - d.cardW) / 2;
-        var maxScroll = lastCard.offsetLeft - centerOffset + d.sidePadL;
+        var maxScroll = totalContentWidth - d.vp + d.sidePadL;
         
         return Math.max(0, maxScroll); 
       }
       
-      function nearestIndexFromOffset(x){
-        var closestIndex = 0;
-        var minDiff = Infinity;
-        
-        for(var i = 0; i < cards.length; i++){
-            var cardPos = cards[i].offsetLeft; 
-            
-            if (i === cards.length - 1) {
-                var d = dims();
-                var centerOffset = (d.vp - d.cardW) / 2; 
-                cardPos = cardPos - centerOffset + d.sidePadL; 
-            }
-            
-            var diff = Math.abs(x - cardPos);
-            
-            if(diff < minDiff){
-                minDiff = diff;
-                closestIndex = i;
-            }
-        }
-        
-        return closestIndex;
-      }
-
-
+      
       function applyTransform(x, ms){
-        x = Math.max(0, Math.min(x, maxOffset())); 
+        var m = maxOffset();
+        
+        // 오프셋 제한
+        x = Math.max(0, Math.min(x, m)); 
         offset = x;
         
         var translateX = -x;
 
-        track.style.transition = 'transform '+ms+'ms cubic-bezier(.15,.7,.25,1.05)';
-        track.style.transform  = 'translate3d('+(translateX)+'px,0,0)';
-      }
-
-      function snapToIndex(n, user){
-        if(user === void 0) user = false;
-        if(isMoving) return;
-        
-        var last = cards.length-1;
-        var newIdx = Math.max(0, Math.min(n, last));
-        
-        if (newIdx === idx && !user) return;
-        if (newIdx === idx && user) return;
-
-        idx = newIdx;
-        setActive(idx);
-        
-        var targetX = cards[newIdx].offsetLeft;
-        
-        if (newIdx === last) {
-             var d = dims();
-             var centerOffset = (d.vp - d.cardW) / 2;
-             targetX = cards[newIdx].offsetLeft - centerOffset + d.sidePadL; 
+        if (ms > 0) {
+            // 드래그/관성/부드러운 루프 시에만 transition 사용
+            track.style.transition = 'transform '+ms+'ms cubic-bezier(.16, 1, .3, 1)';
+        } else {
+            // 부드러운 자동 이동 (컨베이어 벨트) 시에는 transition을 끔
+            track.style.transition = 'none'; 
         }
-
-        var finalOffset = Math.max(0, Math.min(targetX, maxOffset()));
-
-        isMoving = true;
-        applyTransform(finalOffset, 380);
         
-        setTimeout(function() { isMoving = false; }, 380); 
+        track.style.transform  = 'translate3d('+(translateX)+'px,0,0)';
         
-        if(user){ userInteractedAt = performance.now(); restartAuto(); }
+        updateActiveCardIndex(offset);
+        
+        // ✅ 목록 끝에 도달하면 시작 위치로 부드러운 이동 (컨베이어 벨트 루프)
+        if (offset >= m && isAutoPlaying) {
+             // 1초 동안 부드럽게 시작 위치(0)으로 이동 후, autoMove가 다음 프레임부터 다시 흐름을 이어받음
+            applyTransform(0, 1000); 
+        }
+      }
+      
+      
+      function updateActiveCardIndex(currentOffset){
+          var d = dims();
+          var cardCenter = d.cardW / 2;
+          
+          for(var i = 0; i < cards.length; i++){
+              var cardStart = cards[i].offsetLeft - d.sidePadL;
+              
+              if(currentOffset >= cardStart - cardCenter){
+                  idx = i;
+              } else {
+                  break;
+              }
+          }
+          setActive(idx);
       }
 
-      /* ===== 드래그/스와이프 로직 (최적화) ===== */
+
+      /* ===== 드래그/스와이프 로직 (유한 목록) ===== */
       var supportsPointer = typeof window.PointerEvent !== 'undefined';
-      var startX=0, baseOffset=0, currOffset=0, dragging=false;
+      var startX=0, startY=0, baseOffset=0, currOffset=0, dragging=false;
       var lastT=0, lastX=0, velocity=0, startTime=0;
       var capturedPointerId = null;
+      var isScrollPrevented = false; 
 
       function resist(x){
         var m = maxOffset();
-        // ✅ 수정: 되돌아오려는 복원력(저항) 계수를 0.35에서 0.25로 감소
-        if(x < 0) return x * 0.25;
-        if(x > m) return m + (x - m)*0.25;
+        if(x < 0) return x * 0.35;
+        if(x > m) return m + (x - m)*0.35;
         return x;
       }
       
@@ -1690,15 +1643,25 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         if(!dragging) return;
         var translateX = -currOffset;
         track.style.transform = 'translate3d('+(translateX)+'px,0,0)';
+        updateActiveCardIndex(currOffset); 
         animationFrameId = requestAnimationFrame(updateTrackPosition);
       }
 
-      function onDown(clientX, pointerId){
+      function onDown(clientX, clientY, pointerId){ 
         if(isMoving) return;
-        dragging=true; startX=clientX; baseOffset=offset; currOffset=offset; 
-        lastX=clientX; lastT=performance.now(); velocity=0; startTime=performance.now();
+        stopAuto(); // 드래그 시작 시 자동 재생 중지
+        
+        dragging=true; 
+        startX=clientX; 
+        startY=clientY;
+        baseOffset=offset; 
+        currOffset=offset; 
+        lastX=clientX; 
+        lastT=performance.now(); 
+        velocity=0; 
+        startTime=performance.now(); 
+        isScrollPrevented=false; 
         track.style.transition='none'; 
-        userInteractedAt = performance.now();
         viewport.classList.add('is-dragging'); 
         
         if (supportsPointer && pointerId !== undefined) {
@@ -1710,20 +1673,28 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         updateTrackPosition(); 
       }
       
-      function onMove(clientX){
+      function onMove(clientX, clientY, e){ 
         if(!dragging) return;
         var now = performance.now();
         var dx = startX - clientX; 
+        var dy = startY - clientY; 
         
-        currOffset = resist(baseOffset + dx);
-        
-        var dt = now - lastT;
-        if (dt > 0) {
-            velocity = (clientX - lastX) / dt; 
+        if (!isScrollPrevented && Math.abs(dx) > Math.abs(dy)) { 
+            e.preventDefault(); 
+            isScrollPrevented = true; 
         }
-        
-        lastX = clientX; 
-        lastT = now;
+
+        if(isScrollPrevented || Math.abs(dx) > 10 || Math.abs(dy) > 10){
+            currOffset = resist(baseOffset + dx); 
+            
+            var dt = now - lastT;
+            if (dt > 0) {
+                velocity = (clientX - lastX) / dt; 
+            }
+            
+            lastX = clientX; 
+            lastT = now;
+        }
       }
       
       function onUp(pointerId){
@@ -1742,8 +1713,15 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         var targetOffset;
         
         if (dragDuration < 200) { 
-            // ✅ 수정: 관성 값 1800에서 1500으로 감소 (너무 많이 밀려나가는 현상 완화)
-            var inertia = velocity * 1500; 
+            var inertia = velocity * 1200; 
+            
+            var d = dims();
+            var maxInertiaDistance = 2 * (d.cardW + d.gap); 
+            
+            if (Math.abs(inertia) > maxInertiaDistance) {
+                inertia = Math.sign(inertia) * maxInertiaDistance;
+            }
+            
             targetOffset = currOffset - inertia;
         } else {
             targetOffset = currOffset;
@@ -1751,61 +1729,92 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
         targetOffset = Math.max(0, Math.min(targetOffset, m));
         
-        var newIdx = nearestIndexFromOffset(targetOffset);
+        offset = targetOffset;
         
-        var snapTargetX = cards[newIdx].offsetLeft;
+        // 관성 이동 시에는 부드러운 transition 적용 (500ms)
+        applyTransform(offset, 500); 
         
-        if (newIdx === cards.length - 1) {
-             var d = dims();
-             var centerOffset = (d.vp - d.cardW) / 2;
-             snapTargetX = cards[newIdx].offsetLeft - centerOffset + d.sidePadL; 
-        }
-        
-        snapTargetX = Math.max(0, Math.min(snapTargetX, m));
-        
-        offset = snapTargetX;
-        applyTransform(offset, 380); 
-        
-        idx = newIdx; 
-        setActive(idx);
+        updateActiveCardIndex(offset);
         restartAuto();
         
         isMoving = true;
-        setTimeout(function() { isMoving = false; }, 380);
+        setTimeout(function() { isMoving = false; }, 500);
       }
       
-      var passiveOpts = {passive:true};
+      var activeOpts = {passive:false};
+      var passiveOpts = {passive:true}; 
+
       if(supportsPointer){
         viewport.addEventListener('pointerdown', function(e){ 
           if(e.button !== 0 && !e.isPrimary) return;
-          onDown(e.clientX, e.pointerId); 
+          onDown(e.clientX, e.clientY, e.pointerId); 
         }, passiveOpts); 
-        viewport.addEventListener('pointermove', function(e){ onMove(e.clientX); }, passiveOpts);
+        viewport.addEventListener('pointermove', function(e){ 
+            if(!dragging) return; 
+            onMove(e.clientX, e.clientY, e); 
+        }, activeOpts);
         window.addEventListener('pointerup', function(e){ onUp(e.pointerId); }, passiveOpts);
         window.addEventListener('pointercancel', function(e){ onUp(e.pointerId); }, passiveOpts);
       }else{
-        viewport.addEventListener('touchstart', function(e){ if(!e.touches||!e.touches.length)return; onDown(e.touches[0].clientX); }, passiveOpts);
-        viewport.addEventListener('touchmove',  function(e){ if(!e.touches||!e.touches.length)return; onMove(e.touches[0].clientX); }, passiveOpts);
+        viewport.addEventListener('touchstart', function(e){ 
+            if(!e.touches||!e.touches.length)return; 
+            onDown(e.touches[0].clientX, e.touches[0].clientY); 
+        }, passiveOpts);
+        viewport.addEventListener('touchmove',  function(e){ 
+            if(!e.touches||!e.touches.length)return; 
+            onMove(e.touches[0].clientX, e.touches[0].clientY, e); 
+        }, activeOpts); 
         window.addEventListener('touchend',   function(){ onUp(); }, passiveOpts);
         
-        viewport.addEventListener('mousedown', function(e){ onDown(e.clientX); }, passiveOpts);
-        window.addEventListener('mousemove',   function(e){ onMove(e.clientX); }, passiveOpts);
+        viewport.addEventListener('mousedown', function(e){ onDown(e.clientX, e.clientY); }, passiveOpts); 
+        window.addEventListener('mousemove',   function(e){ 
+            if(!dragging) return;
+            onMove(e.clientX, e.clientY, e); 
+        }, activeOpts); 
         window.addEventListener('mouseup',     function(){ onUp(); }, passiveOpts);
       }
       
-      /* ===== 자동 재생 로직 ===== */
+      /* ===== 자동 재생 로직 (requestAnimationFrame 기반 부드러운 이동) ===== */
+      
+      function autoMove(timestamp){
+          if (!lastTimestamp) {
+              lastTimestamp = timestamp;
+              autoRafId = requestAnimationFrame(autoMove);
+              return;
+          }
+          
+          var deltaTime = timestamp - lastTimestamp;
+          
+          // deltaTime이 너무 크면 건너뛰어 속도 폭발 방지 (예: 100ms 이상)
+          if (deltaTime > 100) deltaTime = 0; 
+          
+          // ✅ 경과 시간에 속도를 곱하여 이동할 거리 계산
+          var distance = autoSpeed * deltaTime;
+          
+          var nextOffset = offset + distance;
+          
+          // applyTransform(nextOffset, 0)을 사용하여 transition 없이 즉시 이동
+          applyTransform(nextOffset, 0); 
+          
+          lastTimestamp = timestamp;
+          
+          if (isAutoPlaying) {
+             autoRafId = requestAnimationFrame(autoMove);
+          }
+      }
       
       function startAuto(){
-        if(timer) return;
-        var cs = getComputedStyle(root);
-        var interval = parseInt(cs.getPropertyValue('--autoMs')) || 3800; 
-        timer = setInterval(function(){
-          if(performance.now() - userInteractedAt < 6000) return;
-          var last = cards.length-1;
-          if(idx < last) snapToIndex(idx+1); else snapToIndex(0);
-        }, interval);
+        if(isAutoPlaying) return;
+        isAutoPlaying = true;
+        lastTimestamp = 0; // 시작 시 타임스탬프 초기화
+        autoRafId = requestAnimationFrame(autoMove);
       }
-      function stopAuto(){ clearInterval(timer); timer=null; }
+      
+      function stopAuto(){ 
+        if (autoRafId) cancelAnimationFrame(autoRafId);
+        isAutoPlaying = false; 
+        autoRafId = null; 
+      }
       function restartAuto(){ stopAuto(); startAuto(); }
 
 
@@ -1813,10 +1822,10 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         requestAnimationFrame(function(){
           root.classList.add('ecs-mounted');
           
-          var initialOffset = cards[0].offsetLeft; 
+          var initialOffset = 0; // 시작 위치 0
           
-          applyTransform(Math.max(0, initialOffset), 0); 
-          setActive(0);
+          applyTransform(initialOffset, 0); 
+          updateActiveCardIndex(initialOffset); 
           startAuto();
         });
       });
@@ -1827,30 +1836,38 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         rAF = requestAnimationFrame(function(){
           var newMaxOffset = maxOffset();
           
-          var ni = nearestIndexFromOffset(offset); 
-          var snapTargetX = cards[ni].offsetLeft;
-          
-          if (ni === cards.length - 1) {
-              var d = dims();
-              var centerOffset = (d.vp - d.cardW) / 2;
-              snapTargetX = cards[ni].offsetLeft - centerOffset + d.sidePadL;
-          }
-          
-          offset = Math.max(0, Math.min(snapTargetX, newMaxOffset));
+          offset = Math.max(0, Math.min(offset, newMaxOffset));
 
           applyTransform(offset, 0);
-          if(ni!==idx){ idx=ni; setActive(idx); }
+          updateActiveCardIndex(offset);
+          restartAuto(); // 속도 계산에 영향을 줄 수 있으므로 재시작
         });
       });
-
-      cards.forEach(function(c,i){ c.addEventListener('click', function(){ snapToIndex(i, true); }); });
+      
+      // ✅ 호버/클릭 시 자동 재생 멈춤 및 즉시 재개 로직
+      var handleInteraction = function(e){
+          if (e.type === 'click' || e.type === 'mouseenter') {
+              stopAuto();
+          } else if (e.type === 'mouseleave' && !dragging && !isMoving) {
+              // 마우스가 풀리고 드래그/관성 이동 중이 아니면 즉시 자동 이동 재개
+              restartAuto();
+          }
+      };
+      viewport.addEventListener('click', handleInteraction);
+      viewport.addEventListener('mouseenter', handleInteraction);
+      viewport.addEventListener('mouseleave', handleInteraction);
+      
     })();
   </script>
 </section>
 
-<section class="ecs-slider" aria-label="Live Server Drag Card Slider">
+<section class="ecs-slider" aria-label="Finite List Drag Card Slider">
   <style>
-    /* ========= Scope: .ecs-slider only (전역 충돌 없음) ========= */
+    /*
+      ====================================
+      CSS: 디자인 및 반응형 설정 (변경 없음)
+      ====================================
+    */
     .ecs-slider{
       --ink:#0f172a;
       --accent:#e73700;
@@ -1860,9 +1877,8 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       --radius: 18px;
       --shadow: 0 10px 24px rgba(15,23,42,.08); 
       --fadeDur: 700ms;
-      --autoMs: 3800;
+      --autoMs: 3800; /* 이 변수는 JS에서 속도 기준으로 사용됩니다. */
       --ease: cubic-bezier(.22,.61,.36,1); 
-      /* ✅ 추가: 게이지 진행도를 위한 변수 */
       --progress: 0; 
       
       font-family: "Pretendard","Noto Sans KR",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
@@ -1885,16 +1901,13 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     }
     .ecs-slider .ecs-title:after{content:"";position:absolute;left:0;bottom:-10px;width:36px;height:4px;border-radius:2px;background:var(--accent)}
 
-    /* 뷰포트 */
     .ecs-slider .ecs-viewport{
       position:relative;
       overflow: hidden; 
-      
       padding:10px 8px;
       --sidePad:max(20px,(100% - 1000px)/2);
       padding-left:var(--gap); 
       padding-right:var(--sidePad);
-      
       contain:layout paint size;border-radius:20px;
       min-height:calc(var(--cardW) + 20px); 
       transform:translateY(8px);
@@ -1908,12 +1921,11 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
     .ecs-slider.ecs-mounted .ecs-viewport{opacity:1;transform:none}
 
-    /* 트랙 */
+    /* 트랙: 부드러운 이동 시 transition: none, 드래그 관성 시 transition: 500ms */
     .ecs-slider .ecs-track{
       display:flex;gap:var(--gap);
       will-change: transform;
-      /* ✅ 수정: 일정 속도로 이동하다가 부드럽게 멈추는 가속도 곡선 */
-      transition:transform 380ms cubic-bezier(.1, .7, .1, 1); 
+      transition:transform 500ms cubic-bezier(.16, 1, .3, 1); 
     }
 
     /* 카드 */
@@ -1930,54 +1942,16 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     .ecs-slider .ecs-card.ecs-active{
         box-shadow: 0 24px 60px rgba(13,18,30,.18); 
     }
-
-    /* 로고 */
-    .ecs-slider .ecs-logo{
-        position:absolute;
-        top:16px; 
-        left:16px; 
-        z-index:3; 
-        width:40px; 
-        height:40px; 
-        border-radius:10px; 
-        overflow:hidden;
-        background:transparent; 
-        box-shadow:0 2px 6px rgba(15,23,42,.1);
-        display:grid; 
-        place-items:center;
-        pointer-events:none; 
-    }
-    .ecs-slider .ecs-logo img{
-        width:70%; 
-        height:70%;
-        object-fit:contain; 
-        display:block;
-    }
-
-    /* 이미지 레이어 */
+    .ecs-slider .ecs-logo{position:absolute;top:16px;left:16px;z-index:3;width:40px;height:40px;border-radius:10px;overflow:hidden;background:transparent;box-shadow:0 2px 6px rgba(15,23,42,.1);display:grid;place-items:center;pointer-events:none;}
+    .ecs-slider .ecs-logo img{width:70%;height:70%;object-fit:contain;display:block;}
     .ecs-slider .ecs-media{position:absolute;inset:0}
-    .ecs-slider .ecs-media img{
-      width:100%;height:100%;object-fit:contain;display:block;
-      transform:scale(1.02);
-      transition:transform 600ms var(--ease),filter 600ms var(--ease)
-    }
-    .ecs-slider .ecs-card:hover .ecs-media img,
-    .ecs-slider .ecs-card.ecs-active .ecs-media img{transform:scale(1.05);filter:saturate(1.04)}
-
-    /* 오버레이 */
+    .ecs-slider .ecs-media img{width:100%;height:100%;object-fit:contain;display:block;transform:scale(1.02);transition:transform 600ms var(--ease),filter 600ms var(--ease)}
+    .ecs-slider .ecs-card:hover .ecs-media img,.ecs-slider .ecs-card.ecs-active .ecs-media img{transform:scale(1.05);filter:saturate(1.04)}
     .ecs-slider .ecs-grad{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 35%,rgba(0,0,0,.78) 95%);z-index:1}
-
-    /* 텍스트 */
-    .ecs-slider .ecs-body{
-      position:absolute;left:16px;right:16px;bottom:14px;z-index:2;color:#fff;
-      transform:translateY(0); 
-      opacity:.98;
-      transition:opacity 380ms cubic-bezier(.15,.7,.25,1.05);
-    }
+    .ecs-slider .ecs-body{position:absolute;left:16px;right:16px;bottom:14px;z-index:2;color:#fff;transform:translateY(0);opacity:.98;transition:opacity 380ms cubic-bezier(.15,.7,.25,1.05);}
     .ecs-slider .ecs-title2{font-size:clamp(12px,2vw,16px);line-height:1.2;margin:0;font-weight:800;letter-spacing:-.01em}
     .ecs-slider .ecs-card:not(.ecs-active) .ecs-body{opacity: 0.8;} 
-    
-    /* ✅ 추가: 게이지 컨테이너 (Track) */
+
     .ecs-slider .ecs-gauge{
         width: clamp(120px, 15vw, 180px); 
         height: 6px; 
@@ -1986,7 +1960,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         overflow: hidden;
         margin-top: 10px;
     }
-    /* ✅ 추가: 진행 표시줄 (Progress) */
     .ecs-slider .ecs-progress-bar{
         width: 100%;
         height: 100%;
@@ -2104,17 +2077,27 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       var gauge       = root.querySelector('.ecs-gauge');
       var gaugeBar    = root.querySelector('.ecs-progress-bar'); 
 
-      var idx = 0;
+      var idx = 0; 
       var timer = null;
-      var userInteractedAt = 0;
       var offset = 0; 
       var isMoving = false; 
       var animationFrameId = null; 
+      
+      // ✅ 컨베이어 벨트 속도: 0.05px/ms (초당 50px)
+      var autoSpeed = 0.05; 
+      var lastTimestamp = 0;
+      var isAutoPlaying = false; 
+      var autoRafId = null;
+
 
       function setActive(i){
-        cards.forEach(function(c,k){ c.classList.toggle('ecs-active', k===i); });
+        cards.forEach(function(c,k){ 
+            c.classList.toggle('ecs-active', k===i); 
+        });
         
+        // 게이지 진행도 업데이트 (자동 이동 시에도 대략적인 위치 표시)
         if(cards.length > 1 && gauge && gaugeBar){
+            // 현재 활성화된 카드 인덱스 기준으로 진행도를 표시
             var progressRatio = i / (cards.length - 1);
             root.style.setProperty('--progress', progressRatio);
             gauge.setAttribute('aria-valuenow', i + 1);
@@ -2124,7 +2107,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       function dims(){
         var cs = getComputedStyle(root);
         var cardW   = parseFloat(cs.getPropertyValue('--cardW')) || 400;
-        
         return {
           cardW:   cardW,
           gap:     parseFloat(cs.getPropertyValue('--gap')) || 18,
@@ -2138,92 +2120,71 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         if (cards.length === 0) return 0;
         
         var d = dims();
-        var lastCard = cards[cards.length - 1];
+        var totalContentWidth = (d.cardW + d.gap) * cards.length - d.gap;
         
-        var centerOffset = (d.vp - d.cardW) / 2;
-        var maxScroll = lastCard.offsetLeft - centerOffset + d.sidePadL;
+        var maxScroll = totalContentWidth - d.vp + d.sidePadL;
         
         return Math.max(0, maxScroll); 
       }
       
-      function nearestIndexFromOffset(x){
-        var closestIndex = 0;
-        var minDiff = Infinity;
-        
-        for(var i = 0; i < cards.length; i++){
-            var cardPos = cards[i].offsetLeft; 
-            
-            if (i === cards.length - 1) {
-                var d = dims();
-                var centerOffset = (d.vp - d.cardW) / 2; 
-                cardPos = cardPos - centerOffset + d.sidePadL; 
-            }
-            
-            var diff = Math.abs(x - cardPos);
-            
-            if(diff < minDiff){
-                minDiff = diff;
-                closestIndex = i;
-            }
-        }
-        
-        return closestIndex;
-      }
-
-
+      
       function applyTransform(x, ms){
-        x = Math.max(0, Math.min(x, maxOffset())); 
+        var m = maxOffset();
+        
+        // 오프셋 제한
+        x = Math.max(0, Math.min(x, m)); 
         offset = x;
         
         var translateX = -x;
 
-        // ✅ JS의 applyTransform 함수는 이전에 요청했던 부드러운 감속 효과를 CSS에서 가져와 사용합니다.
-        // 현재 CSS 트랜지션: transform 380ms cubic-bezier(.1, .7, .1, 1)
-        track.style.transition = 'transform '+ms+'ms cubic-bezier(.1, .7, .1, 1)';
-        track.style.transform  = 'translate3d('+(translateX)+'px,0,0)';
-      }
-
-      function snapToIndex(n, user){
-        if(user === void 0) user = false;
-        if(isMoving) return;
-        
-        var last = cards.length-1;
-        var newIdx = Math.max(0, Math.min(n, last));
-        
-        if (newIdx === idx && !user) return;
-        if (newIdx === idx && user) return;
-
-        idx = newIdx;
-        setActive(idx);
-        
-        var targetX = cards[newIdx].offsetLeft;
-        
-        if (newIdx === last) {
-             var d = dims();
-             var centerOffset = (d.vp - d.cardW) / 2;
-             targetX = cards[newIdx].offsetLeft - centerOffset + d.sidePadL; 
+        if (ms > 0) {
+            // 드래그/관성/부드러운 루프 시에만 transition 사용
+            track.style.transition = 'transform '+ms+'ms cubic-bezier(.16, 1, .3, 1)';
+        } else {
+            // 부드러운 자동 이동 (컨베이어 벨트) 시에는 transition을 끔
+            track.style.transition = 'none'; 
         }
-
-        var finalOffset = Math.max(0, Math.min(targetX, maxOffset()));
-
-        isMoving = true;
-        applyTransform(finalOffset, 380);
         
-        setTimeout(function() { isMoving = false; }, 380); 
+        track.style.transform  = 'translate3d('+(translateX)+'px,0,0)';
         
-        if(user){ userInteractedAt = performance.now(); restartAuto(); }
+        updateActiveCardIndex(offset);
+        
+        // ✅ 목록 끝에 도달하면 시작 위치로 부드러운 이동 (컨베이어 벨트 루프)
+        if (offset >= m && isAutoPlaying) {
+             // 1초 동안 부드럽게 시작 위치(0)으로 이동 후, autoMove가 다음 프레임부터 다시 흐름을 이어받음
+            applyTransform(0, 1000); 
+        }
+      }
+      
+      
+      function updateActiveCardIndex(currentOffset){
+          var d = dims();
+          var cardCenter = d.cardW / 2;
+          
+          for(var i = 0; i < cards.length; i++){
+              var cardStart = cards[i].offsetLeft - d.sidePadL;
+              
+              if(currentOffset >= cardStart - cardCenter){
+                  idx = i;
+              } else {
+                  break;
+              }
+          }
+          setActive(idx);
       }
 
-      /* ===== 드래그/스와이프 로직 (최적화) ===== */
+
+      /* ===== 드래그/스와이프 로직 (유한 목록) ===== */
       var supportsPointer = typeof window.PointerEvent !== 'undefined';
-      var startX=0, baseOffset=0, currOffset=0, dragging=false;
+      var startX=0, startY=0, baseOffset=0, currOffset=0, dragging=false;
       var lastT=0, lastX=0, velocity=0, startTime=0;
       var capturedPointerId = null;
+      var isScrollPrevented = false; 
 
       function resist(x){
         var m = maxOffset();
-        if(x < 0) return x * 0.25;
-        if(x > m) return m + (x - m)*0.25;
+        if(x < 0) return x * 0.35;
+        if(x > m) return m + (x - m)*0.35;
         return x;
       }
       
@@ -2231,15 +2192,25 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         if(!dragging) return;
         var translateX = -currOffset;
         track.style.transform = 'translate3d('+(translateX)+'px,0,0)';
+        updateActiveCardIndex(currOffset); 
         animationFrameId = requestAnimationFrame(updateTrackPosition);
       }
 
-      function onDown(clientX, pointerId){
+      function onDown(clientX, clientY, pointerId){ 
         if(isMoving) return;
-        dragging=true; startX=clientX; baseOffset=offset; currOffset=offset; 
-        lastX=clientX; lastT=performance.now(); velocity=0; startTime=performance.now();
+        stopAuto(); // 드래그 시작 시 자동 재생 중지
+        
+        dragging=true; 
+        startX=clientX; 
+        startY=clientY;
+        baseOffset=offset; 
+        currOffset=offset; 
+        lastX=clientX; 
+        lastT=performance.now(); 
+        velocity=0; 
+        startTime=performance.now(); 
+        isScrollPrevented=false; 
         track.style.transition='none'; 
-        userInteractedAt = performance.now();
         viewport.classList.add('is-dragging'); 
         
         if (supportsPointer && pointerId !== undefined) {
@@ -2251,20 +2222,28 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         updateTrackPosition(); 
       }
       
-      function onMove(clientX){
+      function onMove(clientX, clientY, e){ 
         if(!dragging) return;
         var now = performance.now();
         var dx = startX - clientX; 
+        var dy = startY - clientY; 
         
-        currOffset = resist(baseOffset + dx);
-        
-        var dt = now - lastT;
-        if (dt > 0) {
-            velocity = (clientX - lastX) / dt; 
+        if (!isScrollPrevented && Math.abs(dx) > Math.abs(dy)) { 
+            e.preventDefault(); 
+            isScrollPrevented = true; 
         }
-        
-        lastX = clientX; 
-        lastT = now;
+
+        if(isScrollPrevented || Math.abs(dx) > 10 || Math.abs(dy) > 10){
+            currOffset = resist(baseOffset + dx); 
+            
+            var dt = now - lastT;
+            if (dt > 0) {
+                velocity = (clientX - lastX) / dt; 
+            }
+            
+            lastX = clientX; 
+            lastT = now;
+        }
       }
       
       function onUp(pointerId){
@@ -2283,11 +2262,10 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         var targetOffset;
         
         if (dragDuration < 200) { 
-            var inertia = velocity * 1500; 
+            var inertia = velocity * 1200; 
             
             var d = dims();
-            // 이전 로직에 따라 관성 거리 제한이 적용됩니다.
-            var maxInertiaDistance = 2.5 * (d.cardW + d.gap); 
+            var maxInertiaDistance = 2 * (d.cardW + d.gap); 
             
             if (Math.abs(inertia) > maxInertiaDistance) {
                 inertia = Math.sign(inertia) * maxInertiaDistance;
@@ -2300,61 +2278,92 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
         targetOffset = Math.max(0, Math.min(targetOffset, m));
         
-        var newIdx = nearestIndexFromOffset(targetOffset);
+        offset = targetOffset;
         
-        var snapTargetX = cards[newIdx].offsetLeft;
+        // 관성 이동 시에는 부드러운 transition 적용 (500ms)
+        applyTransform(offset, 500); 
         
-        if (newIdx === cards.length - 1) {
-             var d = dims();
-             var centerOffset = (d.vp - d.cardW) / 2;
-             snapTargetX = cards[newIdx].offsetLeft - centerOffset + d.sidePadL; 
-        }
-        
-        snapTargetX = Math.max(0, Math.min(snapTargetX, m));
-        
-        offset = snapTargetX;
-        applyTransform(offset, 380); 
-        
-        idx = newIdx; 
-        setActive(idx);
+        updateActiveCardIndex(offset);
         restartAuto();
         
         isMoving = true;
-        setTimeout(function() { isMoving = false; }, 380);
+        setTimeout(function() { isMoving = false; }, 500);
       }
       
-      var passiveOpts = {passive:true};
+      var activeOpts = {passive:false};
+      var passiveOpts = {passive:true}; 
+
       if(supportsPointer){
         viewport.addEventListener('pointerdown', function(e){ 
           if(e.button !== 0 && !e.isPrimary) return;
-          onDown(e.clientX, e.pointerId); 
+          onDown(e.clientX, e.clientY, e.pointerId); 
         }, passiveOpts); 
-        viewport.addEventListener('pointermove', function(e){ onMove(e.clientX); }, passiveOpts);
+        viewport.addEventListener('pointermove', function(e){ 
+            if(!dragging) return; 
+            onMove(e.clientX, e.clientY, e); 
+        }, activeOpts);
         window.addEventListener('pointerup', function(e){ onUp(e.pointerId); }, passiveOpts);
         window.addEventListener('pointercancel', function(e){ onUp(e.pointerId); }, passiveOpts);
       }else{
-        viewport.addEventListener('touchstart', function(e){ if(!e.touches||!e.touches.length)return; onDown(e.touches[0].clientX); }, passiveOpts);
-        viewport.addEventListener('touchmove',  function(e){ if(!e.touches||!e.touches.length)return; onMove(e.touches[0].clientX); }, passiveOpts);
+        viewport.addEventListener('touchstart', function(e){ 
+            if(!e.touches||!e.touches.length)return; 
+            onDown(e.touches[0].clientX, e.touches[0].clientY); 
+        }, passiveOpts);
+        viewport.addEventListener('touchmove',  function(e){ 
+            if(!e.touches||!e.touches.length)return; 
+            onMove(e.touches[0].clientX, e.touches[0].clientY, e); 
+        }, activeOpts); 
         window.addEventListener('touchend',   function(){ onUp(); }, passiveOpts);
         
-        viewport.addEventListener('mousedown', function(e){ onDown(e.clientX); }, passiveOpts);
-        window.addEventListener('mousemove',   function(e){ onMove(e.clientX); }, passiveOpts);
+        viewport.addEventListener('mousedown', function(e){ onDown(e.clientX, e.clientY); }, passiveOpts); 
+        window.addEventListener('mousemove',   function(e){ 
+            if(!dragging) return;
+            onMove(e.clientX, e.clientY, e); 
+        }, activeOpts); 
         window.addEventListener('mouseup',     function(){ onUp(); }, passiveOpts);
       }
       
-      /* ===== 자동 재생 로직 ===== */
+      /* ===== 자동 재생 로직 (requestAnimationFrame 기반 부드러운 이동) ===== */
+      
+      function autoMove(timestamp){
+          if (!lastTimestamp) {
+              lastTimestamp = timestamp;
+              autoRafId = requestAnimationFrame(autoMove);
+              return;
+          }
+          
+          var deltaTime = timestamp - lastTimestamp;
+          
+          // deltaTime이 너무 크면 건너뛰어 속도 폭발 방지 (예: 100ms 이상)
+          if (deltaTime > 100) deltaTime = 0; 
+          
+          // ✅ 경과 시간에 속도를 곱하여 이동할 거리 계산
+          var distance = autoSpeed * deltaTime;
+          
+          var nextOffset = offset + distance;
+          
+          // applyTransform(nextOffset, 0)을 사용하여 transition 없이 즉시 이동
+          applyTransform(nextOffset, 0); 
+          
+          lastTimestamp = timestamp;
+          
+          if (isAutoPlaying) {
+             autoRafId = requestAnimationFrame(autoMove);
+          }
+      }
       
       function startAuto(){
-        if(timer) return;
-        var cs = getComputedStyle(root);
-        var interval = parseInt(cs.getPropertyValue('--autoMs')) || 3800; 
-        timer = setInterval(function(){
-          if(performance.now() - userInteractedAt < 6000) return;
-          var last = cards.length-1;
-          if(idx < last) snapToIndex(idx+1); else snapToIndex(0);
-        }, interval);
+        if(isAutoPlaying) return;
+        isAutoPlaying = true;
+        lastTimestamp = 0; // 시작 시 타임스탬프 초기화
+        autoRafId = requestAnimationFrame(autoMove);
       }
-      function stopAuto(){ clearInterval(timer); timer=null; }
+      
+      function stopAuto(){ 
+        if (autoRafId) cancelAnimationFrame(autoRafId);
+        isAutoPlaying = false; 
+        autoRafId = null; 
+      }
       function restartAuto(){ stopAuto(); startAuto(); }
 
 
@@ -2362,10 +2371,10 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         requestAnimationFrame(function(){
           root.classList.add('ecs-mounted');
           
-          var initialOffset = cards[0].offsetLeft; 
+          var initialOffset = 0; // 시작 위치 0
           
-          applyTransform(Math.max(0, initialOffset), 0); 
-          setActive(0);
+          applyTransform(initialOffset, 0); 
+          updateActiveCardIndex(initialOffset); 
           startAuto();
         });
       });
@@ -2376,30 +2385,38 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         rAF = requestAnimationFrame(function(){
           var newMaxOffset = maxOffset();
           
-          var ni = nearestIndexFromOffset(offset); 
-          var snapTargetX = cards[ni].offsetLeft;
-          
-          if (ni === cards.length - 1) {
-              var d = dims();
-              var centerOffset = (d.vp - d.cardW) / 2;
-              snapTargetX = cards[ni].offsetLeft - centerOffset + d.sidePadL;
-          }
-          
-          offset = Math.max(0, Math.min(snapTargetX, newMaxOffset));
+          offset = Math.max(0, Math.min(offset, newMaxOffset));
 
           applyTransform(offset, 0);
-          if(ni!==idx){ idx=ni; setActive(idx); }
+          updateActiveCardIndex(offset);
+          restartAuto(); // 속도 계산에 영향을 줄 수 있으므로 재시작
         });
       });
-
-      cards.forEach(function(c,i){ c.addEventListener('click', function(){ snapToIndex(i, true); }); });
+      
+      // ✅ 호버/클릭 시 자동 재생 멈춤 및 즉시 재개 로직
+      var handleInteraction = function(e){
+          if (e.type === 'click' || e.type === 'mouseenter') {
+              stopAuto();
+          } else if (e.type === 'mouseleave' && !dragging && !isMoving) {
+              // 마우스가 풀리고 드래그/관성 이동 중이 아니면 즉시 자동 이동 재개
+              restartAuto();
+          }
+      };
+      viewport.addEventListener('click', handleInteraction);
+      viewport.addEventListener('mouseenter', handleInteraction);
+      viewport.addEventListener('mouseleave', handleInteraction);
+      
     })();
   </script>
 </section>
 
-<section class="ecs-slider" aria-label="Live Server Drag Card Slider">
+<section class="ecs-slider" aria-label="Finite List Drag Card Slider">
   <style>
-    /* ========= Scope: .ecs-slider only (전역 충돌 없음) ========= */
+    /*
+      ====================================
+      CSS: 디자인 및 반응형 설정 (변경 없음)
+      ====================================
+    */
     .ecs-slider{
       --ink:#0f172a;
       --accent:#e73700;
@@ -2409,9 +2426,8 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       --radius: 18px;
       --shadow: 0 10px 24px rgba(15,23,42,.08); 
       --fadeDur: 700ms;
-      --autoMs: 3800;
+      --autoMs: 3800; 
       --ease: cubic-bezier(.22,.61,.36,1); 
-      /* ✅ 추가: 게이지 진행도를 위한 변수 */
       --progress: 0; 
       
       font-family: "Pretendard","Noto Sans KR",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
@@ -2434,21 +2450,17 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     }
     .ecs-slider .ecs-title:after{content:"";position:absolute;left:0;bottom:-10px;width:36px;height:4px;border-radius:2px;background:var(--accent)}
 
-    /* 뷰포트 */
     .ecs-slider .ecs-viewport{
       position:relative;
       overflow: hidden; 
-      
       padding:10px 8px;
       --sidePad:max(20px,(100% - 1000px)/2);
       padding-left:var(--gap); 
       padding-right:var(--sidePad);
-      
       contain:layout paint size;border-radius:20px;
       min-height:calc(var(--cardW) + 20px); 
       transform:translateY(8px);
       transition:opacity var(--fadeDur) var(--ease),transform var(--fadeDur) var(--ease);
-      /* ✅ 유지: 세로 스크롤 방지 (브라우저 정책에 따라 JS 추가 필요) */
       touch-action: pan-y pinch-zoom; 
       user-select: none; 
     }
@@ -2458,11 +2470,9 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
     .ecs-slider.ecs-mounted .ecs-viewport{opacity:1;transform:none}
 
-    /* 트랙 */
     .ecs-slider .ecs-track{
       display:flex;gap:var(--gap);
       will-change: transform;
-      /* ✅ 최종 수정: 느리고 부드럽게 멈추는 가속도 곡선 */
       transition:transform 500ms cubic-bezier(.16, 1, .3, 1); 
     }
 
@@ -2480,54 +2490,16 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     .ecs-slider .ecs-card.ecs-active{
         box-shadow: 0 24px 60px rgba(13,18,30,.18); 
     }
-
-    /* 로고 */
-    .ecs-slider .ecs-logo{
-        position:absolute;
-        top:16px; 
-        left:16px; 
-        z-index:3; 
-        width:40px; 
-        height:40px; 
-        border-radius:10px; 
-        overflow:hidden;
-        background:transparent; 
-        box-shadow:0 2px 6px rgba(15,23,42,.1);
-        display:grid; 
-        place-items:center;
-        pointer-events:none; 
-    }
-    .ecs-slider .ecs-logo img{
-        width:70%; 
-        height:70%;
-        object-fit:contain; 
-        display:block;
-    }
-
-    /* 이미지 레이어 */
+    .ecs-slider .ecs-logo{position:absolute;top:16px;left:16px;z-index:3;width:40px;height:40px;border-radius:10px;overflow:hidden;background:transparent;box-shadow:0 2px 6px rgba(15,23,42,.1);display:grid;place-items:center;pointer-events:none;}
+    .ecs-slider .ecs-logo img{width:70%;height:70%;object-fit:contain;display:block;}
     .ecs-slider .ecs-media{position:absolute;inset:0}
-    .ecs-slider .ecs-media img{
-      width:100%;height:100%;object-fit:contain;display:block;
-      transform:scale(1.02);
-      transition:transform 600ms var(--ease),filter 600ms var(--ease)
-    }
-    .ecs-slider .ecs-card:hover .ecs-media img,
-    .ecs-slider .ecs-card.ecs-active .ecs-media img{transform:scale(1.05);filter:saturate(1.04)}
-
-    /* 오버레이 */
+    .ecs-slider .ecs-media img{width:100%;height:100%;object-fit:contain;display:block;transform:scale(1.02);transition:transform 600ms var(--ease),filter 600ms var(--ease)}
+    .ecs-slider .ecs-card:hover .ecs-media img,.ecs-slider .ecs-card.ecs-active .ecs-media img{transform:scale(1.05);filter:saturate(1.04)}
     .ecs-slider .ecs-grad{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 35%,rgba(0,0,0,.78) 95%);z-index:1}
-
-    /* 텍스트 */
-    .ecs-slider .ecs-body{
-      position:absolute;left:16px;right:16px;bottom:14px;z-index:2;color:#fff;
-      transform:translateY(0); 
-      opacity:.98;
-      transition:opacity 380ms cubic-bezier(.15,.7,.25,1.05);
-    }
+    .ecs-slider .ecs-body{position:absolute;left:16px;right:16px;bottom:14px;z-index:2;color:#fff;transform:translateY(0);opacity:.98;transition:opacity 380ms cubic-bezier(.15,.7,.25,1.05);}
     .ecs-slider .ecs-title2{font-size:clamp(12px,2vw,16px);line-height:1.2;margin:0;font-weight:800;letter-spacing:-.01em}
     .ecs-slider .ecs-card:not(.ecs-active) .ecs-body{opacity: 0.8;} 
 
-    /* ✅ 추가: 게이지 컨테이너 (Track) */
     .ecs-slider .ecs-gauge{
         width: clamp(120px, 15vw, 180px); 
         height: 6px; 
@@ -2536,7 +2508,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         overflow: hidden;
         margin-top: 10px;
     }
-    /* ✅ 추가: 진행 표시줄 (Progress) */
     .ecs-slider .ecs-progress-bar{
         width: 100%;
         height: 100%;
@@ -2578,18 +2549,14 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     <div class="ecs-viewport">
       <div class="ecs-track">
         <article class="ecs-card ecs-active" data-ecs-slide>
-          <div class="ecs-logo">
-            <img src="./img/bf-logo.webp" alt="Dota 2 Logo">
-          </div>
+          <div class="ecs-logo"><img src="./img/bf-logo.webp" alt="Dota 2 Logo"></div>
           <div class="ecs-media"><img src="https://lh3.googleusercontent.com/sgybYaPyPxNBlX5YPlbFxoo3w_RaUk9wS9e2PJNG4IcWGcPwCm91cLUrk6Cjw7q_OcK664IOA66bkP2QujVkL5YXky_InkQD0voSDkiPSSA8KUmQqSL-KQ=w800" alt="Dota 2"></div>
           <div class="ecs-grad"></div>
           <div class="ecs-body"><h3 class="ecs-title2">바디프랜드 헬스케어로봇 [팔콘S]</h3></div>
         </article>
 
          <article class="ecs-card" data-ecs-slide>
-          <div class="ecs-logo">
-            <img src="./img/bf-logo.webp" alt="The Witcher 3 Logo">
-          </div>
+          <div class="ecs-logo"><img src="./img/bf-logo.webp" alt="The Witcher 3 Logo"></div>
           <div class="ecs-media"><img src="https://lh3.googleusercontent.com/gAMHQZwL6odDs6cgGpmVQwY9xYxZ0T4o8RbZm4Ej6xB4WtNibvFIlry_U7EmIPifg9nt2zATLBHUPIVLX-g0PFvFCPRgo4ajiSABidD3Rd39LaH9fGhQiQ=w800" alt="The Witcher 3"></div>
           <div class="ecs-grad"></div>
           <div class="ecs-body"><h3 class="ecs-title2">바디프랜드 헬스케어로봇 [팔콘]</h3></div>
@@ -2597,9 +2564,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
 
         <article class="ecs-card" data-ecs-slide>
-          <div class="ecs-logo">
-            <img src="./img/lg-logo.png" alt="The Witcher 3 Logo">
-          </div>
+          <div class="ecs-logo"><img src="./img/lg-logo.png" alt="The Witcher 3 Logo"></div>
           <div class="ecs-media"><img src="https://lh3.googleusercontent.com/OCvwDBrlgdjSl3c-iiAkz4fSW1kSFNEdJahMLBhr21cpKPrO9fT4YGAGG_DIkT9MBYq7ejEaWwzpJ7NHU5zjpxtqGPSenTqxnRIa3ihHuQOFMfPU6xtK=w800" alt="The Witcher 3"></div>
           <div class="ecs-grad"></div>
           <div class="ecs-body"><h3 class="ecs-title2">LG 오브제 얼음정수기</h3></div>
@@ -2607,18 +2572,14 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
        
 
           <article class="ecs-card" data-ecs-slide>
-          <div class="ecs-logo">
-            <img src="./img/sk-logo.png" alt="The Witcher 3 Logo">
-          </div>
+          <div class="ecs-logo"><img src="./img/sk-logo.png" alt="The Witcher 3 Logo"></div>
           <div class="ecs-media"><img src="https://lh3.googleusercontent.com/EusKBLB4epfKV3_lorg97y7TEP78DgUEoXEkHFXrC9Bk_VVgR_wjumS3uFaNhtAP0AjWbzauDV2vRhBPRS35AfC2LR-qgDC8uilI1UEBfqp85qD03GKgSw=w800" alt="The Witcher 3"></div>
           <div class="ecs-grad"></div>
           <div class="ecs-body"><h3 class="ecs-title2">SK 매직 얼음물 정수기</h3></div>
         </article>
 
           <article class="ecs-card" data-ecs-slide>
-          <div class="ecs-logo">
-          <img src="./img/lg-logo.png" alt="The Witcher 3 Logo">
-          </div>
+          <div class="ecs-logo"><img src="./img/lg-logo.png" alt="The Witcher 3 Logo"></div>
           <div class="ecs-media"><img src="https://lh3.googleusercontent.com/dwgAvcYsYN3khFtvXBANMq_Y-ag2Xfx5oOm5DthPIRo4Xm1mkdM8XWEyLwWZT9uBodddTgASIXhsvxjcj05-eFe5zE6d2KSjXzpkJko1eCYBIL-BzqxySg=w800" alt="The Witcher 3"></div>
           <div class="ecs-grad"></div>
           <div class="ecs-body"><h3 class="ecs-title2">LG 오브제 라이트온 온정 정수기</h3></div>
@@ -2627,20 +2588,13 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
 
       <article class="ecs-card" data-ecs-slide>
-          <div class="ecs-logo">
-            <img src="./img/cuckoo-logo.png" alt="The Witcher 3 Logo">
-          </div>
+          <div class="ecs-logo"><img src="./img/cuckoo-logo.png" alt="The Witcher 3 Logo"></div>
           <div class="ecs-media"><img src="https://lh3.googleusercontent.com/NjK64wDytyDEx71RASQjzL6cAoYrUT1GX4PBaKKUYYCCChcjDKz1OXAOlbiunwghSU9InLewctdR27R9_bzh7sOh5As32RMSm4U_bhiBpyFGMdtaQNkdAQ=w800" alt="The Witcher 3"></div>
           <div class="ecs-grad"></div>
           <div class="ecs-body"><h3 class="ecs-title2">쿠쿠 슬림 얼음정수기 (60개월방문)</h3></div>
         </article>
-    
-        
-     
       </div>
-
-      </div>
-    
+    </div>
   </div>
 
   <script>
@@ -2664,15 +2618,23 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       var gauge       = root.querySelector('.ecs-gauge');
       var gaugeBar    = root.querySelector('.ecs-progress-bar'); 
 
-      var idx = 0;
+      var idx = 0; 
       var timer = null;
-      var userInteractedAt = 0;
+      // var userInteractedAt = 0; // ✅ 제거: 지연 로직에 사용되던 변수
       var offset = 0; 
       var isMoving = false; 
       var animationFrameId = null; 
+      
+      var autoSpeed = 0.05; 
+      var lastTimestamp = 0;
+      var isAutoPlaying = false; 
+      var autoRafId = null;
+
 
       function setActive(i){
-        cards.forEach(function(c,k){ c.classList.toggle('ecs-active', k===i); });
+        cards.forEach(function(c,k){ 
+            c.classList.toggle('ecs-active', k===i); 
+        });
         
         if(cards.length > 1 && gauge && gaugeBar){
             var progressRatio = i / (cards.length - 1);
@@ -2684,7 +2646,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       function dims(){
         var cs = getComputedStyle(root);
         var cardW   = parseFloat(cs.getPropertyValue('--cardW')) || 400;
-        
         return {
           cardW:   cardW,
           gap:     parseFloat(cs.getPropertyValue('--gap')) || 18,
@@ -2698,93 +2659,66 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         if (cards.length === 0) return 0;
         
         var d = dims();
-        var lastCard = cards[cards.length - 1];
+        var totalContentWidth = (d.cardW + d.gap) * cards.length - d.gap;
         
-        var centerOffset = (d.vp - d.cardW) / 2;
-        var maxScroll = lastCard.offsetLeft - centerOffset + d.sidePadL;
+        var maxScroll = totalContentWidth - d.vp + d.sidePadL;
         
         return Math.max(0, maxScroll); 
       }
       
-      function nearestIndexFromOffset(x){
-        var closestIndex = 0;
-        var minDiff = Infinity;
-        
-        for(var i = 0; i < cards.length; i++){
-            var cardPos = cards[i].offsetLeft; 
-            
-            if (i === cards.length - 1) {
-                var d = dims();
-                var centerOffset = (d.vp - d.cardW) / 2; 
-                cardPos = cardPos - centerOffset + d.sidePadL; 
-            }
-            
-            var diff = Math.abs(x - cardPos);
-            
-            if(diff < minDiff){
-                minDiff = diff;
-                closestIndex = i;
-            }
-        }
-        
-        return closestIndex;
-      }
-
-
+      
       function applyTransform(x, ms){
-        x = Math.max(0, Math.min(x, maxOffset())); 
+        var m = maxOffset();
+        
+        x = Math.max(0, Math.min(x, m)); 
         offset = x;
         
         var translateX = -x;
 
-        // ✅ 수정된 Cubic-Bezier 및 ms 적용 (500ms)
-        track.style.transition = 'transform '+ms+'ms cubic-bezier(.16, 1, .3, 1)';
-        track.style.transform  = 'translate3d('+(translateX)+'px,0,0)';
-      }
-
-      function snapToIndex(n, user){
-        if(user === void 0) user = false;
-        if(isMoving) return;
-        
-        var last = cards.length-1;
-        var newIdx = Math.max(0, Math.min(n, last));
-        
-        if (newIdx === idx && !user) return;
-        if (newIdx === idx && user) return;
-
-        idx = newIdx;
-        setActive(idx);
-        
-        var targetX = cards[newIdx].offsetLeft;
-        
-        if (newIdx === last) {
-             var d = dims();
-             var centerOffset = (d.vp - d.cardW) / 2;
-             targetX = cards[newIdx].offsetLeft - centerOffset + d.sidePadL; 
+        if (ms > 0) {
+            track.style.transition = 'transform '+ms+'ms cubic-bezier(.16, 1, .3, 1)';
+        } else {
+            track.style.transition = 'none'; 
         }
-
-        var finalOffset = Math.max(0, Math.min(targetX, maxOffset()));
-
-        isMoving = true;
-        // ✅ 수정: 이동 시간 500ms
-        applyTransform(finalOffset, 500); 
         
-        setTimeout(function() { isMoving = false; }, 500); 
+        track.style.transform  = 'translate3d('+(translateX)+'px,0,0)';
         
-        if(user){ userInteractedAt = performance.now(); restartAuto(); }
+        updateActiveCardIndex(offset);
+        
+        // ✅ 목록 끝에 도달하면 시작 위치로 이동 (부드러운 순환)
+        if (offset >= m && isAutoPlaying) {
+             // 1초 동안 부드럽게 시작 위치로 이동
+            applyTransform(0, 1000); 
+        }
+      }
+      
+      
+      function updateActiveCardIndex(currentOffset){
+          var d = dims();
+          var cardCenter = d.cardW / 2;
+          
+          for(var i = 0; i < cards.length; i++){
+              var cardStart = cards[i].offsetLeft - d.sidePadL;
+              
+              if(currentOffset >= cardStart - cardCenter){
+                  idx = i;
+              } else {
+                  break;
+              }
+          }
+          setActive(idx);
       }
 
-      /* ===== 드래그/스와이프 로직 (개선) ===== */
+
+      /* ===== 드래그/스와이프 로직 (유한 목록) ===== */
       var supportsPointer = typeof window.PointerEvent !== 'undefined';
-      // ✅ 추가된 변수: Y축 시작 위치와 스크롤 방지 여부 플래그
       var startX=0, startY=0, baseOffset=0, currOffset=0, dragging=false;
       var lastT=0, lastX=0, velocity=0, startTime=0;
       var capturedPointerId = null;
-      var isScrollPrevented = false; // 스크롤 방지 플래그
+      var isScrollPrevented = false; 
 
       function resist(x){
         var m = maxOffset();
-        // 복원력 계수 0.35 유지
         if(x < 0) return x * 0.35;
         if(x > m) return m + (x - m)*0.35;
         return x;
@@ -2794,23 +2728,26 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         if(!dragging) return;
         var translateX = -currOffset;
         track.style.transform = 'translate3d('+(translateX)+'px,0,0)';
+        updateActiveCardIndex(currOffset); 
         animationFrameId = requestAnimationFrame(updateTrackPosition);
       }
 
-      function onDown(clientX, clientY, pointerId){ // ✅ clientY 파라미터 추가
+      function onDown(clientX, clientY, pointerId){ 
         if(isMoving) return;
+        stopAuto(); // 드래그 시작 시 자동 재생 중지
+        
         dragging=true; 
         startX=clientX; 
-        startY=clientY; // ✅ Y축 시작 위치 기록
+        startY=clientY;
         baseOffset=offset; 
         currOffset=offset; 
-        lastX=startX; 
+        lastX=clientX; 
         lastT=performance.now(); 
         velocity=0; 
         startTime=performance.now(); 
-        isScrollPrevented=false; // ✅ 플래그 초기화
+        isScrollPrevented=false; 
         track.style.transition='none'; 
-        userInteractedAt = performance.now();
+        // userInteractedAt = performance.now(); // ✅ 제거
         viewport.classList.add('is-dragging'); 
         
         if (supportsPointer && pointerId !== undefined) {
@@ -2822,22 +2759,19 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         updateTrackPosition(); 
       }
       
-      function onMove(clientX, clientY, e){ // ✅ clientY, e 파라미터 추가
+      function onMove(clientX, clientY, e){ 
         if(!dragging) return;
         var now = performance.now();
         var dx = startX - clientX; 
-        var dy = startY - clientY; // ✅ 수직 이동 거리 계산
+        var dy = startY - clientY; 
         
-        // **스크롤 차단 로직**: 수평 이동 거리가 수직 이동 거리보다 크면
-        // (즉, 좌우 드래그를 하려는 의도가 명확하면) 스크롤을 차단합니다.
         if (!isScrollPrevented && Math.abs(dx) > Math.abs(dy)) { 
-            e.preventDefault(); // ✅ 기본 동작(스크롤) 차단
-            isScrollPrevented = true; // 플래그 설정
+            e.preventDefault(); 
+            isScrollPrevented = true; 
         }
 
-        // 스크롤이 차단되었거나, 아직 드래그 방향이 결정되지 않았다면 슬라이더를 움직임
         if(isScrollPrevented || Math.abs(dx) > 10 || Math.abs(dy) > 10){
-            currOffset = resist(baseOffset + dx);
+            currOffset = resist(baseOffset + dx); 
             
             var dt = now - lastT;
             if (dt > 0) {
@@ -2865,10 +2799,8 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         var targetOffset;
         
         if (dragDuration < 200) { 
-            // ✅ 관성 계수 1200으로 낮춤 (덜 미끄러짐)
             var inertia = velocity * 1200; 
             
-            // ✅ 한 번에 2 카드 폭까지만 관성 적용하도록 제한 (끝까지 가는 것 방지)
             var d = dims();
             var maxInertiaDistance = 2 * (d.cardW + d.gap); 
             
@@ -2883,73 +2815,89 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
         targetOffset = Math.max(0, Math.min(targetOffset, m));
         
-        var newIdx = nearestIndexFromOffset(targetOffset);
+        offset = targetOffset;
         
-        var snapTargetX = cards[newIdx].offsetLeft;
-        
-        if (newIdx === cards.length - 1) {
-             var d = dims();
-             var centerOffset = (d.vp - d.cardW) / 2;
-             snapTargetX = cards[newIdx].offsetLeft - centerOffset + d.sidePadL; 
-        }
-        
-        snapTargetX = Math.max(0, Math.min(snapTargetX, m));
-        
-        offset = snapTargetX;
-        // ✅ 수정: 이동 시간 500ms
         applyTransform(offset, 500); 
         
-        idx = newIdx; 
-        setActive(idx);
+        updateActiveCardIndex(offset);
         restartAuto();
         
         isMoving = true;
         setTimeout(function() { isMoving = false; }, 500);
       }
       
-      // ✅ passive: false로 변경하여 onMove에서 preventDefault() 호출 허용
       var activeOpts = {passive:false};
       var passiveOpts = {passive:true}; 
 
       if(supportsPointer){
         viewport.addEventListener('pointerdown', function(e){ 
           if(e.button !== 0 && !e.isPrimary) return;
-          onDown(e.clientX, e.clientY, e.pointerId); // ✅ clientY 전달
+          onDown(e.clientX, e.clientY, e.pointerId); 
         }, passiveOpts); 
-        // ✅ onMove는 passive: false로 변경하여 preventDefault 허용
-        viewport.addEventListener('pointermove', function(e){ onMove(e.clientX, e.clientY, e); }, activeOpts);
+        viewport.addEventListener('pointermove', function(e){ 
+            if(!dragging) return; 
+            onMove(e.clientX, e.clientY, e); 
+        }, activeOpts);
         window.addEventListener('pointerup', function(e){ onUp(e.pointerId); }, passiveOpts);
         window.addEventListener('pointercancel', function(e){ onUp(e.pointerId); }, passiveOpts);
       }else{
         viewport.addEventListener('touchstart', function(e){ 
             if(!e.touches||!e.touches.length)return; 
-            onDown(e.touches[0].clientX, e.touches[0].clientY); // ✅ clientY 전달
+            onDown(e.touches[0].clientX, e.touches[0].clientY); 
         }, passiveOpts);
-        // ✅ onMove는 passive: false로 변경하여 preventDefault 허용
         viewport.addEventListener('touchmove',  function(e){ 
             if(!e.touches||!e.touches.length)return; 
-            onMove(e.touches[0].clientX, e.touches[0].clientY, e); // ✅ clientY, e 전달
+            onMove(e.touches[0].clientX, e.touches[0].clientY, e); 
         }, activeOpts); 
         window.addEventListener('touchend',   function(){ onUp(); }, passiveOpts);
         
-        viewport.addEventListener('mousedown', function(e){ onDown(e.clientX, e.clientY); }, passiveOpts); // ✅ clientY 전달
-        window.addEventListener('mousemove',   function(e){ onMove(e.clientX, e.clientY, e); }, passiveOpts); // ✅ clientY, e 전달
+        viewport.addEventListener('mousedown', function(e){ onDown(e.clientX, e.clientY); }, passiveOpts); 
+        window.addEventListener('mousemove',   function(e){ 
+            if(!dragging) return;
+            onMove(e.clientX, e.clientY, e); 
+        }, activeOpts); 
         window.addEventListener('mouseup',     function(){ onUp(); }, passiveOpts);
       }
       
-      /* ===== 자동 재생 로직 ===== */
+      /* ===== 자동 재생 로직 (requestAnimationFrame 기반 부드러운 이동) ===== */
+      
+      function autoMove(timestamp){
+          if (!lastTimestamp) {
+              lastTimestamp = timestamp;
+              autoRafId = requestAnimationFrame(autoMove);
+              return;
+          }
+          
+          var deltaTime = timestamp - lastTimestamp;
+          
+          if (deltaTime > 100) deltaTime = 0; 
+          
+          var distance = autoSpeed * deltaTime;
+          
+          var nextOffset = offset + distance;
+          
+          // applyTransform 내부에서 maxOffset 체크 및 순환 로직 처리
+          applyTransform(nextOffset, 0); 
+          
+          lastTimestamp = timestamp;
+          
+          if (isAutoPlaying) {
+             autoRafId = requestAnimationFrame(autoMove);
+          }
+      }
       
       function startAuto(){
-        if(timer) return;
-        var cs = getComputedStyle(root);
-        var interval = parseInt(cs.getPropertyValue('--autoMs')) || 3800; 
-        timer = setInterval(function(){
-          if(performance.now() - userInteractedAt < 6000) return;
-          var last = cards.length-1;
-          if(idx < last) snapToIndex(idx+1); else snapToIndex(0);
-        }, interval);
+        if(isAutoPlaying) return;
+        isAutoPlaying = true;
+        lastTimestamp = 0; 
+        autoRafId = requestAnimationFrame(autoMove);
       }
-      function stopAuto(){ clearInterval(timer); timer=null; }
+      
+      function stopAuto(){ 
+        if (autoRafId) cancelAnimationFrame(autoRafId);
+        isAutoPlaying = false; 
+        autoRafId = null; 
+      }
       function restartAuto(){ stopAuto(); startAuto(); }
 
 
@@ -2957,10 +2905,10 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         requestAnimationFrame(function(){
           root.classList.add('ecs-mounted');
           
-          var initialOffset = cards[0].offsetLeft; 
+          var initialOffset = 0; 
           
-          applyTransform(Math.max(0, initialOffset), 0); 
-          setActive(0);
+          applyTransform(initialOffset, 0); 
+          updateActiveCardIndex(initialOffset); 
           startAuto();
         });
       });
@@ -2971,23 +2919,27 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         rAF = requestAnimationFrame(function(){
           var newMaxOffset = maxOffset();
           
-          var ni = nearestIndexFromOffset(offset); 
-          var snapTargetX = cards[ni].offsetLeft;
-          
-          if (ni === cards.length - 1) {
-              var d = dims();
-              var centerOffset = (d.vp - d.cardW) / 2;
-              snapTargetX = cards[ni].offsetLeft - centerOffset + d.sidePadL;
-          }
-          
-          offset = Math.max(0, Math.min(snapTargetX, newMaxOffset));
+          offset = Math.max(0, Math.min(offset, newMaxOffset));
 
           applyTransform(offset, 0);
-          if(ni!==idx){ idx=ni; setActive(idx); }
+          updateActiveCardIndex(offset);
+          restartAuto(); 
         });
       });
-
-      cards.forEach(function(c,i){ c.addEventListener('click', function(){ snapToIndex(i, true); }); });
+      
+      // ✅ 호버/클릭 시 자동 재생 멈춤 로직
+      var handleInteraction = function(e){
+          if (e.type === 'click' || e.type === 'mouseenter') {
+              stopAuto();
+          } else if (e.type === 'mouseleave' && !dragging && !isMoving) {
+              // ✅ 호버가 풀리면 즉시 자동 이동 재개
+              restartAuto();
+          }
+      };
+      viewport.addEventListener('click', handleInteraction);
+      viewport.addEventListener('mouseenter', handleInteraction);
+      viewport.addEventListener('mouseleave', handleInteraction);
+      
     })();
   </script>
 </section>
