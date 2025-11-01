@@ -132,170 +132,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 </section>
 
 <section class="ecs-slider" aria-label="Live Server Drag Card Slider">
-  <style>
-    /* ========= Scope: .ecs-slider only (전역 충돌 없음) ========= */
-    .ecs-slider{
-      --ink:#0f172a;
-      --accent:#e73700;
-      --bg:#f6f7fb;
-      --cardW: 400px; 
-      --gap: 18px;
-      --radius: 18px;
-      --shadow: 0 10px 24px rgba(15,23,42,.08); 
-      --fadeDur: 700ms;
-      --autoMs: 3800;
-      --ease: cubic-bezier(.22,.61,.36,1); 
-      /* ✅ 추가: 게이지 진행도를 위한 변수 */
-      --progress: 0; 
-      
-      font-family: "Pretendard","Noto Sans KR",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-      background: var(--bg);
-      position: relative;
-    }
-
-    .ecs-slider .ecs-wrap{margin:0 auto;padding:56px 20px}
-    .ecs-slider .ecs-head{
-        display:flex;
-        align-items:center; 
-        justify-content:space-between;
-        margin-bottom:18px;
-    }
-    .ecs-slider .ecs-title{
-      font-size:clamp(18px,2.2vw,24px);line-height:1.3;color:var(--ink);
-      font-weight:800;position:relative;padding-bottom:0; 
-      margin-bottom:10px; 
-      letter-spacing:-.02em
-    }
-    .ecs-slider .ecs-title:after{content:"";position:absolute;left:0;bottom:-10px;width:36px;height:4px;border-radius:2px;background:var(--accent)}
-
-    /* 뷰포트 */
-    .ecs-slider .ecs-viewport{
-      position:relative;
-      overflow: hidden; 
-      
-      padding:10px 8px;
-      --sidePad:max(20px,(100% - 1000px)/2);
-      padding-left:var(--gap); 
-      padding-right:var(--sidePad);
-      
-      contain:layout paint size;border-radius:20px;
-      min-height:calc(var(--cardW) + 20px); 
-      transform:translateY(8px);
-      transition:opacity var(--fadeDur) var(--ease),transform var(--fadeDur) var(--ease);
-      touch-action: pan-y; 
-      user-select: none; 
-    }
-    .ecs-slider .ecs-viewport.is-dragging {
-        cursor: grabbing; 
-    }
-
-    .ecs-slider.ecs-mounted .ecs-viewport{opacity:1;transform:none}
-
-    /* 트랙 */
-    .ecs-slider .ecs-track{
-      display:flex;gap:var(--gap);
-      will-change: transform;
-      transition:transform 380ms cubic-bezier(.15,.7,.25,1.05); 
-    }
-
-    /* 카드 */
-    .ecs-slider .ecs-card{
-      position:relative;
-      flex:0 0 var(--cardW);
-      height:var(--cardW); 
-      border-radius:var(--radius);overflow:hidden;background:#111;
-      box-shadow:var(--shadow); 
-      transform:translateZ(0);cursor:grab; 
-      transition: box-shadow 360ms var(--ease); 
-      isolation:isolate
-    }
-    .ecs-slider .ecs-card.ecs-active{
-        box-shadow: 0 24px 60px rgba(13,18,30,.18); 
-    }
-
-    /* 로고 */
-    .ecs-slider .ecs-logo{
-        position:absolute;
-        top:16px; 
-        left:16px; 
-        z-index:3; 
-        width:40px; 
-        height:40px; 
-        border-radius:10px; 
-        overflow:hidden;
-        background:rgba(255,255,255,0.95); 
-        box-shadow:0 2px 6px rgba(15,23,42,.1);
-        display:grid; 
-        place-items:center;
-        pointer-events:none; 
-    }
-    .ecs-slider .ecs-logo img{
-        width:70%; 
-        height:70%;
-        object-fit:contain; 
-        display:block;
-    }
-
-    /* 이미지 레이어 */
-    .ecs-slider .ecs-media{position:absolute;inset:0}
-    .ecs-slider .ecs-media img{
-      width:100%;height:100%;object-fit:cover;display:block;
-      transform:scale(1.02);
-      transition:transform 600ms var(--ease),filter 600ms var(--ease)
-    }
-    .ecs-slider .ecs-card:hover .ecs-media img,
-    .ecs-slider .ecs-card.ecs-active .ecs-media img{transform:scale(1.05);filter:saturate(1.04)}
-
-    /* 오버레이 */
-    .ecs-slider .ecs-grad{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 35%,rgba(0,0,0,.78) 95%);z-index:1}
-
-    /* 텍스트 */
-    .ecs-slider .ecs-body{
-      position:absolute;left:16px;right:16px;bottom:14px;z-index:2;color:#fff;
-      transform:translateY(0); 
-      opacity:.98;
-      transition:opacity 380ms cubic-bezier(.15,.7,.25,1.05);
-    }
-    .ecs-slider .ecs-title2{font-size:clamp(17px,2vw,22px);line-height:1.2;margin:0;font-weight:800;letter-spacing:-.01em}
-    .ecs-slider .ecs-card:not(.ecs-active) .ecs-body{opacity: 0.8;} 
-
-    /* ✅ 추가: 게이지 컨테이너 (Track) */
-    .ecs-slider .ecs-gauge{
-        width: clamp(120px, 15vw, 180px); /* 게이지 바 전체 너비 */
-        height: 6px; /* 게이지 바 높이 */
-        background: #e2e8f0; /* 배경색 */
-        border-radius: 3px;
-        overflow: hidden;
-        margin-top: 10px;
-    }
-    /* ✅ 추가: 진행 표시줄 (Progress) */
-    .ecs-slider .ecs-progress-bar{
-        width: 100%;
-        height: 100%;
-        background: var(--accent); /* 강조색 */
-        transform: scaleX(var(--progress)); /* JavaScript로 제어 */
-        transform-origin: left center;
-        transition: transform 380ms var(--ease);
-    }
-
-    /* 반응형 */
-    @media (max-width:1100px){.ecs-slider{--cardW:320px;}}
-    @media (max-width:820px){
-        .ecs-slider{
-            --cardW:260px;
-            --gap:14px;
-        }
-        .ecs-slider .ecs-wrap{padding:44px 16px}
-    }
-    @media (max-width:420px){
-        .ecs-slider{
-            --cardW: clamp(180px, 85vw - 32px, 300px); 
-        }
-        .ecs-slider .ecs-gauge {
-             width: 80px; /* 모바일에서 게이지 바 너비 축소 */
-        }
-    }
-  </style>
+  
 
   <div class="ecs-wrap">
     
@@ -362,7 +199,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     
   </div>
 
-  <script>
+    <script>
     (function(){
       var root = (function(){
         var currentScript = document.currentScript;
@@ -380,7 +217,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       var track       = root.querySelector('.ecs-track');
       var cards       = Array.prototype.slice.call(root.querySelectorAll('[data-ecs-slide]'));
       
-      // ✅ 변경: 도트 대신 게이지 바 참조
       var gauge       = root.querySelector('.ecs-gauge');
       var gaugeBar    = root.querySelector('.ecs-progress-bar'); 
 
@@ -394,18 +230,11 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       function setActive(i){
         cards.forEach(function(c,k){ c.classList.toggle('ecs-active', k===i); });
         
-        // ✅ 변경: 게이지 바 업데이트 로직
         if(cards.length > 1 && gauge && gaugeBar){
-            // 진행률 계산: (현재 인덱스) / (총 카드 수 - 1)
             var progressRatio = i / (cards.length - 1);
-            
-            // 게이지 바 CSS 변수 업데이트
             root.style.setProperty('--progress', progressRatio);
-            
-            // ARIA 속성 업데이트 (접근성)
             gauge.setAttribute('aria-valuenow', i + 1);
         }
-        // ---
       }
 
       function dims(){
@@ -427,10 +256,10 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         var d = dims();
         var lastCard = cards[cards.length - 1];
         
-        var totalTrackWidth = track.scrollWidth;
-        var maxScrollDistance = totalTrackWidth - viewport.clientWidth;
-
-        return Math.max(0, lastCard.offsetLeft);
+        var centerOffset = (d.vp - d.cardW) / 2;
+        var maxScroll = lastCard.offsetLeft - centerOffset + d.sidePadL;
+        
+        return Math.max(0, maxScroll); 
       }
       
       function nearestIndexFromOffset(x){
@@ -476,8 +305,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         var newIdx = Math.max(0, Math.min(n, last));
         
         if (newIdx === idx && !user) return;
-        
-        // 이동할 카드가 없는 경우 처리
         if (newIdx === idx && user) return;
 
         idx = newIdx;
@@ -501,7 +328,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         if(user){ userInteractedAt = performance.now(); restartAuto(); }
       }
 
-      /* ===== 드래그/스와이프 로직 (유지) ===== */
+      /* ===== 드래그/스와이프 로직 (최적화) ===== */
       var supportsPointer = typeof window.PointerEvent !== 'undefined';
       var startX=0, baseOffset=0, currOffset=0, dragging=false;
       var lastT=0, lastX=0, velocity=0, startTime=0;
@@ -509,8 +336,9 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
       function resist(x){
         var m = maxOffset();
-        if(x < 0) return x * 0.35;
-        if(x > m) return m + (x - m)*0.35;
+        // ✅ 수정: 되돌아오려는 복원력(저항) 계수를 0.35에서 0.25로 감소
+        if(x < 0) return x * 0.25;
+        if(x > m) return m + (x - m)*0.25;
         return x;
       }
       
@@ -524,7 +352,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       function onDown(clientX, pointerId){
         if(isMoving) return;
         dragging=true; startX=clientX; baseOffset=offset; currOffset=offset; 
-        lastX=startX; lastT=performance.now(); velocity=0; startTime=0;
+        lastX=clientX; lastT=performance.now(); velocity=0; startTime=performance.now();
         track.style.transition='none'; 
         userInteractedAt = performance.now();
         viewport.classList.add('is-dragging'); 
@@ -570,7 +398,8 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         var targetOffset;
         
         if (dragDuration < 200) { 
-            var inertia = velocity * 150; 
+            // ✅ 수정: 관성 값 1800에서 1500으로 감소 (너무 많이 밀려나가는 현상 완화)
+            var inertia = velocity * 1500; 
             targetOffset = currOffset - inertia;
         } else {
             targetOffset = currOffset;
@@ -620,9 +449,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         window.addEventListener('mouseup',     function(){ onUp(); }, passiveOpts);
       }
       
-      /* ===== 초기화 / 리사이즈 / 기타 로직 (게이지 바에는 필요 없음) ===== */
-      
-      // ✅ 제거됨: 도트 생성 및 클릭 이벤트 리스너 제거
+      /* ===== 자동 재생 로직 ===== */
       
       function startAuto(){
         if(timer) return;
@@ -678,170 +505,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 </section>
 
 <section class="ecs-slider" aria-label="Live Server Drag Card Slider">
-  <style>
-    /* ========= Scope: .ecs-slider only (전역 충돌 없음) ========= */
-    .ecs-slider{
-      --ink:#0f172a;
-      --accent:#e73700;
-      --bg:#f6f7fb;
-      --cardW: 400px; 
-      --gap: 18px;
-      --radius: 18px;
-      --shadow: 0 10px 24px rgba(15,23,42,.08); 
-      --fadeDur: 700ms;
-      --autoMs: 3800;
-      --ease: cubic-bezier(.22,.61,.36,1); 
-      /* ✅ 추가: 게이지 진행도를 위한 변수 */
-      --progress: 0; 
-      
-      font-family: "Pretendard","Noto Sans KR",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-      background: var(--bg);
-      position: relative;
-    }
 
-    .ecs-slider .ecs-wrap{margin:0 auto;padding:56px 20px}
-    .ecs-slider .ecs-head{
-        display:flex;
-        align-items:center; 
-        justify-content:space-between;
-        margin-bottom:18px;
-    }
-    .ecs-slider .ecs-title{
-      font-size:clamp(18px,2.2vw,24px);line-height:1.3;color:var(--ink);
-      font-weight:800;position:relative;padding-bottom:0; 
-      margin-bottom:10px; 
-      letter-spacing:-.02em
-    }
-    .ecs-slider .ecs-title:after{content:"";position:absolute;left:0;bottom:-10px;width:36px;height:4px;border-radius:2px;background:var(--accent)}
-
-    /* 뷰포트 */
-    .ecs-slider .ecs-viewport{
-      position:relative;
-      overflow: hidden; 
-      
-      padding:10px 8px;
-      --sidePad:max(20px,(100% - 1000px)/2);
-      padding-left:var(--gap); 
-      padding-right:var(--sidePad);
-      
-      contain:layout paint size;border-radius:20px;
-      min-height:calc(var(--cardW) + 20px); 
-      transform:translateY(8px);
-      transition:opacity var(--fadeDur) var(--ease),transform var(--fadeDur) var(--ease);
-      touch-action: pan-y; 
-      user-select: none; 
-    }
-    .ecs-slider .ecs-viewport.is-dragging {
-        cursor: grabbing; 
-    }
-
-    .ecs-slider.ecs-mounted .ecs-viewport{opacity:1;transform:none}
-
-    /* 트랙 */
-    .ecs-slider .ecs-track{
-      display:flex;gap:var(--gap);
-      will-change: transform;
-      transition:transform 380ms cubic-bezier(.15,.7,.25,1.05); 
-    }
-
-    /* 카드 */
-    .ecs-slider .ecs-card{
-      position:relative;
-      flex:0 0 var(--cardW);
-      height:var(--cardW); 
-      border-radius:var(--radius);overflow:hidden;background:#111;
-      box-shadow:var(--shadow); 
-      transform:translateZ(0);cursor:grab; 
-      transition: box-shadow 360ms var(--ease); 
-      isolation:isolate
-    }
-    .ecs-slider .ecs-card.ecs-active{
-        box-shadow: 0 24px 60px rgba(13,18,30,.18); 
-    }
-
-    /* 로고 */
-    .ecs-slider .ecs-logo{
-        position:absolute;
-        top:16px; 
-        left:16px; 
-        z-index:3; 
-        width:40px; 
-        height:40px; 
-        border-radius:10px; 
-        overflow:hidden;
-        background:rgba(255,255,255,0.95); 
-        box-shadow:0 2px 6px rgba(15,23,42,.1);
-        display:grid; 
-        place-items:center;
-        pointer-events:none; 
-    }
-    .ecs-slider .ecs-logo img{
-        width:70%; 
-        height:70%;
-        object-fit:contain; 
-        display:block;
-    }
-
-    /* 이미지 레이어 */
-    .ecs-slider .ecs-media{position:absolute;inset:0}
-    .ecs-slider .ecs-media img{
-      width:100%;height:100%;object-fit:cover;display:block;
-      transform:scale(1.02);
-      transition:transform 600ms var(--ease),filter 600ms var(--ease)
-    }
-    .ecs-slider .ecs-card:hover .ecs-media img,
-    .ecs-slider .ecs-card.ecs-active .ecs-media img{transform:scale(1.05);filter:saturate(1.04)}
-
-    /* 오버레이 */
-    .ecs-slider .ecs-grad{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 35%,rgba(0,0,0,.78) 95%);z-index:1}
-
-    /* 텍스트 */
-    .ecs-slider .ecs-body{
-      position:absolute;left:16px;right:16px;bottom:14px;z-index:2;color:#fff;
-      transform:translateY(0); 
-      opacity:.98;
-      transition:opacity 380ms cubic-bezier(.15,.7,.25,1.05);
-    }
-    .ecs-slider .ecs-title2{font-size:clamp(12px,2vw,18px);line-height:1.2;margin:0;font-weight:800;letter-spacing:-.01em}
-    .ecs-slider .ecs-card:not(.ecs-active) .ecs-body{opacity: 0.8;} 
-
-    /* ✅ 추가: 게이지 컨테이너 (Track) */
-    .ecs-slider .ecs-gauge{
-        width: clamp(120px, 15vw, 180px); /* 게이지 바 전체 너비 */
-        height: 6px; /* 게이지 바 높이 */
-        background: #e2e8f0; /* 배경색 */
-        border-radius: 3px;
-        overflow: hidden;
-        margin-top: 10px;
-    }
-    /* ✅ 추가: 진행 표시줄 (Progress) */
-    .ecs-slider .ecs-progress-bar{
-        width: 100%;
-        height: 100%;
-        background: var(--accent); /* 강조색 */
-        transform: scaleX(var(--progress)); /* JavaScript로 제어 */
-        transform-origin: left center;
-        transition: transform 380ms var(--ease);
-    }
-
-    /* 반응형 */
-    @media (max-width:1100px){.ecs-slider{--cardW:320px;}}
-    @media (max-width:820px){
-        .ecs-slider{
-            --cardW:260px;
-            --gap:14px;
-        }
-        .ecs-slider .ecs-wrap{padding:44px 16px}
-    }
-    @media (max-width:420px){
-        .ecs-slider{
-            --cardW: clamp(180px, 85vw - 32px, 300px); 
-        }
-        .ecs-slider .ecs-gauge {
-             width: 80px; /* 모바일에서 게이지 바 너비 축소 */
-        }
-    }
-  </style>
 
   <div class="ecs-wrap">
     
@@ -940,7 +604,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     
   </div>
 
-  <script>
+    <script>
     (function(){
       var root = (function(){
         var currentScript = document.currentScript;
@@ -958,7 +622,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       var track       = root.querySelector('.ecs-track');
       var cards       = Array.prototype.slice.call(root.querySelectorAll('[data-ecs-slide]'));
       
-      // ✅ 변경: 도트 대신 게이지 바 참조
       var gauge       = root.querySelector('.ecs-gauge');
       var gaugeBar    = root.querySelector('.ecs-progress-bar'); 
 
@@ -972,18 +635,11 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       function setActive(i){
         cards.forEach(function(c,k){ c.classList.toggle('ecs-active', k===i); });
         
-        // ✅ 변경: 게이지 바 업데이트 로직
         if(cards.length > 1 && gauge && gaugeBar){
-            // 진행률 계산: (현재 인덱스) / (총 카드 수 - 1)
             var progressRatio = i / (cards.length - 1);
-            
-            // 게이지 바 CSS 변수 업데이트
             root.style.setProperty('--progress', progressRatio);
-            
-            // ARIA 속성 업데이트 (접근성)
             gauge.setAttribute('aria-valuenow', i + 1);
         }
-        // ---
       }
 
       function dims(){
@@ -1005,10 +661,10 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         var d = dims();
         var lastCard = cards[cards.length - 1];
         
-        var totalTrackWidth = track.scrollWidth;
-        var maxScrollDistance = totalTrackWidth - viewport.clientWidth;
-
-        return Math.max(0, lastCard.offsetLeft);
+        var centerOffset = (d.vp - d.cardW) / 2;
+        var maxScroll = lastCard.offsetLeft - centerOffset + d.sidePadL;
+        
+        return Math.max(0, maxScroll); 
       }
       
       function nearestIndexFromOffset(x){
@@ -1054,8 +710,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         var newIdx = Math.max(0, Math.min(n, last));
         
         if (newIdx === idx && !user) return;
-        
-        // 이동할 카드가 없는 경우 처리
         if (newIdx === idx && user) return;
 
         idx = newIdx;
@@ -1079,7 +733,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         if(user){ userInteractedAt = performance.now(); restartAuto(); }
       }
 
-      /* ===== 드래그/스와이프 로직 (유지) ===== */
+      /* ===== 드래그/스와이프 로직 (최적화) ===== */
       var supportsPointer = typeof window.PointerEvent !== 'undefined';
       var startX=0, baseOffset=0, currOffset=0, dragging=false;
       var lastT=0, lastX=0, velocity=0, startTime=0;
@@ -1087,8 +741,9 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
       function resist(x){
         var m = maxOffset();
-        if(x < 0) return x * 0.35;
-        if(x > m) return m + (x - m)*0.35;
+        // ✅ 수정: 되돌아오려는 복원력(저항) 계수를 0.35에서 0.25로 감소
+        if(x < 0) return x * 0.25;
+        if(x > m) return m + (x - m)*0.25;
         return x;
       }
       
@@ -1102,7 +757,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       function onDown(clientX, pointerId){
         if(isMoving) return;
         dragging=true; startX=clientX; baseOffset=offset; currOffset=offset; 
-        lastX=startX; lastT=performance.now(); velocity=0; startTime=0;
+        lastX=clientX; lastT=performance.now(); velocity=0; startTime=performance.now();
         track.style.transition='none'; 
         userInteractedAt = performance.now();
         viewport.classList.add('is-dragging'); 
@@ -1148,7 +803,8 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         var targetOffset;
         
         if (dragDuration < 200) { 
-            var inertia = velocity * 150; 
+            // ✅ 수정: 관성 값 1800에서 1500으로 감소 (너무 많이 밀려나가는 현상 완화)
+            var inertia = velocity * 1500; 
             targetOffset = currOffset - inertia;
         } else {
             targetOffset = currOffset;
@@ -1198,9 +854,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         window.addEventListener('mouseup',     function(){ onUp(); }, passiveOpts);
       }
       
-      /* ===== 초기화 / 리사이즈 / 기타 로직 (게이지 바에는 필요 없음) ===== */
-      
-      // ✅ 제거됨: 도트 생성 및 클릭 이벤트 리스너 제거
+      /* ===== 자동 재생 로직 ===== */
       
       function startAuto(){
         if(timer) return;
@@ -1256,170 +910,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 </section>
 
 <section class="ecs-slider" aria-label="Live Server Drag Card Slider">
-  <style>
-    /* ========= Scope: .ecs-slider only (전역 충돌 없음) ========= */
-    .ecs-slider{
-      --ink:#0f172a;
-      --accent:#e73700;
-      --bg:#f6f7fb;
-      --cardW: 400px; 
-      --gap: 18px;
-      --radius: 18px;
-      --shadow: 0 10px 24px rgba(15,23,42,.08); 
-      --fadeDur: 700ms;
-      --autoMs: 3800;
-      --ease: cubic-bezier(.22,.61,.36,1); 
-      /* ✅ 추가: 게이지 진행도를 위한 변수 */
-      --progress: 0; 
-      
-      font-family: "Pretendard","Noto Sans KR",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-      background: var(--bg);
-      position: relative;
-    }
-
-    .ecs-slider .ecs-wrap{margin:0 auto;padding:56px 20px}
-    .ecs-slider .ecs-head{
-        display:flex;
-        align-items:center; 
-        justify-content:space-between;
-        margin-bottom:18px;
-    }
-    .ecs-slider .ecs-title{
-      font-size:clamp(18px,2.2vw,24px);line-height:1.3;color:var(--ink);
-      font-weight:800;position:relative;padding-bottom:0; 
-      margin-bottom:10px; 
-      letter-spacing:-.02em
-    }
-    .ecs-slider .ecs-title:after{content:"";position:absolute;left:0;bottom:-10px;width:36px;height:4px;border-radius:2px;background:var(--accent)}
-
-    /* 뷰포트 */
-    .ecs-slider .ecs-viewport{
-      position:relative;
-      overflow: hidden; 
-      
-      padding:10px 8px;
-      --sidePad:max(20px,(100% - 1000px)/2);
-      padding-left:var(--gap); 
-      padding-right:var(--sidePad);
-      
-      contain:layout paint size;border-radius:20px;
-      min-height:calc(var(--cardW) + 20px); 
-      transform:translateY(8px);
-      transition:opacity var(--fadeDur) var(--ease),transform var(--fadeDur) var(--ease);
-      touch-action: pan-y; 
-      user-select: none; 
-    }
-    .ecs-slider .ecs-viewport.is-dragging {
-        cursor: grabbing; 
-    }
-
-    .ecs-slider.ecs-mounted .ecs-viewport{opacity:1;transform:none}
-
-    /* 트랙 */
-    .ecs-slider .ecs-track{
-      display:flex;gap:var(--gap);
-      will-change: transform;
-      transition:transform 380ms cubic-bezier(.15,.7,.25,1.05); 
-    }
-
-    /* 카드 */
-    .ecs-slider .ecs-card{
-      position:relative;
-      flex:0 0 var(--cardW);
-      height:var(--cardW); 
-      border-radius:var(--radius);overflow:hidden;background:#fff;
-      box-shadow:var(--shadow); 
-      transform:translateZ(0);cursor:grab; 
-      transition: box-shadow 360ms var(--ease); 
-      isolation:isolate
-    }
-    .ecs-slider .ecs-card.ecs-active{
-        box-shadow: 0 24px 60px rgba(13,18,30,.18); 
-    }
-
-    /* 로고 */
-    .ecs-slider .ecs-logo{
-        position:absolute;
-        top:16px; 
-        left:16px; 
-        z-index:3; 
-        width:40px; 
-        height:40px; 
-        border-radius:10px; 
-        overflow:hidden;
-        background:transparent; 
-        box-shadow:0 2px 6px rgba(15,23,42,.1);
-        display:grid; 
-        place-items:center;
-        pointer-events:none; 
-    }
-    .ecs-slider .ecs-logo img{
-        width:70%; 
-        height:70%;
-        object-fit:contain; 
-        display:block;
-    }
-
-    /* 이미지 레이어 */
-    .ecs-slider .ecs-media{position:absolute;inset:0}
-    .ecs-slider .ecs-media img{
-      width:100%;height:100%;object-fit:contain;display:block;
-      transform:scale(1.02);
-      transition:transform 600ms var(--ease),filter 600ms var(--ease)
-    }
-    .ecs-slider .ecs-card:hover .ecs-media img,
-    .ecs-slider .ecs-card.ecs-active .ecs-media img{transform:scale(1.05);filter:saturate(1.04)}
-
-    /* 오버레이 */
-    .ecs-slider .ecs-grad{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 35%,rgba(0,0,0,.78) 95%);z-index:1}
-
-    /* 텍스트 */
-    .ecs-slider .ecs-body{
-      position:absolute;left:16px;right:16px;bottom:14px;z-index:2;color:#fff;
-      transform:translateY(0); 
-      opacity:.98;
-      transition:opacity 380ms cubic-bezier(.15,.7,.25,1.05);
-    }
-    .ecs-slider .ecs-title2{font-size:clamp(12px,2vw,16px);line-height:1.2;margin:0;font-weight:800;letter-spacing:-.01em}
-    .ecs-slider .ecs-card:not(.ecs-active) .ecs-body{opacity: 0.8;} 
-
-    /* ✅ 추가: 게이지 컨테이너 (Track) */
-    .ecs-slider .ecs-gauge{
-        width: clamp(120px, 15vw, 180px); /* 게이지 바 전체 너비 */
-        height: 6px; /* 게이지 바 높이 */
-        background: #e2e8f0; /* 배경색 */
-        border-radius: 3px;
-        overflow: hidden;
-        margin-top: 10px;
-    }
-    /* ✅ 추가: 진행 표시줄 (Progress) */
-    .ecs-slider .ecs-progress-bar{
-        width: 100%;
-        height: 100%;
-        background: var(--accent); /* 강조색 */
-        transform: scaleX(var(--progress)); /* JavaScript로 제어 */
-        transform-origin: left center;
-        transition: transform 380ms var(--ease);
-    }
-
-    /* 반응형 */
-    @media (max-width:1100px){.ecs-slider{--cardW:320px;}}
-    @media (max-width:820px){
-        .ecs-slider{
-            --cardW:260px;
-            --gap:14px;
-        }
-        .ecs-slider .ecs-wrap{padding:44px 16px}
-    }
-    @media (max-width:420px){
-        .ecs-slider{
-            --cardW: clamp(180px, 85vw - 32px, 300px); 
-        }
-        .ecs-slider .ecs-gauge {
-             width: 80px; /* 모바일에서 게이지 바 너비 축소 */
-        }
-    }
-  </style>
+ 
 
   <div class="ecs-wrap">
     
@@ -1487,7 +978,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       </div>
     
   </div>
-
   <script>
     (function(){
       var root = (function(){
@@ -1506,7 +996,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       var track       = root.querySelector('.ecs-track');
       var cards       = Array.prototype.slice.call(root.querySelectorAll('[data-ecs-slide]'));
       
-      // ✅ 변경: 도트 대신 게이지 바 참조
       var gauge       = root.querySelector('.ecs-gauge');
       var gaugeBar    = root.querySelector('.ecs-progress-bar'); 
 
@@ -1520,18 +1009,11 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       function setActive(i){
         cards.forEach(function(c,k){ c.classList.toggle('ecs-active', k===i); });
         
-        // ✅ 변경: 게이지 바 업데이트 로직
         if(cards.length > 1 && gauge && gaugeBar){
-            // 진행률 계산: (현재 인덱스) / (총 카드 수 - 1)
             var progressRatio = i / (cards.length - 1);
-            
-            // 게이지 바 CSS 변수 업데이트
             root.style.setProperty('--progress', progressRatio);
-            
-            // ARIA 속성 업데이트 (접근성)
             gauge.setAttribute('aria-valuenow', i + 1);
         }
-        // ---
       }
 
       function dims(){
@@ -1553,10 +1035,10 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         var d = dims();
         var lastCard = cards[cards.length - 1];
         
-        var totalTrackWidth = track.scrollWidth;
-        var maxScrollDistance = totalTrackWidth - viewport.clientWidth;
-
-        return Math.max(0, lastCard.offsetLeft);
+        var centerOffset = (d.vp - d.cardW) / 2;
+        var maxScroll = lastCard.offsetLeft - centerOffset + d.sidePadL;
+        
+        return Math.max(0, maxScroll); 
       }
       
       function nearestIndexFromOffset(x){
@@ -1602,8 +1084,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         var newIdx = Math.max(0, Math.min(n, last));
         
         if (newIdx === idx && !user) return;
-        
-        // 이동할 카드가 없는 경우 처리
         if (newIdx === idx && user) return;
 
         idx = newIdx;
@@ -1627,7 +1107,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         if(user){ userInteractedAt = performance.now(); restartAuto(); }
       }
 
-      /* ===== 드래그/스와이프 로직 (유지) ===== */
+      /* ===== 드래그/스와이프 로직 (최적화) ===== */
       var supportsPointer = typeof window.PointerEvent !== 'undefined';
       var startX=0, baseOffset=0, currOffset=0, dragging=false;
       var lastT=0, lastX=0, velocity=0, startTime=0;
@@ -1635,8 +1115,9 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
       function resist(x){
         var m = maxOffset();
-        if(x < 0) return x * 0.35;
-        if(x > m) return m + (x - m)*0.35;
+        // ✅ 수정: 되돌아오려는 복원력(저항) 계수를 0.35에서 0.25로 감소
+        if(x < 0) return x * 0.25;
+        if(x > m) return m + (x - m)*0.25;
         return x;
       }
       
@@ -1650,7 +1131,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       function onDown(clientX, pointerId){
         if(isMoving) return;
         dragging=true; startX=clientX; baseOffset=offset; currOffset=offset; 
-        lastX=startX; lastT=performance.now(); velocity=0; startTime=0;
+        lastX=clientX; lastT=performance.now(); velocity=0; startTime=performance.now();
         track.style.transition='none'; 
         userInteractedAt = performance.now();
         viewport.classList.add('is-dragging'); 
@@ -1696,7 +1177,8 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         var targetOffset;
         
         if (dragDuration < 200) { 
-            var inertia = velocity * 150; 
+            // ✅ 수정: 관성 값 1800에서 1500으로 감소 (너무 많이 밀려나가는 현상 완화)
+            var inertia = velocity * 1500; 
             targetOffset = currOffset - inertia;
         } else {
             targetOffset = currOffset;
@@ -1746,9 +1228,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         window.addEventListener('mouseup',     function(){ onUp(); }, passiveOpts);
       }
       
-      /* ===== 초기화 / 리사이즈 / 기타 로직 (게이지 바에는 필요 없음) ===== */
-      
-      // ✅ 제거됨: 도트 생성 및 클릭 이벤트 리스너 제거
+      /* ===== 자동 재생 로직 ===== */
       
       function startAuto(){
         if(timer) return;
@@ -2063,7 +1543,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     
   </div>
 
-  <script>
+    <script>
     (function(){
       var root = (function(){
         var currentScript = document.currentScript;
@@ -2081,7 +1561,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       var track       = root.querySelector('.ecs-track');
       var cards       = Array.prototype.slice.call(root.querySelectorAll('[data-ecs-slide]'));
       
-      // ✅ 변경: 도트 대신 게이지 바 참조
       var gauge       = root.querySelector('.ecs-gauge');
       var gaugeBar    = root.querySelector('.ecs-progress-bar'); 
 
@@ -2095,18 +1574,11 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       function setActive(i){
         cards.forEach(function(c,k){ c.classList.toggle('ecs-active', k===i); });
         
-        // ✅ 변경: 게이지 바 업데이트 로직
         if(cards.length > 1 && gauge && gaugeBar){
-            // 진행률 계산: (현재 인덱스) / (총 카드 수 - 1)
             var progressRatio = i / (cards.length - 1);
-            
-            // 게이지 바 CSS 변수 업데이트
             root.style.setProperty('--progress', progressRatio);
-            
-            // ARIA 속성 업데이트 (접근성)
             gauge.setAttribute('aria-valuenow', i + 1);
         }
-        // ---
       }
 
       function dims(){
@@ -2128,10 +1600,10 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         var d = dims();
         var lastCard = cards[cards.length - 1];
         
-        var totalTrackWidth = track.scrollWidth;
-        var maxScrollDistance = totalTrackWidth - viewport.clientWidth;
-
-        return Math.max(0, lastCard.offsetLeft);
+        var centerOffset = (d.vp - d.cardW) / 2;
+        var maxScroll = lastCard.offsetLeft - centerOffset + d.sidePadL;
+        
+        return Math.max(0, maxScroll); 
       }
       
       function nearestIndexFromOffset(x){
@@ -2177,8 +1649,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         var newIdx = Math.max(0, Math.min(n, last));
         
         if (newIdx === idx && !user) return;
-        
-        // 이동할 카드가 없는 경우 처리
         if (newIdx === idx && user) return;
 
         idx = newIdx;
@@ -2202,7 +1672,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         if(user){ userInteractedAt = performance.now(); restartAuto(); }
       }
 
-      /* ===== 드래그/스와이프 로직 (유지) ===== */
+      /* ===== 드래그/스와이프 로직 (최적화) ===== */
       var supportsPointer = typeof window.PointerEvent !== 'undefined';
       var startX=0, baseOffset=0, currOffset=0, dragging=false;
       var lastT=0, lastX=0, velocity=0, startTime=0;
@@ -2210,8 +1680,9 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
       function resist(x){
         var m = maxOffset();
-        if(x < 0) return x * 0.35;
-        if(x > m) return m + (x - m)*0.35;
+        // ✅ 수정: 되돌아오려는 복원력(저항) 계수를 0.35에서 0.25로 감소
+        if(x < 0) return x * 0.25;
+        if(x > m) return m + (x - m)*0.25;
         return x;
       }
       
@@ -2225,7 +1696,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       function onDown(clientX, pointerId){
         if(isMoving) return;
         dragging=true; startX=clientX; baseOffset=offset; currOffset=offset; 
-        lastX=startX; lastT=performance.now(); velocity=0; startTime=0;
+        lastX=clientX; lastT=performance.now(); velocity=0; startTime=performance.now();
         track.style.transition='none'; 
         userInteractedAt = performance.now();
         viewport.classList.add('is-dragging'); 
@@ -2271,7 +1742,8 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         var targetOffset;
         
         if (dragDuration < 200) { 
-            var inertia = velocity * 150; 
+            // ✅ 수정: 관성 값 1800에서 1500으로 감소 (너무 많이 밀려나가는 현상 완화)
+            var inertia = velocity * 1500; 
             targetOffset = currOffset - inertia;
         } else {
             targetOffset = currOffset;
@@ -2321,9 +1793,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         window.addEventListener('mouseup',     function(){ onUp(); }, passiveOpts);
       }
       
-      /* ===== 초기화 / 리사이즈 / 기타 로직 (게이지 바에는 필요 없음) ===== */
-      
-      // ✅ 제거됨: 도트 생성 및 클릭 이벤트 리스너 제거
+      /* ===== 자동 재생 로직 ===== */
       
       function startAuto(){
         if(timer) return;
@@ -2429,7 +1899,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       min-height:calc(var(--cardW) + 20px); 
       transform:translateY(8px);
       transition:opacity var(--fadeDur) var(--ease),transform var(--fadeDur) var(--ease);
-      touch-action: pan-y; 
+      touch-action: pan-y pinch-zoom; 
       user-select: none; 
     }
     .ecs-slider .ecs-viewport.is-dragging {
@@ -2442,7 +1912,8 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     .ecs-slider .ecs-track{
       display:flex;gap:var(--gap);
       will-change: transform;
-      transition:transform 380ms cubic-bezier(.15,.7,.25,1.05); 
+      /* ✅ 수정: 일정 속도로 이동하다가 부드럽게 멈추는 가속도 곡선 */
+      transition:transform 380ms cubic-bezier(.1, .7, .1, 1); 
     }
 
     /* 카드 */
@@ -2505,12 +1976,12 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     }
     .ecs-slider .ecs-title2{font-size:clamp(12px,2vw,16px);line-height:1.2;margin:0;font-weight:800;letter-spacing:-.01em}
     .ecs-slider .ecs-card:not(.ecs-active) .ecs-body{opacity: 0.8;} 
-
+    
     /* ✅ 추가: 게이지 컨테이너 (Track) */
     .ecs-slider .ecs-gauge{
-        width: clamp(120px, 15vw, 180px); /* 게이지 바 전체 너비 */
-        height: 6px; /* 게이지 바 높이 */
-        background: #e2e8f0; /* 배경색 */
+        width: clamp(120px, 15vw, 180px); 
+        height: 6px; 
+        background: #e2e8f0; 
         border-radius: 3px;
         overflow: hidden;
         margin-top: 10px;
@@ -2519,8 +1990,8 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     .ecs-slider .ecs-progress-bar{
         width: 100%;
         height: 100%;
-        background: var(--accent); /* 강조색 */
-        transform: scaleX(var(--progress)); /* JavaScript로 제어 */
+        background: var(--accent); 
+        transform: scaleX(var(--progress)); 
         transform-origin: left center;
         transition: transform 380ms var(--ease);
     }
@@ -2539,7 +2010,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
             --cardW: clamp(180px, 85vw - 32px, 300px); 
         }
         .ecs-slider .ecs-gauge {
-             width: 80px; /* 모바일에서 게이지 바 너비 축소 */
+             width: 80px; 
         }
     }
   </style>
@@ -2553,6 +2024,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         </div>
     </div>
 
+    
     <div class="ecs-viewport">
       <div class="ecs-track">
         <article class="ecs-card ecs-active" data-ecs-slide>
@@ -2571,7 +2043,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
           <div class="ecs-grad"></div>
           <div class="ecs-body"><h3 class="ecs-title2">삼성 갤럭시북5 Pro 360 (16인치)</h3></div>
         </article>
- <article class="ecs-card" data-ecs-slide>
+        <article class="ecs-card" data-ecs-slide>
           <div class="ecs-logo">
             <img src="./img/lg-logo.png" alt="The Witcher 3 Logo">
           </div>
@@ -2629,7 +2101,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       var track       = root.querySelector('.ecs-track');
       var cards       = Array.prototype.slice.call(root.querySelectorAll('[data-ecs-slide]'));
       
-      // ✅ 변경: 도트 대신 게이지 바 참조
       var gauge       = root.querySelector('.ecs-gauge');
       var gaugeBar    = root.querySelector('.ecs-progress-bar'); 
 
@@ -2643,18 +2114,11 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       function setActive(i){
         cards.forEach(function(c,k){ c.classList.toggle('ecs-active', k===i); });
         
-        // ✅ 변경: 게이지 바 업데이트 로직
         if(cards.length > 1 && gauge && gaugeBar){
-            // 진행률 계산: (현재 인덱스) / (총 카드 수 - 1)
             var progressRatio = i / (cards.length - 1);
-            
-            // 게이지 바 CSS 변수 업데이트
             root.style.setProperty('--progress', progressRatio);
-            
-            // ARIA 속성 업데이트 (접근성)
             gauge.setAttribute('aria-valuenow', i + 1);
         }
-        // ---
       }
 
       function dims(){
@@ -2676,10 +2140,10 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         var d = dims();
         var lastCard = cards[cards.length - 1];
         
-        var totalTrackWidth = track.scrollWidth;
-        var maxScrollDistance = totalTrackWidth - viewport.clientWidth;
-
-        return Math.max(0, lastCard.offsetLeft);
+        var centerOffset = (d.vp - d.cardW) / 2;
+        var maxScroll = lastCard.offsetLeft - centerOffset + d.sidePadL;
+        
+        return Math.max(0, maxScroll); 
       }
       
       function nearestIndexFromOffset(x){
@@ -2713,7 +2177,9 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         
         var translateX = -x;
 
-        track.style.transition = 'transform '+ms+'ms cubic-bezier(.15,.7,.25,1.05)';
+        // ✅ JS의 applyTransform 함수는 이전에 요청했던 부드러운 감속 효과를 CSS에서 가져와 사용합니다.
+        // 현재 CSS 트랜지션: transform 380ms cubic-bezier(.1, .7, .1, 1)
+        track.style.transition = 'transform '+ms+'ms cubic-bezier(.1, .7, .1, 1)';
         track.style.transform  = 'translate3d('+(translateX)+'px,0,0)';
       }
 
@@ -2725,8 +2191,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         var newIdx = Math.max(0, Math.min(n, last));
         
         if (newIdx === idx && !user) return;
-        
-        // 이동할 카드가 없는 경우 처리
         if (newIdx === idx && user) return;
 
         idx = newIdx;
@@ -2750,7 +2214,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         if(user){ userInteractedAt = performance.now(); restartAuto(); }
       }
 
-      /* ===== 드래그/스와이프 로직 (유지) ===== */
+      /* ===== 드래그/스와이프 로직 (최적화) ===== */
       var supportsPointer = typeof window.PointerEvent !== 'undefined';
       var startX=0, baseOffset=0, currOffset=0, dragging=false;
       var lastT=0, lastX=0, velocity=0, startTime=0;
@@ -2758,8 +2222,8 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
       function resist(x){
         var m = maxOffset();
-        if(x < 0) return x * 0.35;
-        if(x > m) return m + (x - m)*0.35;
+        if(x < 0) return x * 0.25;
+        if(x > m) return m + (x - m)*0.25;
         return x;
       }
       
@@ -2773,7 +2237,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       function onDown(clientX, pointerId){
         if(isMoving) return;
         dragging=true; startX=clientX; baseOffset=offset; currOffset=offset; 
-        lastX=startX; lastT=performance.now(); velocity=0; startTime=0;
+        lastX=clientX; lastT=performance.now(); velocity=0; startTime=performance.now();
         track.style.transition='none'; 
         userInteractedAt = performance.now();
         viewport.classList.add('is-dragging'); 
@@ -2819,7 +2283,16 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         var targetOffset;
         
         if (dragDuration < 200) { 
-            var inertia = velocity * 150; 
+            var inertia = velocity * 1500; 
+            
+            var d = dims();
+            // 이전 로직에 따라 관성 거리 제한이 적용됩니다.
+            var maxInertiaDistance = 2.5 * (d.cardW + d.gap); 
+            
+            if (Math.abs(inertia) > maxInertiaDistance) {
+                inertia = Math.sign(inertia) * maxInertiaDistance;
+            }
+            
             targetOffset = currOffset - inertia;
         } else {
             targetOffset = currOffset;
@@ -2869,9 +2342,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         window.addEventListener('mouseup',     function(){ onUp(); }, passiveOpts);
       }
       
-      /* ===== 초기화 / 리사이즈 / 기타 로직 (게이지 바에는 필요 없음) ===== */
-      
-      // ✅ 제거됨: 도트 생성 및 클릭 이벤트 리스너 제거
+      /* ===== 자동 재생 로직 ===== */
       
       function startAuto(){
         if(timer) return;
@@ -2926,7 +2397,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
   </script>
 </section>
 
-
 <section class="ecs-slider" aria-label="Live Server Drag Card Slider">
   <style>
     /* ========= Scope: .ecs-slider only (전역 충돌 없음) ========= */
@@ -2978,7 +2448,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       min-height:calc(var(--cardW) + 20px); 
       transform:translateY(8px);
       transition:opacity var(--fadeDur) var(--ease),transform var(--fadeDur) var(--ease);
-      /* ✅ 수정: 세로 스크롤 허용 (pan-y) 및 가로 드래그 우선 처리 */
+      /* ✅ 유지: 세로 스크롤 방지 */
       touch-action: pan-y pinch-zoom; 
       user-select: none; 
     }
@@ -2992,8 +2462,8 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     .ecs-slider .ecs-track{
       display:flex;gap:var(--gap);
       will-change: transform;
-      /* ✅ 수정: 부드러운 스냅을 위한 Cubic-Bezier */
-      transition:transform 380ms cubic-bezier(.42, 0, .58, 1); 
+      /* ✅ 최종 수정: 느리고 부드럽게 멈추는 가속도 곡선 */
+      transition:transform 500ms cubic-bezier(.16, 1, .3, 1); 
     }
 
     /* 카드 */
@@ -3098,64 +2568,75 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
   <div class="ecs-wrap">
     
     <div class="ecs-head">
-        <h2 class="ecs-title">노트북/태블릿</h2>
+        <h2 class="ecs-title">안마의자/정수기</h2>
         <div class="ecs-gauge" role="progressbar" aria-valuenow="1" aria-valuemin="1" aria-valuemax="6">
             <div class="ecs-progress-bar"></div>
         </div>
     </div>
 
+    
     <div class="ecs-viewport">
       <div class="ecs-track">
         <article class="ecs-card ecs-active" data-ecs-slide>
           <div class="ecs-logo">
-            <img src="./img/apple-logo.png" alt="Dota 2 Logo">
+            <img src="./img/bf-logo.webp" alt="Dota 2 Logo">
           </div>
-          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/uxipfYo3TemCpc06R4WsP4G0a36zNJOqDTgAz6y3N8_304dh70CcaEXpfwuRAQ70FJoZNZPYJ2Q-9OhuZLT6dXmabCwaVf_htn02Rd7c5RrU0PRxy-Ix3mM=w800" alt="Dota 2"></div>
+          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/sgybYaPyPxNBlX5YPlbFxoo3w_RaUk9wS9e2PJNG4IcWGcPwCm91cLUrk6Cjw7q_OcK664IOA66bkP2QujVkL5YXky_InkQD0voSDkiPSSA8KUmQqSL-KQ=w800" alt="Dota 2"></div>
           <div class="ecs-grad"></div>
-          <div class="ecs-body"><h3 class="ecs-title2">애플 맥북 PRO 14 노트북</h3></div>
+          <div class="ecs-body"><h3 class="ecs-title2">바디프랜드 헬스케어로봇 [팔콘S]</h3></div>
         </article>
-        <article class="ecs-card" data-ecs-slide>
+
+         <article class="ecs-card" data-ecs-slide>
           <div class="ecs-logo">
-            <img src="./img/samsung-logo.svg" alt="The Witcher 3 Logo">
+            <img src="./img/bf-logo.webp" alt="The Witcher 3 Logo">
           </div>
-          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/o6pd1GzhTQq-wsmqbRhNfJ1OI1Ncv4eUDCq7jRDUoVEfWg4OPkFf4q-45zOl6_1NOY74qzUw2xpCVkfWNA1xjUpSbs-qOR_iusVMpigOtxuTSF8-aVdfhg=w800" alt="The Witcher 3"></div>
+          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/gAMHQZwL6odDs6cgGpmVQwY9xYxZ0T4o8RbZm4Ej6xB4WtNibvFIlry_U7EmIPifg9nt2zATLBHUPIVLX-g0PFvFCPRgo4ajiSABidD3Rd39LaH9fGhQiQ=w800" alt="The Witcher 3"></div>
           <div class="ecs-grad"></div>
-          <div class="ecs-body"><h3 class="ecs-title2">삼성 갤럭시북5 Pro 360 (16인치)</h3></div>
+          <div class="ecs-body"><h3 class="ecs-title2">바디프랜드 헬스케어로봇 [팔콘]</h3></div>
         </article>
- <article class="ecs-card" data-ecs-slide>
+
+
+        <article class="ecs-card" data-ecs-slide>
           <div class="ecs-logo">
             <img src="./img/lg-logo.png" alt="The Witcher 3 Logo">
           </div>
-          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/F8BEA00ntrl_SDI8IziliqMs3oI8K3shY3uEiqNQhoJhccehwu_w3zzemiKdvOAqQkQgIQkV8t6_Po-fqJ4ZHdpq3i5r3SgpUtXdnfxHpHt3lqoIAg5oNQ=w800" alt="The Witcher 3"></div>
+          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/OCvwDBrlgdjSl3c-iiAkz4fSW1kSFNEdJahMLBhr21cpKPrO9fT4YGAGG_DIkT9MBYq7ejEaWwzpJ7NHU5zjpxtqGPSenTqxnRIa3ihHuQOFMfPU6xtK=w800" alt="The Witcher 3"></div>
           <div class="ecs-grad"></div>
-          <div class="ecs-body"><h3 class="ecs-title2">LG 17인치 그램 노트북</h3></div>
+          <div class="ecs-body"><h3 class="ecs-title2">LG 오브제 얼음정수기</h3></div>
         </article>
+       
+
+          <article class="ecs-card" data-ecs-slide>
+          <div class="ecs-logo">
+            <img src="./img/sk-logo.png" alt="The Witcher 3 Logo">
+          </div>
+          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/EusKBLB4epfKV3_lorg97y7TEP78DgUEoXEkHFXrC9Bk_VVgR_wjumS3uFaNhtAP0AjWbzauDV2vRhBPRS35AfC2LR-qgDC8uilI1UEBfqp85qD03GKgSw=w800" alt="The Witcher 3"></div>
+          <div class="ecs-grad"></div>
+          <div class="ecs-body"><h3 class="ecs-title2">SK 매직 얼음물 정수기</h3></div>
+        </article>
+
+          <article class="ecs-card" data-ecs-slide>
+          <div class="ecs-logo">
+          <img src="./img/lg-logo.png" alt="The Witcher 3 Logo">
+          </div>
+          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/dwgAvcYsYN3khFtvXBANMq_Y-ag2Xfx5oOm5DthPIRo4Xm1mkdM8XWEyLwWZT9uBodddTgASIXhsvxjcj05-eFe5zE6d2KSjXzpkJko1eCYBIL-BzqxySg=w800" alt="The Witcher 3"></div>
+          <div class="ecs-grad"></div>
+          <div class="ecs-body"><h3 class="ecs-title2">LG 오브제 라이트온 온정 정수기</h3></div>
+        </article>
+
+
 
       <article class="ecs-card" data-ecs-slide>
           <div class="ecs-logo">
-            <img src="./img/apple-logo.png" alt="The Witcher 3 Logo">
+            <img src="./img/cuckoo-logo.png" alt="The Witcher 3 Logo">
           </div>
-          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/6gJPXZmfl5hD-VwLODnt22gFmYUMuUlAkXREw91rYQum12xbQYcSBXlV-0QdeZI3B-lIupTCFSgbaVhG37Y6AcSfrve2o8R3WFDNj7JSlbxBU8yhHVa9TF4=w800" alt="The Witcher 3"></div>
+          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/NjK64wDytyDEx71RASQjzL6cAoYrUT1GX4PBaKKUYYCCChcjDKz1OXAOlbiunwghSU9InLewctdR27R9_bzh7sOh5As32RMSm4U_bhiBpyFGMdtaQNkdAQ=w800" alt="The Witcher 3"></div>
           <div class="ecs-grad"></div>
-          <div class="ecs-body"><h3 class="ecs-title2">애플 맥북 에어 13인치(M4) + 매직마우스 + 노트북가방</h3></div>
-        </article>
-       <article class="ecs-card" data-ecs-slide>
-          <div class="ecs-logo">
-            <img src="./img/msi-logo.png" alt="The Witcher 3 Logo">
-          </div>
-          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/ADEzQ8dOTmNKwegBpgnB3lYHpuDnMJzJhzZnnwAx2yxNG_NikkCWUK-d-CX6UwaiIWfPWcvVCzs5LSw1onxNgSbJOxOOVJD61LjoMKVD8l33gtZKfBeQUww=w800" alt="The Witcher 3"></div>
-          <div class="ecs-grad"></div>
-          <div class="ecs-body"><h3 class="ecs-title2">MSI 게이밍 노트북(17.3″)</h3></div>
-        </article>
-         <article class="ecs-card" data-ecs-slide>
-          <div class="ecs-logo">
-            <img src="./img/apple-logo.png" alt="The Witcher 3 Logo">
-          </div>
-          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/v-nGVoe8bWQlrKEIdhB8GLnAZYiptNcak8km72HAoEoj7oFCWWXK7CQTCsOSca1zuHZUaGN-rc_0q8RWXGtsrblUMOdJW9VftRnEbTW8FD9y5hIVjOBHYQ=w800" alt="The Witcher 3"></div>
-          <div class="ecs-grad"></div>
-          <div class="ecs-body"><h3 class="ecs-title2">애플 아이패드 에어 11인치(M3)</h3></div>
+          <div class="ecs-body"><h3 class="ecs-title2">쿠쿠 슬림 얼음정수기 (60개월방문)</h3></div>
         </article>
     
+        
+     
       </div>
 
       </div>
@@ -3217,9 +2698,12 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         if (cards.length === 0) return 0;
         
         var d = dims();
-        var totalTrackWidth = track.scrollWidth;
-        // ✅ 수정: 최대 스크롤 가능 거리만 반환 (마지막 카드 정렬 로직 제거)
-        return Math.max(0, totalTrackWidth - d.vp + d.sidePadL); 
+        var lastCard = cards[cards.length - 1];
+        
+        var centerOffset = (d.vp - d.cardW) / 2;
+        var maxScroll = lastCard.offsetLeft - centerOffset + d.sidePadL;
+        
+        return Math.max(0, maxScroll); 
       }
       
       function nearestIndexFromOffset(x){
@@ -3229,7 +2713,11 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         for(var i = 0; i < cards.length; i++){
             var cardPos = cards[i].offsetLeft; 
             
-            // ✅ 수정: 마지막 카드에 대한 스냅 목표 위치 조정 로직 제거 (단순화)
+            if (i === cards.length - 1) {
+                var d = dims();
+                var centerOffset = (d.vp - d.cardW) / 2; 
+                cardPos = cardPos - centerOffset + d.sidePadL; 
+            }
             
             var diff = Math.abs(x - cardPos);
             
@@ -3244,14 +2732,13 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
 
       function applyTransform(x, ms){
-        // 최대 오프셋을 초과하지 않도록 제한
         x = Math.max(0, Math.min(x, maxOffset())); 
         offset = x;
         
         var translateX = -x;
 
-        // ✅ 수정: 부드러운 스냅을 위한 Cubic-Bezier 적용
-        track.style.transition = 'transform '+ms+'ms cubic-bezier(.42, 0, .58, 1)';
+        // ✅ 수정된 Cubic-Bezier 및 ms 적용 (500ms)
+        track.style.transition = 'transform '+ms+'ms cubic-bezier(.16, 1, .3, 1)';
         track.style.transform  = 'translate3d('+(translateX)+'px,0,0)';
       }
 
@@ -3263,7 +2750,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         var newIdx = Math.max(0, Math.min(n, last));
         
         if (newIdx === idx && !user) return;
-        
         if (newIdx === idx && user) return;
 
         idx = newIdx;
@@ -3271,15 +2757,19 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         
         var targetX = cards[newIdx].offsetLeft;
         
-        // ✅ 수정: 마지막 카드 스냅 로직 제거 (단순화)
-        
+        if (newIdx === last) {
+             var d = dims();
+             var centerOffset = (d.vp - d.cardW) / 2;
+             targetX = cards[newIdx].offsetLeft - centerOffset + d.sidePadL; 
+        }
+
         var finalOffset = Math.max(0, Math.min(targetX, maxOffset()));
 
         isMoving = true;
-        // ✅ 수정: 스냅 속도 380ms 유지
-        applyTransform(finalOffset, 380);
+        // ✅ 수정: 이동 시간 500ms
+        applyTransform(finalOffset, 500); 
         
-        setTimeout(function() { isMoving = false; }, 380); 
+        setTimeout(function() { isMoving = false; }, 500); 
         
         if(user){ userInteractedAt = performance.now(); restartAuto(); }
       }
@@ -3292,6 +2782,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
       function resist(x){
         var m = maxOffset();
+        // 복원력 계수 0.35 유지
         if(x < 0) return x * 0.35;
         if(x > m) return m + (x - m)*0.35;
         return x;
@@ -3307,7 +2798,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       function onDown(clientX, pointerId){
         if(isMoving) return;
         dragging=true; startX=clientX; baseOffset=offset; currOffset=offset; 
-        lastX=startX; lastT=performance.now(); velocity=0; startTime=performance.now(); // startTime 초기화
+        lastX=startX; lastT=performance.now(); velocity=0; startTime=performance.now(); 
         track.style.transition='none'; 
         userInteractedAt = performance.now();
         viewport.classList.add('is-dragging'); 
@@ -3330,7 +2821,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         
         var dt = now - lastT;
         if (dt > 0) {
-            // ✅ 관성 계산을 위해 속도 저장
             velocity = (clientX - lastX) / dt; 
         }
         
@@ -3353,10 +2843,18 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         var dragDuration = performance.now() - startTime;
         var targetOffset;
         
-        // ✅ 관성 스크롤 적용 (드래그 시간이 짧을 때)
-        if (dragDuration < 300) { 
-            // 관성 값 조정 (더 자연스럽게 미끄러지도록)
-            var inertia = velocity * 400; 
+        if (dragDuration < 200) { 
+            // ✅ 관성 계수 1200으로 낮춤 (덜 미끄러짐)
+            var inertia = velocity * 1200; 
+            
+            // ✅ 한 번에 2 카드 폭까지만 관성 적용하도록 제한 (끝까지 가는 것 방지)
+            var d = dims();
+            var maxInertiaDistance = 2 * (d.cardW + d.gap); 
+            
+            if (Math.abs(inertia) > maxInertiaDistance) {
+                inertia = Math.sign(inertia) * maxInertiaDistance;
+            }
+            
             targetOffset = currOffset - inertia;
         } else {
             targetOffset = currOffset;
@@ -3368,20 +2866,24 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         
         var snapTargetX = cards[newIdx].offsetLeft;
         
-        // ✅ 수정: 마지막 카드 스냅 로직 제거 (단순화)
+        if (newIdx === cards.length - 1) {
+             var d = dims();
+             var centerOffset = (d.vp - d.cardW) / 2;
+             snapTargetX = cards[newIdx].offsetLeft - centerOffset + d.sidePadL; 
+        }
         
         snapTargetX = Math.max(0, Math.min(snapTargetX, m));
         
         offset = snapTargetX;
-        // ✅ 수정: 스냅 속도 380ms 유지
-        applyTransform(offset, 380); 
+        // ✅ 수정: 이동 시간 500ms
+        applyTransform(offset, 500); 
         
         idx = newIdx; 
         setActive(idx);
         restartAuto();
         
         isMoving = true;
-        setTimeout(function() { isMoving = false; }, 380);
+        setTimeout(function() { isMoving = false; }, 500);
       }
       
       var passiveOpts = {passive:true};
@@ -3403,7 +2905,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         window.addEventListener('mouseup',     function(){ onUp(); }, passiveOpts);
       }
       
-      /* ===== 초기화 / 리사이즈 / 기타 로직 (유지) ===== */
+      /* ===== 자동 재생 로직 ===== */
       
       function startAuto(){
         if(timer) return;
@@ -3440,7 +2942,11 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
           var ni = nearestIndexFromOffset(offset); 
           var snapTargetX = cards[ni].offsetLeft;
           
-          // ✅ 수정: 마지막 카드 스냅 로직 제거 (단순화)
+          if (ni === cards.length - 1) {
+              var d = dims();
+              var centerOffset = (d.vp - d.cardW) / 2;
+              snapTargetX = cards[ni].offsetLeft - centerOffset + d.sidePadL;
+          }
           
           offset = Math.max(0, Math.min(snapTargetX, newMaxOffset));
 
@@ -3453,7 +2959,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     })();
   </script>
 </section>
-
 <section id="eventList">
 
   <!-- 상단 헤더 -->
