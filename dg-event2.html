@@ -2323,14 +2323,14 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       padding:10px 8px;
       --sidePad:max(20px,(100% - 1000px)/2);
       /* min-height는 cardW보다 작아도 정사각형 유지를 위해 cardW에 의존 */
-      min-height:200px; /* ✅ 수정: min-height 200px */
+       /* ✅ 수정: min-height 200px */
       padding-left:var(--gap); 
       padding-right:var(--sidePad);
       
       contain:layout paint size;border-radius:20px;
       /* 카드 높이(var(--cardW))에 맞추어 뷰포트 높이 설정 */
       height:calc(var(--cardW) + 20px); 
-      
+      min-height:200px;
       transition:opacity var(--fadeDur) var(--ease),transform var(--fadeDur) var(--ease);
       touch-action: pan-y pinch-zoom; 
       user-select: none; 
@@ -2356,7 +2356,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       /* 정사각형 유지를 위해 height를 var(--cardW)로 설정 */
       height:var(--cardW); 
       /* min-height를 var(--cardW)와 200px 중 큰 값으로 설정하여 정사각형 또는 최소 높이 200px 유지 */
-      min-height: max(var(--cardW), 200px); 
+      min-height:200px;
       border-radius:var(--radius);overflow:hidden;background:#fff;
       box-shadow:var(--shadow); 
       transform:translateZ(0);cursor:grab; 
