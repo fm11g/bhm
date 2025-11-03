@@ -54,33 +54,43 @@ form1.innerHTML = `
                         <td>
     
                             <select name='entry.1024743880' id='db3' class="form-control" placeholder="※ 희망제품 (1)">
-    
-						<option value="" selected disabled>-※ 희망제품 (1) 선택-</option>
-			                 <option value="[삼성]갤북4울트라">[삼성]갤북4울트라</option>
-                            <option value="[삼성]갤럭시북5프로360(NEW)">[삼성]갤럭시북5프로360(NEW)</option>
-                            <option value="[LG]그램(17인치/15인치)노트북(NEW)">[LG]그램(17인치/15인치)노트북(NEW)</option>
-                            <option value="[MSI]게이밍노트북세트(GF76신모델)">[MSI]게이밍노트북세트(GF76신모델)</option>
-                            <option value="[애플]맥북 Pro 14 노트북">[애플]맥북 Pro 14 노트북</option>
-                            <option value="[애플]아이패드프로11 M4칩+애플펜슬pro세트">[애플]아이패드프로11 M4칩+애플펜슬pro세트</option>
-                            <option value="[LG]스마트TV-(60/75/86인치)+사운드바set">[LG]스마트TV-(60/75/86인치)+사운드바set</option>
-                            <option value="[삼성]스마트TV-(60/75/85인치)+사운드바set">[삼성]스마트TV-(60/75/85인치)+사운드바set</option>
-                            <option value="[삼성/LG]최신냉장고(양문형/4도어)">[삼성/LG]최신냉장고(양문형/4도어)</option>
-                            <option value="[삼성/LG]김치냉장고(스탠드)">[삼성/LG]김치냉장고(스탠드)</option>
-                            <option value="[삼성/LG]세탁기+건조기set">[삼성/LG]세탁기+건조기set</option>
-                            <option value="[삼성/LG]세탁기">[삼성/LG]세탁기</option>
-                            <option value="[삼성/LG]건조기">[삼성/LG]건조기</option>
-                            <option value="[삼성/LG]에어드레서/스타일러(대용량)">[삼성/LG]에어드레서/스타일러(대용량)</option>
-                            <option value="[삼성/LG]스탠드 에어컨">[삼성/LG]스탠드 에어컨</option>
+
+                            <option value="" selected disabled>-※ 희망제품 (1) 선택-</option>
+                            <option value="LG 86인치 UHD TV + 사운드바">LG 86인치 UHD TV + 사운드바</option>
+                            <option value="LG 65인치 OLED TV">LG 65인치 OLED TV</option>
+                            <option value="삼성 (75인치/85인치) QLED TV + 사운드바">삼성 (75인치/85인치) QLED TV + 사운드바</option>
+                            <option value="LG 오브제 베이직 냉장고(870리터)">LG 오브제 베이직 냉장고(870리터)</option>
+                            <option value="LG 오브제 김치냉장고(김치톡톡)505리터">LG 오브제 김치냉장고(김치톡톡)505리터</option>
+                            <option value="LG 오브제 김치냉장고(김치톡톡)324리터">LG 오브제 김치냉장고(김치톡톡)324리터</option>
+                            <option value="LG 오브제 STEM 노크온 냉장고 860리터">LG 오브제 STEM 노크온 냉장고 860리터</option>
+                            <option value="삼성 비스포크 냉장고 (884리터 / 902리터)">삼성 비스포크 냉장고 (884리터 / 902리터)</option>
+                            <option value="삼성 비스포크 키친핏 냉장고 640리터">삼성 비스포크 키친핏 냉장고 640리터</option>
+                            <option value="삼성 비스포크 김치냉장고 490리터">삼성 비스포크 김치냉장고 490리터</option>
+                            <option value="삼성 비스포크 김치냉장고 키친핏 420리터">삼성 비스포크 김치냉장고 키친핏 420리터</option>
+                            <option value="LG 오브제 세탁기(25kg) + 건조기(22kg)">LG 오브제 세탁기(25kg) + 건조기(22kg)</option>
+                            <option value="LG 오브제 세탁기(21kg) + 건조기(19kg)">LG 오브제 세탁기(21kg) + 건조기(19kg)</option>
+                            <option value="LG 트롬 세탁기(21kg)">LG 트롬 세탁기(21kg)</option>
+                            <option value="LG 오브제 건조기 (22kg)">LG 오브제 건조기 (22kg)</option>
+                            <option value="삼성 원바디 그랑데 세탁기+건조기(25kg+22kg)">삼성 원바디 그랑데 세탁기+건조기(25kg+22kg)</option>
+                            <option value="삼성 그랑데 세탁기(21kg)+건조기(21kg)">삼성 그랑데 세탁기(21kg)+건조기(21kg)</option>
+                            <option value="삼성 그랑데 세탁기(21kg)">삼성 그랑데 세탁기(21kg)</option>
+                            <option value="삼성 그랑데 건조기(21kg)">삼성 그랑데 건조기(21kg)</option>
                             <option value="[삼성/LG]2 in 1 에어컨(스탠드+벽걸이)">[삼성/LG]2 in 1 에어컨(스탠드+벽걸이)</option>
-                            <option value="[삼성/LG]무선청소기">[삼성/LG]무선청소기</option>
+                            <option value="[삼성/LG]스탠드 에어컨">[삼성/LG]스탠드 에어컨</option>
+                            <option value="[삼성/LG]벽걸이 에어컨">[삼성/LG]벽걸이 에어컨</option>
+                            <option value="[삼성/LG]비스포크 에어드레서/오브제 스타일러">[삼성/LG]비스포크 에어드레서/오브제 스타일러</option>
+                            <option value="LG 오브제 청소기+공기청정기(19평)">LG 오브제 청소기+공기청정기(19평)</option>
+                            <option value="LG 코드제로 로보킹 AI 로봇청소기">LG 코드제로 로보킹 AI 로봇청소기</option>
                             <option value="[삼성/LG]공기청정기">[삼성/LG]공기청정기</option>
-                            <option value="[바디프렌드]헬스케어로봇 안마의자">[바디프렌드]헬스케어로봇 안마의자</option>
-                            <option value="[세라젬]더뉴마스터V4">[세라젬]더뉴마스터V4</option>
-                            <option value="[바디프렌드/코지마/세라젬]안마의자">[바디프렌드/코지마/세라젬]안마의자</option>
+                            <option value="[삼성]갤럭시북5 pro 360 노트북(16인치)">[삼성]갤럭시북5 pro 360 노트북(16인치)</option>
+                            <option value="[LG]그램17 노트북">[LG]그램17 노트북</option>
+                            <option value="[MSI]게이밍노트북set (17.3인치)">[MSI]게이밍노트북set (17.3인치)</option>
+                            <option value="[애플]맥북프로/에어/아이패드">[애플]맥북프로/에어/아이패드</option>
+                            <option value="바디프렌드 헬스케어로봇(안마의자)">바디프렌드 헬스케어로봇(안마의자)</option>
+                            <option value="세라젬 더 뉴 마스터(V4)">세라젬 더 뉴 마스터(V4)</option>
+                            <option value="바디프렌드/코지마/세라젬_안마의자">바디프렌드/코지마/세라젬_안마의자</option>
                             <option value="[쿠쿠/코웨이/SK]얼음냉온정수기">[쿠쿠/코웨이/SK]얼음냉온정수기</option>
                             <option value="[기타제품]상담 후 결정">[기타제품]상담 후 결정</option>
-                                                        
-                                   
                                   
                             </select>
     
@@ -95,27 +105,39 @@ form1.innerHTML = `
                             <select name='entry.1946482491' id='db4' class="form-control" placeholder="※ 희망제품 (2)">
     
                                   <option value="" selected disabled>-※ 희망제품 (2) 선택-</option>
-			                 <option value="[삼성]갤북4울트라">[삼성]갤북4울트라</option>
-                            <option value="[삼성]갤럭시북5프로360(NEW)">[삼성]갤럭시북5프로360(NEW)</option>
-                            <option value="[LG]그램(17인치/15인치)노트북(NEW)">[LG]그램(17인치/15인치)노트북(NEW)</option>
-                            <option value="[MSI]게이밍노트북세트(GF76신모델)">[MSI]게이밍노트북세트(GF76신모델)</option>
-                            <option value="[애플]맥북 Pro 14 노트북">[애플]맥북 Pro 14 노트북</option>
-                            <option value="[애플]아이패드프로11 M4칩+애플펜슬pro세트">[애플]아이패드프로11 M4칩+애플펜슬pro세트</option>
-                            <option value="[LG]스마트TV-(60/75/86인치)+사운드바set">[LG]스마트TV-(60/75/86인치)+사운드바set</option>
-                            <option value="[삼성]스마트TV-(60/75/85인치)+사운드바set">[삼성]스마트TV-(60/75/85인치)+사운드바set</option>
-                            <option value="[삼성/LG]최신냉장고(양문형/4도어)">[삼성/LG]최신냉장고(양문형/4도어)</option>
-                            <option value="[삼성/LG]김치냉장고(스탠드)">[삼성/LG]김치냉장고(스탠드)</option>
-                            <option value="[삼성/LG]세탁기+건조기set">[삼성/LG]세탁기+건조기set</option>
-                            <option value="[삼성/LG]세탁기">[삼성/LG]세탁기</option>
-                            <option value="[삼성/LG]건조기">[삼성/LG]건조기</option>
-                            <option value="[삼성/LG]에어드레서/스타일러(대용량)">[삼성/LG]에어드레서/스타일러(대용량)</option>
-                            <option value="[삼성/LG]스탠드 에어컨">[삼성/LG]스탠드 에어컨</option>
+			              <option value="LG 86인치 UHD TV + 사운드바">LG 86인치 UHD TV + 사운드바</option>
+                            <option value="LG 65인치 OLED TV">LG 65인치 OLED TV</option>
+                            <option value="삼성 (75인치/85인치) QLED TV + 사운드바">삼성 (75인치/85인치) QLED TV + 사운드바</option>
+                            <option value="LG 오브제 베이직 냉장고(870리터)">LG 오브제 베이직 냉장고(870리터)</option>
+                            <option value="LG 오브제 김치냉장고(김치톡톡)505리터">LG 오브제 김치냉장고(김치톡톡)505리터</option>
+                            <option value="LG 오브제 김치냉장고(김치톡톡)324리터">LG 오브제 김치냉장고(김치톡톡)324리터</option>
+                            <option value="LG 오브제 STEM 노크온 냉장고 860리터">LG 오브제 STEM 노크온 냉장고 860리터</option>
+                            <option value="삼성 비스포크 냉장고 (884리터 / 902리터)">삼성 비스포크 냉장고 (884리터 / 902리터)</option>
+                            <option value="삼성 비스포크 키친핏 냉장고 640리터">삼성 비스포크 키친핏 냉장고 640리터</option>
+                            <option value="삼성 비스포크 김치냉장고 490리터">삼성 비스포크 김치냉장고 490리터</option>
+                            <option value="삼성 비스포크 김치냉장고 키친핏 420리터">삼성 비스포크 김치냉장고 키친핏 420리터</option>
+                            <option value="LG 오브제 세탁기(25kg) + 건조기(22kg)">LG 오브제 세탁기(25kg) + 건조기(22kg)</option>
+                            <option value="LG 오브제 세탁기(21kg) + 건조기(19kg)">LG 오브제 세탁기(21kg) + 건조기(19kg)</option>
+                            <option value="LG 트롬 세탁기(21kg)">LG 트롬 세탁기(21kg)</option>
+                            <option value="LG 오브제 건조기 (22kg)">LG 오브제 건조기 (22kg)</option>
+                            <option value="삼성 원바디 그랑데 세탁기+건조기(25kg+22kg)">삼성 원바디 그랑데 세탁기+건조기(25kg+22kg)</option>
+                            <option value="삼성 그랑데 세탁기(21kg)+건조기(21kg)">삼성 그랑데 세탁기(21kg)+건조기(21kg)</option>
+                            <option value="삼성 그랑데 세탁기(21kg)">삼성 그랑데 세탁기(21kg)</option>
+                            <option value="삼성 그랑데 건조기(21kg)">삼성 그랑데 건조기(21kg)</option>
                             <option value="[삼성/LG]2 in 1 에어컨(스탠드+벽걸이)">[삼성/LG]2 in 1 에어컨(스탠드+벽걸이)</option>
-                            <option value="[삼성/LG]무선청소기">[삼성/LG]무선청소기</option>
+                            <option value="[삼성/LG]스탠드 에어컨">[삼성/LG]스탠드 에어컨</option>
+                            <option value="[삼성/LG]벽걸이 에어컨">[삼성/LG]벽걸이 에어컨</option>
+                            <option value="[삼성/LG]비스포크 에어드레서/오브제 스타일러">[삼성/LG]비스포크 에어드레서/오브제 스타일러</option>
+                            <option value="LG 오브제 청소기+공기청정기(19평)">LG 오브제 청소기+공기청정기(19평)</option>
+                            <option value="LG 코드제로 로보킹 AI 로봇청소기">LG 코드제로 로보킹 AI 로봇청소기</option>
                             <option value="[삼성/LG]공기청정기">[삼성/LG]공기청정기</option>
-                            <option value="[바디프렌드]헬스케어로봇 안마의자">[바디프렌드]헬스케어로봇 안마의자</option>
-                            <option value="[세라젬]더뉴마스터V4">[세라젬]더뉴마스터V4</option>
-                            <option value="[바디프렌드/코지마/세라젬]안마의자">[바디프렌드/코지마/세라젬]안마의자</option>
+                            <option value="[삼성]갤럭시북5 pro 360 노트북(16인치)">[삼성]갤럭시북5 pro 360 노트북(16인치)</option>
+                            <option value="[LG]그램17 노트북">[LG]그램17 노트북</option>
+                            <option value="[MSI]게이밍노트북set (17.3인치)">[MSI]게이밍노트북set (17.3인치)</option>
+                            <option value="[애플]맥북프로/에어/아이패드">[애플]맥북프로/에어/아이패드</option>
+                            <option value="바디프렌드 헬스케어로봇(안마의자)">바디프렌드 헬스케어로봇(안마의자)</option>
+                            <option value="세라젬 더 뉴 마스터(V4)">세라젬 더 뉴 마스터(V4)</option>
+                            <option value="바디프렌드/코지마/세라젬_안마의자">바디프렌드/코지마/세라젬_안마의자</option>
                             <option value="[쿠쿠/코웨이/SK]얼음냉온정수기">[쿠쿠/코웨이/SK]얼음냉온정수기</option>
                             <option value="[기타제품]상담 후 결정">[기타제품]상담 후 결정</option>
                                                         
