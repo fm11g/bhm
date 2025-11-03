@@ -195,6 +195,11 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
           <div class="ecs-grad"></div>
           <div class="ecs-body"><h3 class="ecs-title2">삼성 85인치 QLED TV + 갤럭시탭 A9플러스</h3></div>
         </article>
+
+          <article class="ecs-card" data-ecs-slide style="background-color: transparent;box-shadow: none;">
+        
+        </article>
+
       </div>
 
       </div>
@@ -643,6 +648,11 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
           <div class="ecs-grad"></div>
           <div class="ecs-body"><h3 class="ecs-title2">삼성 비스포크 김치냉장고 키친핏 420ℓ</h3></div>
         </article>
+
+          <article class="ecs-card" data-ecs-slide style="background-color: transparent;box-shadow: none;">
+        
+        </article>
+
       </div>
 
       </div>
@@ -1060,7 +1070,9 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
           <div class="ecs-grad"></div>
           <div class="ecs-body"><h3 class="ecs-title2">삼성 원바디 그랑데 세탁기 + 건조기</h3></div>
         </article>
-       
+         <article class="ecs-card" data-ecs-slide style="background-color: transparent;box-shadow: none;">
+        
+        </article>
       </div>
 
       </div>
@@ -1505,6 +1517,10 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
           <div class="ecs-grad"></div>
           <div class="ecs-body"><h3 class="ecs-title2">삼성 비스포크 제트 AI 청소기 + 공기청정기</h3></div>
         </article>
+
+          <article class="ecs-card" data-ecs-slide style="background-color: transparent;box-shadow: none;">
+        
+        </article>
      
       </div>
 
@@ -1922,6 +1938,10 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
           <div class="ecs-media"><img src="https://lh3.googleusercontent.com/v-nGVoe8bWQlrKEIdhB8GLnAZYiptNcak8km72HAoEoj7oFCWWXK7CQTCsOSca1zuHZUaGN-rc_0q8RWXGtsrblUMOdJW9VftRnEbTW8FD9y5hIVjOBHYQ=w800" alt="The Witcher 3"></div>
           <div class="ecs-grad"></div>
           <div class="ecs-body"><h3 class="ecs-title2">애플 아이패드 에어 11인치(M3)</h3></div>
+        </article>
+
+          <article class="ecs-card" data-ecs-slide style="background-color: transparent;box-shadow: none;">
+        
         </article>
     
       </div>
@@ -2363,7 +2383,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     .ecs-slider .ecs-grad{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 35%,rgba(0,0,0,.78) 95%);z-index:1}
     .ecs-slider .ecs-body{position:absolute;left:16px;right:16px;bottom:14px;z-index:2;color:#fff;transform:translateY(0);opacity:.98;transition:opacity 380ms cubic-bezier(.15,.7,.25,1.05);}
     .ecs-slider .ecs-title2{font-size:clamp(12px,2vw,16px);line-height:1.2;margin:0;font-weight:800;letter-spacing:-.01em}
-   .ecs-slider .ecs-card:not(.ecs-active) .ecs-body{opacity: 0.8;} 
+    .ecs-slider .ecs-card:not(.ecs-active) .ecs-body{opacity: 0.8;} 
 
     .ecs-slider .ecs-gauge{
         width: clamp(120px, 15vw, 180px); 
@@ -2660,6 +2680,9 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
           }
         }
         if(isScrollPrevented){
+          /* ✅ 드래그 중 자동재생이 혹시 켜져 있으면 즉시 끔 (모바일 안전장치) */
+          if (isAutoPlaying) stopAuto();
+
           currOffset = resist(baseOffset + dx); 
           var dt = now - lastT;
           if (dt > 0) velocity = (clientX - lastX) / dt; 
@@ -2726,11 +2749,15 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       
       /* ===== 자동 재생 (requestAnimationFrame) ===== */
       function autoMove(timestamp){
-        if (!isAutoPlaying){ return; }
-        if (dragging){               /* 드래그 중엔 절대 자동 이동 안 함 */
-          autoRafId = requestAnimationFrame(autoMove);
+        /* ✅ 드래그 중에는 절대 자동 이동하지 않음 */
+        if (dragging) { 
+          if (isAutoPlaying) { /* 프레임 루프만 유지하고 이동은 금지 */
+            autoRafId = requestAnimationFrame(autoMove);
+          }
           return;
         }
+        if (!isAutoPlaying){ return; }
+
         if (!lastTimestamp) {
           lastTimestamp = timestamp;
           autoRafId = requestAnimationFrame(autoMove);
@@ -2784,23 +2811,22 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         }, 100);
       });
       
-      /* ===== 호버/터치 시 자동재생 일시정지 & 영역 이탈/손 떼면 즉시 재시작 ===== */
+      /* ===== 호버/터치 일시정지 & 즉시 재시작 ===== */
       function pauseForHover(){ isHovering = true; stopAuto(); }
       function resumeFromHover(){ 
         isHovering = false; 
         if (!dragging && !momentumId) startAuto(); 
       }
-      function resumeNow(){        /* 즉시 재시작(중복 재개 방지용) */
+      function resumeNow(){
+        /* ✅ 드래그/모멘텀 중이면 재가동 금지 (모바일 안전) */
+        if (dragging || momentumId) return;
         isHovering = false;
-        stopMomentum();
         restartAuto();
       }
 
-      // 데스크톱: 호버 시 정지
+      // 데스크톱: 호버 시 정지 / 이탈 시 즉시 재가동
       viewport.addEventListener('mouseenter', pauseForHover, {passive:true});
       viewport.addEventListener('pointerover', pauseForHover, {passive:true});
-
-      // ✅ 영역 이탈 시 즉시 재가동 (한 군데로 통일하여 중복 재시작 방지)
       viewport.addEventListener('pointerleave', resumeNow, {passive:true});
       viewport.addEventListener('mouseleave', resumeNow, {passive:true});
 
