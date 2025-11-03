@@ -205,7 +205,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       </div>
     
   </div>
-
   <script>
     (function(){
       var root = (function(){
@@ -213,8 +212,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         if (currentScript && currentScript.parentElement && currentScript.parentElement.classList.contains('ecs-slider')) {
           return currentScript.parentElement;
         }
-        var uninit = document.querySelector('.ecs-slider:not([data-ecs-ready])');
-        return uninit;
+        return document.querySelector('.ecs-slider:not([data-ecs-ready])');
       })();
 
       if(!root || root.hasAttribute('data-ecs-ready')) return;
@@ -223,332 +221,330 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       var viewport    = root.querySelector('.ecs-viewport');
       var track       = root.querySelector('.ecs-track');
       var cards       = Array.prototype.slice.call(root.querySelectorAll('[data-ecs-slide]'));
-      
       var gauge       = root.querySelector('.ecs-gauge');
       var gaugeBar    = root.querySelector('.ecs-progress-bar'); 
 
-      var idx = 0; 
-      var timer = null;
-      // var userInteractedAt = 0; // ✅ 제거: 지연 로직에 사용되던 변수
-      var offset = 0; 
-      var isMoving = false; 
-      var animationFrameId = null; 
-      
-      var autoSpeed = 0.05; 
+      var idx = 0;
+      var offset = 0;
+      var isMoving = false;
+      var animationFrameId = null;
+
+      var autoSpeed = 0.05;      // px per ms
       var lastTimestamp = 0;
-      var isAutoPlaying = false; 
+      var isAutoPlaying = false;
       var autoRafId = null;
 
+      // 드래그/호버 상태 플래그
+      var supportsPointer = typeof window.PointerEvent !== 'undefined';
+      var dragging=false, isHovering=false;
+
+      // 드래그 관련 변수
+      var startX=0, startY=0, baseOffset=0, currOffset=0;
+      var lastT=0, lastX=0, velocity=0, startTime=0;
+      var capturedPointerId = null;
+      var isScrollPrevented = false;
+      var dragThreshold = 10;
+
+      // 모멘텀(관성) 관련
+      var momentumId = null, momentumV = 0, momentumLast = 0;
+
+      function stopMomentum(){
+        if (momentumId) cancelAnimationFrame(momentumId);
+        momentumId = null; momentumV = 0; momentumLast = 0;
+      }
+      function startMomentum(v){
+        stopMomentum();
+        momentumV = v; momentumLast = 0;
+        momentumId = requestAnimationFrame(momentumStep);
+      }
+      function momentumStep(ts){
+        if (!momentumLast){ momentumLast = ts; momentumId = requestAnimationFrame(momentumStep); return; }
+        var dt = ts - momentumLast; momentumLast = ts;
+
+        var next = offset + momentumV * dt;
+        var m = maxOffset();
+        if (next < 0 || next > m){
+          next = Math.max(0, Math.min(next, m));
+          momentumV *= 0.35;
+        }
+        applyTransform(next, 0);
+
+        var per16 = Math.pow(0.94, dt / 16.7);
+        momentumV *= per16;
+
+        if (Math.abs(momentumV) < 0.02){
+          stopMomentum();
+          if (!isHovering && !dragging) restartAuto();
+          return;
+        }
+        momentumId = requestAnimationFrame(momentumStep);
+      }
 
       function setActive(i){
-        cards.forEach(function(c,k){ 
-            c.classList.toggle('ecs-active', k===i); 
+        cards.forEach(function(c,k){
+          c.classList.toggle('ecs-active', k===i);
         });
-        
         if(cards.length > 1 && gauge && gaugeBar){
-            var progressRatio = i / (cards.length - 1);
-            root.style.setProperty('--progress', progressRatio);
-            gauge.setAttribute('aria-valuenow', i + 1);
+          var progressRatio = i / (cards.length - 1);
+          root.style.setProperty('--progress', progressRatio);
+          gauge.setAttribute('aria-valuenow', i + 1);
         }
       }
 
       function dims(){
         var cs = getComputedStyle(root);
-        var cardW   = parseFloat(cs.getPropertyValue('--cardW')) || 400;
+        var cardW = parseFloat(cs.getPropertyValue('--cardW')) || 400;
         return {
-          cardW:   cardW,
-          gap:     parseFloat(cs.getPropertyValue('--gap')) || 18,
-          vp:      viewport.clientWidth,
-          sidePadR: parseFloat(getComputedStyle(viewport).paddingRight) || 20, 
-          sidePadL: parseFloat(getComputedStyle(viewport).paddingLeft) || 18, 
+          cardW: cardW,
+          gap: parseFloat(cs.getPropertyValue('--gap')) || 18,
+          vp: viewport.clientWidth,
+          sidePadR: parseFloat(getComputedStyle(viewport).paddingRight) || 20,
+          sidePadL: parseFloat(getComputedStyle(viewport).paddingLeft)  || 18
         };
       }
-      
+
       function maxOffset(){
         if (cards.length === 0) return 0;
-        
         var d = dims();
         var totalContentWidth = (d.cardW + d.gap) * cards.length - d.gap;
-        
         var maxScroll = totalContentWidth - d.vp + d.sidePadL;
-        
-        return Math.max(0, maxScroll); 
+        return Math.max(0, maxScroll);
       }
-      
-      
+
+      function updateActiveCardIndex(currentOffset){
+        var d = dims();
+        var center = currentOffset + d.vp / 2;
+        var closestIndex = 0, minDelta = Infinity;
+        for (var i=0;i<cards.length;i++){
+          var start = cards[i].offsetLeft;
+          var cardCenter = start + d.cardW/2;
+          var delta = Math.abs(cardCenter - center);
+          if (delta < minDelta){ minDelta = delta; closestIndex = i; }
+        }
+        idx = closestIndex;
+        setActive(idx);
+      }
+
       function applyTransform(x, ms){
         var m = maxOffset();
-        
-        x = Math.max(0, Math.min(x, m)); 
+        x = Math.max(0, Math.min(x, m));
         offset = x;
-        
-        var translateX = -x;
 
-        if (ms > 0) {
-            track.style.transition = 'transform '+ms+'ms cubic-bezier(.16, 1, .3, 1)';
+        if (ms > 0){
+          track.style.transition = 'transform '+ms+'ms cubic-bezier(.16,1,.3,1)';
         } else {
-            track.style.transition = 'none'; 
+          track.style.transition = 'none';
         }
-        
-        track.style.transform  = 'translate3d('+(translateX)+'px,0,0)';
-        
+        track.style.transform = 'translate3d(' + (-x) + 'px,0,0)';
+
         updateActiveCardIndex(offset);
-        
-        // ✅ 목록 끝에 도달하면 시작 위치로 이동 (부드러운 순환)
-        if (offset >= m && isAutoPlaying) {
-             // 1초 동안 부드럽게 시작 위치로 이동
-            applyTransform(0, 1000); 
+
+        // 끝에 도달하면 부드럽게(보이지 않게) 0으로 즉시 리셋
+        if (isAutoPlaying && (m > 0) && (offset >= m - 1)){
+          requestAnimationFrame(function(){
+            track.style.transition = 'none';
+            offset = 0;
+            track.style.transform = 'translate3d(0,0,0)';
+            updateActiveCardIndex(0);
+          });
         }
       }
-      
-      
-      function updateActiveCardIndex(currentOffset){
-          var d = dims();
-          var cardCenter = d.cardW / 2;
-          
-          for(var i = 0; i < cards.length; i++){
-              var cardStart = cards[i].offsetLeft - d.sidePadL;
-              
-              if(currentOffset >= cardStart - cardCenter){
-                  idx = i;
-              } else {
-                  break;
-              }
-          }
-          setActive(idx);
-      }
 
-
-      /* ===== 드래그/스와이프 로직 (유한 목록) ===== */
-      var supportsPointer = typeof window.PointerEvent !== 'undefined';
-      var startX=0, startY=0, baseOffset=0, currOffset=0, dragging=false;
-      var lastT=0, lastX=0, velocity=0, startTime=0;
-      var capturedPointerId = null;
-      var isScrollPrevented = false; 
-
+      /* ========= 드래그 ========= */
       function resist(x){
         var m = maxOffset();
         if(x < 0) return x * 0.35;
-        if(x > m) return m + (x - m)*0.35;
+        if(x > m) return m + (x - m) * 0.35;
         return x;
       }
-      
+
       function updateTrackPosition(){
         if(!dragging) return;
-        var translateX = -currOffset;
-        track.style.transform = 'translate3d('+(translateX)+'px,0,0)';
-        updateActiveCardIndex(currOffset); 
+        track.style.transform = 'translate3d(' + (-currOffset) + 'px,0,0)';
+        updateActiveCardIndex(currOffset);
         animationFrameId = requestAnimationFrame(updateTrackPosition);
       }
 
-      function onDown(clientX, clientY, pointerId){ 
+      function onDown(clientX, clientY, pointerId){
         if(isMoving) return;
-        stopAuto(); // 드래그 시작 시 자동 재생 중지
-        
-        dragging=true; 
-        startX=clientX; 
-        startY=clientY;
-        baseOffset=offset; 
-        currOffset=offset; 
-        lastX=clientX; 
-        lastT=performance.now(); 
-        velocity=0; 
-        startTime=performance.now(); 
-        isScrollPrevented=false; 
-        track.style.transition='none'; 
-        // userInteractedAt = performance.now(); // ✅ 제거
-        viewport.classList.add('is-dragging'); 
-        
-        if (supportsPointer && pointerId !== undefined) {
+        stopAuto();
+        stopMomentum();
+        dragging = true;
+        startX = clientX; startY = clientY;
+        baseOffset = offset; currOffset = offset;
+        lastX = clientX; lastT = performance.now();
+        velocity = 0; startTime = performance.now();
+        isScrollPrevented = false;
+        track.style.transition = 'none';
+        viewport.classList.add('is-dragging');
+
+        if (supportsPointer && pointerId !== undefined){
           viewport.setPointerCapture(pointerId);
           capturedPointerId = pointerId;
         }
-
         cancelAnimationFrame(animationFrameId);
-        updateTrackPosition(); 
+        updateTrackPosition();
       }
-      
-      function onMove(clientX, clientY, e){ 
+
+      function onMove(clientX, clientY, e){
         if(!dragging) return;
         var now = performance.now();
-        var dx = startX - clientX; 
-        var dy = startY - clientY; 
-        
-        if (!isScrollPrevented && Math.abs(dx) > Math.abs(dy)) { 
-            e.preventDefault(); 
-            isScrollPrevented = true; 
-        }
+        var dx = startX - clientX;
+        var dy = startY - clientY;
 
-        if(isScrollPrevented || Math.abs(dx) > 10 || Math.abs(dy) > 10){
-            currOffset = resist(baseOffset + dx); 
-            
-            var dt = now - lastT;
-            if (dt > 0) {
-                velocity = (clientX - lastX) / dt; 
-            }
-            
-            lastX = clientX; 
-            lastT = now;
+        if (!isScrollPrevented){
+          if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > dragThreshold){
+            e.preventDefault();
+            isScrollPrevented = true;
+          }
+        }
+        if (isScrollPrevented){
+          if (isAutoPlaying) stopAuto(); // 모바일 안전장치: 드래그 중 자동재생 즉시 OFF
+          currOffset = resist(baseOffset + dx);
+          var dt = now - lastT;
+          if (dt > 0) velocity = (clientX - lastX) / dt;
+          lastX = clientX; lastT = now;
         }
       }
-      
-      function onUp(pointerId){
-        if(!dragging) return; 
-        dragging=false;
+
+      function onUp(){
+        if(!dragging) return;
+        dragging = false;
         cancelAnimationFrame(animationFrameId);
         viewport.classList.remove('is-dragging');
 
-        if (supportsPointer && capturedPointerId !== null) {
-          try { viewport.releasePointerCapture(capturedPointerId); } catch(e) {}
+        if (supportsPointer && capturedPointerId !== null){
+          try { viewport.releasePointerCapture(capturedPointerId); } catch(e){}
           capturedPointerId = null;
         }
 
-        var m = maxOffset();
-        var dragDuration = performance.now() - startTime;
-        var targetOffset;
-        
-        if (dragDuration < 200) { 
-            var inertia = velocity * 1200; 
-            
-            var d = dims();
-            var maxInertiaDistance = 2 * (d.cardW + d.gap); 
-            
-            if (Math.abs(inertia) > maxInertiaDistance) {
-                inertia = Math.sign(inertia) * maxInertiaDistance;
-            }
-            
-            targetOffset = currOffset - inertia;
-        } else {
-            targetOffset = currOffset;
+        var initialV = -velocity;
+        if (initialV >  2.0) initialV =  2.0;
+        if (initialV < -2.0) initialV = -2.0;
+
+        offset = Math.max(0, Math.min(currOffset, maxOffset()));
+        applyTransform(offset, 0);
+
+        // 스냅 없이 현재 속도로 관성 이동
+        startMomentum(initialV);
+
+        isMoving = true;
+        setTimeout(function(){ isMoving = false; }, 400);
+      }
+
+      var activeOpts = {passive:false};
+      var passiveOpts = {passive:true};
+
+      if (supportsPointer){
+        viewport.addEventListener('pointerdown', function(e){
+          if(e.button !== 0 && !e.isPrimary) return;
+          onDown(e.clientX, e.clientY, e.pointerId);
+        }, passiveOpts);
+        viewport.addEventListener('pointermove', function(e){
+          if(!dragging) return;
+          onMove(e.clientX, e.clientY, e);
+        }, activeOpts);
+        window.addEventListener('pointerup', function(){ onUp(); }, passiveOpts);
+        window.addEventListener('pointercancel', function(){ onUp(); }, passiveOpts);
+      } else {
+        viewport.addEventListener('touchstart', function(e){
+          if(!e.touches || !e.touches.length) return;
+          onDown(e.touches[0].clientX, e.touches[0].clientY);
+        }, passiveOpts);
+        viewport.addEventListener('touchmove', function(e){
+          if(!e.touches || !e.touches.length) return;
+          onMove(e.touches[0].clientX, e.touches[0].clientY, e);
+        }, activeOpts);
+        window.addEventListener('touchend', function(){ onUp(); }, passiveOpts);
+
+        viewport.addEventListener('mousedown', function(e){ onDown(e.clientX, e.clientY); }, passiveOpts);
+        window.addEventListener('mousemove', function(e){
+          if(!dragging) return;
+          onMove(e.clientX, e.clientY, e);
+        }, activeOpts);
+        window.addEventListener('mouseup', function(){ onUp(); }, passiveOpts);
+      }
+
+      /* ========= 자동 재생 ========= */
+      function autoMove(timestamp){
+        // 드래그 중에는 절대 자동 이동 금지
+        if (dragging){ 
+          if (isAutoPlaying) autoRafId = requestAnimationFrame(autoMove);
+          return;
+        }
+        if (!isAutoPlaying) return;
+
+        if (!lastTimestamp){
+          lastTimestamp = timestamp;
+          autoRafId = requestAnimationFrame(autoMove);
+          return;
         }
 
-        targetOffset = Math.max(0, Math.min(targetOffset, m));
-        
-        offset = targetOffset;
-        
-        applyTransform(offset, 500); 
-        
-        updateActiveCardIndex(offset);
-        restartAuto();
-        
-        isMoving = true;
-        setTimeout(function() { isMoving = false; }, 500);
-      }
-      
-      var activeOpts = {passive:false};
-      var passiveOpts = {passive:true}; 
+        var dt = timestamp - lastTimestamp;
+        if (dt > 100) dt = 0;
 
-      if(supportsPointer){
-        viewport.addEventListener('pointerdown', function(e){ 
-          if(e.button !== 0 && !e.isPrimary) return;
-          onDown(e.clientX, e.clientY, e.pointerId); 
-        }, passiveOpts); 
-        viewport.addEventListener('pointermove', function(e){ 
-            if(!dragging) return; 
-            onMove(e.clientX, e.clientY, e); 
-        }, activeOpts);
-        window.addEventListener('pointerup', function(e){ onUp(e.pointerId); }, passiveOpts);
-        window.addEventListener('pointercancel', function(e){ onUp(e.pointerId); }, passiveOpts);
-      }else{
-        viewport.addEventListener('touchstart', function(e){ 
-            if(!e.touches||!e.touches.length)return; 
-            onDown(e.touches[0].clientX, e.touches[0].clientY); 
-        }, passiveOpts);
-        viewport.addEventListener('touchmove',  function(e){ 
-            if(!e.touches||!e.touches.length)return; 
-            onMove(e.touches[0].clientX, e.touches[0].clientY, e); 
-        }, activeOpts); 
-        window.addEventListener('touchend',   function(){ onUp(); }, passiveOpts);
-        
-        viewport.addEventListener('mousedown', function(e){ onDown(e.clientX, e.clientY); }, passiveOpts); 
-        window.addEventListener('mousemove',   function(e){ 
-            if(!dragging) return;
-            onMove(e.clientX, e.clientY, e); 
-        }, activeOpts); 
-        window.addEventListener('mouseup',     function(){ onUp(); }, passiveOpts);
+        applyTransform(offset + autoSpeed * dt, 0);
+
+        lastTimestamp = timestamp;
+        if (isAutoPlaying) autoRafId = requestAnimationFrame(autoMove);
       }
-      
-      /* ===== 자동 재생 로직 (requestAnimationFrame 기반 부드러운 이동) ===== */
-      
-      function autoMove(timestamp){
-          if (!lastTimestamp) {
-              lastTimestamp = timestamp;
-              autoRafId = requestAnimationFrame(autoMove);
-              return;
-          }
-          
-          var deltaTime = timestamp - lastTimestamp;
-          
-          if (deltaTime > 100) deltaTime = 0; 
-          
-          var distance = autoSpeed * deltaTime;
-          
-          var nextOffset = offset + distance;
-          
-          // applyTransform 내부에서 maxOffset 체크 및 순환 로직 처리
-          applyTransform(nextOffset, 0); 
-          
-          lastTimestamp = timestamp;
-          
-          if (isAutoPlaying) {
-             autoRafId = requestAnimationFrame(autoMove);
-          }
-      }
-      
+
       function startAuto(){
-        if(isAutoPlaying) return;
+        if (isAutoPlaying) return;
         isAutoPlaying = true;
-        lastTimestamp = 0; 
+        lastTimestamp = 0;
         autoRafId = requestAnimationFrame(autoMove);
       }
-      
-      function stopAuto(){ 
+      function stopAuto(){
         if (autoRafId) cancelAnimationFrame(autoRafId);
-        isAutoPlaying = false; 
-        autoRafId = null; 
+        isAutoPlaying = false;
+        autoRafId = null;
       }
       function restartAuto(){ stopAuto(); startAuto(); }
 
-
+      /* ========= 초기화 ========= */
       document.addEventListener('DOMContentLoaded', function(){
         requestAnimationFrame(function(){
-          root.classList.add('ecs-mounted');
-          
-          var initialOffset = 0; 
-          
-          applyTransform(initialOffset, 0); 
-          updateActiveCardIndex(initialOffset); 
+          applyTransform(0, 0);
+          updateActiveCardIndex(0);
           startAuto();
         });
       });
 
+      /* ========= 리사이즈 대응 ========= */
       var rAF=null;
       window.addEventListener('resize', function(){
         cancelAnimationFrame(rAF);
         rAF = requestAnimationFrame(function(){
-          var newMaxOffset = maxOffset();
-          
-          offset = Math.max(0, Math.min(offset, newMaxOffset));
-
+          var m = maxOffset();
+          offset = Math.max(0, Math.min(offset, m));
           applyTransform(offset, 0);
           updateActiveCardIndex(offset);
-          restartAuto(); 
+          if (!momentumId && !isHovering && !dragging) restartAuto();
         });
       });
-      
-      // ✅ 호버/클릭 시 자동 재생 멈춤 로직
-      var handleInteraction = function(e){
-          if (e.type === 'click' || e.type === 'mouseenter') {
-              stopAuto();
-          } else if (e.type === 'mouseleave' && !dragging && !isMoving) {
-              // ✅ 호버가 풀리면 즉시 자동 이동 재개
-              restartAuto();
-          }
-      };
-      viewport.addEventListener('click', handleInteraction);
-      viewport.addEventListener('mouseenter', handleInteraction);
-      viewport.addEventListener('mouseleave', handleInteraction);
-      
+
+      /* ========= 호버/터치: 정지 & 즉시 재시작 ========= */
+      function pauseForHover(){ isHovering = true; stopAuto(); }
+      function resumeNow(){
+        // 드래그/모멘텀 중에는 자동 재가동 금지
+        if (dragging || momentumId) return;
+        isHovering = false;
+        restartAuto();
+      }
+
+      // 데스크톱
+      viewport.addEventListener('mouseenter', pauseForHover, {passive:true});
+      viewport.addEventListener('pointerover', pauseForHover, {passive:true});
+      viewport.addEventListener('pointerleave', resumeNow, {passive:true});
+      viewport.addEventListener('mouseleave', resumeNow, {passive:true});
+
+      // 터치: 손가락 올리면 정지, 손 떼면 즉시 재가동
+      viewport.addEventListener('touchstart', pauseForHover, {passive:true});
+      window.addEventListener('touchend', resumeNow, {passive:true});
+
+      // 클릭 시 일시정지(원 요청 유지)
+      viewport.addEventListener('click', pauseForHover, {passive:true});
     })();
   </script>
 </section>
@@ -666,8 +662,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         if (currentScript && currentScript.parentElement && currentScript.parentElement.classList.contains('ecs-slider')) {
           return currentScript.parentElement;
         }
-        var uninit = document.querySelector('.ecs-slider:not([data-ecs-ready])');
-        return uninit;
+        return document.querySelector('.ecs-slider:not([data-ecs-ready])');
       })();
 
       if(!root || root.hasAttribute('data-ecs-ready')) return;
@@ -676,332 +671,330 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       var viewport    = root.querySelector('.ecs-viewport');
       var track       = root.querySelector('.ecs-track');
       var cards       = Array.prototype.slice.call(root.querySelectorAll('[data-ecs-slide]'));
-      
       var gauge       = root.querySelector('.ecs-gauge');
       var gaugeBar    = root.querySelector('.ecs-progress-bar'); 
 
-      var idx = 0; 
-      var timer = null;
-      // var userInteractedAt = 0; // ✅ 제거: 지연 로직에 사용되던 변수
-      var offset = 0; 
-      var isMoving = false; 
-      var animationFrameId = null; 
-      
-      var autoSpeed = 0.05; 
+      var idx = 0;
+      var offset = 0;
+      var isMoving = false;
+      var animationFrameId = null;
+
+      var autoSpeed = 0.05;      // px per ms
       var lastTimestamp = 0;
-      var isAutoPlaying = false; 
+      var isAutoPlaying = false;
       var autoRafId = null;
 
+      // 드래그/호버 상태 플래그
+      var supportsPointer = typeof window.PointerEvent !== 'undefined';
+      var dragging=false, isHovering=false;
+
+      // 드래그 관련 변수
+      var startX=0, startY=0, baseOffset=0, currOffset=0;
+      var lastT=0, lastX=0, velocity=0, startTime=0;
+      var capturedPointerId = null;
+      var isScrollPrevented = false;
+      var dragThreshold = 10;
+
+      // 모멘텀(관성) 관련
+      var momentumId = null, momentumV = 0, momentumLast = 0;
+
+      function stopMomentum(){
+        if (momentumId) cancelAnimationFrame(momentumId);
+        momentumId = null; momentumV = 0; momentumLast = 0;
+      }
+      function startMomentum(v){
+        stopMomentum();
+        momentumV = v; momentumLast = 0;
+        momentumId = requestAnimationFrame(momentumStep);
+      }
+      function momentumStep(ts){
+        if (!momentumLast){ momentumLast = ts; momentumId = requestAnimationFrame(momentumStep); return; }
+        var dt = ts - momentumLast; momentumLast = ts;
+
+        var next = offset + momentumV * dt;
+        var m = maxOffset();
+        if (next < 0 || next > m){
+          next = Math.max(0, Math.min(next, m));
+          momentumV *= 0.35;
+        }
+        applyTransform(next, 0);
+
+        var per16 = Math.pow(0.94, dt / 16.7);
+        momentumV *= per16;
+
+        if (Math.abs(momentumV) < 0.02){
+          stopMomentum();
+          if (!isHovering && !dragging) restartAuto();
+          return;
+        }
+        momentumId = requestAnimationFrame(momentumStep);
+      }
 
       function setActive(i){
-        cards.forEach(function(c,k){ 
-            c.classList.toggle('ecs-active', k===i); 
+        cards.forEach(function(c,k){
+          c.classList.toggle('ecs-active', k===i);
         });
-        
         if(cards.length > 1 && gauge && gaugeBar){
-            var progressRatio = i / (cards.length - 1);
-            root.style.setProperty('--progress', progressRatio);
-            gauge.setAttribute('aria-valuenow', i + 1);
+          var progressRatio = i / (cards.length - 1);
+          root.style.setProperty('--progress', progressRatio);
+          gauge.setAttribute('aria-valuenow', i + 1);
         }
       }
 
       function dims(){
         var cs = getComputedStyle(root);
-        var cardW   = parseFloat(cs.getPropertyValue('--cardW')) || 400;
+        var cardW = parseFloat(cs.getPropertyValue('--cardW')) || 400;
         return {
-          cardW:   cardW,
-          gap:     parseFloat(cs.getPropertyValue('--gap')) || 18,
-          vp:      viewport.clientWidth,
-          sidePadR: parseFloat(getComputedStyle(viewport).paddingRight) || 20, 
-          sidePadL: parseFloat(getComputedStyle(viewport).paddingLeft) || 18, 
+          cardW: cardW,
+          gap: parseFloat(cs.getPropertyValue('--gap')) || 18,
+          vp: viewport.clientWidth,
+          sidePadR: parseFloat(getComputedStyle(viewport).paddingRight) || 20,
+          sidePadL: parseFloat(getComputedStyle(viewport).paddingLeft)  || 18
         };
       }
-      
+
       function maxOffset(){
         if (cards.length === 0) return 0;
-        
         var d = dims();
         var totalContentWidth = (d.cardW + d.gap) * cards.length - d.gap;
-        
         var maxScroll = totalContentWidth - d.vp + d.sidePadL;
-        
-        return Math.max(0, maxScroll); 
+        return Math.max(0, maxScroll);
       }
-      
-      
+
+      function updateActiveCardIndex(currentOffset){
+        var d = dims();
+        var center = currentOffset + d.vp / 2;
+        var closestIndex = 0, minDelta = Infinity;
+        for (var i=0;i<cards.length;i++){
+          var start = cards[i].offsetLeft;
+          var cardCenter = start + d.cardW/2;
+          var delta = Math.abs(cardCenter - center);
+          if (delta < minDelta){ minDelta = delta; closestIndex = i; }
+        }
+        idx = closestIndex;
+        setActive(idx);
+      }
+
       function applyTransform(x, ms){
         var m = maxOffset();
-        
-        x = Math.max(0, Math.min(x, m)); 
+        x = Math.max(0, Math.min(x, m));
         offset = x;
-        
-        var translateX = -x;
 
-        if (ms > 0) {
-            track.style.transition = 'transform '+ms+'ms cubic-bezier(.16, 1, .3, 1)';
+        if (ms > 0){
+          track.style.transition = 'transform '+ms+'ms cubic-bezier(.16,1,.3,1)';
         } else {
-            track.style.transition = 'none'; 
+          track.style.transition = 'none';
         }
-        
-        track.style.transform  = 'translate3d('+(translateX)+'px,0,0)';
-        
+        track.style.transform = 'translate3d(' + (-x) + 'px,0,0)';
+
         updateActiveCardIndex(offset);
-        
-        // ✅ 목록 끝에 도달하면 시작 위치로 이동 (부드러운 순환)
-        if (offset >= m && isAutoPlaying) {
-             // 1초 동안 부드럽게 시작 위치로 이동
-            applyTransform(0, 1000); 
+
+        // 끝에 도달하면 부드럽게(보이지 않게) 0으로 즉시 리셋
+        if (isAutoPlaying && (m > 0) && (offset >= m - 1)){
+          requestAnimationFrame(function(){
+            track.style.transition = 'none';
+            offset = 0;
+            track.style.transform = 'translate3d(0,0,0)';
+            updateActiveCardIndex(0);
+          });
         }
       }
-      
-      
-      function updateActiveCardIndex(currentOffset){
-          var d = dims();
-          var cardCenter = d.cardW / 2;
-          
-          for(var i = 0; i < cards.length; i++){
-              var cardStart = cards[i].offsetLeft - d.sidePadL;
-              
-              if(currentOffset >= cardStart - cardCenter){
-                  idx = i;
-              } else {
-                  break;
-              }
-          }
-          setActive(idx);
-      }
 
-
-      /* ===== 드래그/스와이프 로직 (유한 목록) ===== */
-      var supportsPointer = typeof window.PointerEvent !== 'undefined';
-      var startX=0, startY=0, baseOffset=0, currOffset=0, dragging=false;
-      var lastT=0, lastX=0, velocity=0, startTime=0;
-      var capturedPointerId = null;
-      var isScrollPrevented = false; 
-
+      /* ========= 드래그 ========= */
       function resist(x){
         var m = maxOffset();
         if(x < 0) return x * 0.35;
-        if(x > m) return m + (x - m)*0.35;
+        if(x > m) return m + (x - m) * 0.35;
         return x;
       }
-      
+
       function updateTrackPosition(){
         if(!dragging) return;
-        var translateX = -currOffset;
-        track.style.transform = 'translate3d('+(translateX)+'px,0,0)';
-        updateActiveCardIndex(currOffset); 
+        track.style.transform = 'translate3d(' + (-currOffset) + 'px,0,0)';
+        updateActiveCardIndex(currOffset);
         animationFrameId = requestAnimationFrame(updateTrackPosition);
       }
 
-      function onDown(clientX, clientY, pointerId){ 
+      function onDown(clientX, clientY, pointerId){
         if(isMoving) return;
-        stopAuto(); // 드래그 시작 시 자동 재생 중지
-        
-        dragging=true; 
-        startX=clientX; 
-        startY=clientY;
-        baseOffset=offset; 
-        currOffset=offset; 
-        lastX=clientX; 
-        lastT=performance.now(); 
-        velocity=0; 
-        startTime=performance.now(); 
-        isScrollPrevented=false; 
-        track.style.transition='none'; 
-        // userInteractedAt = performance.now(); // ✅ 제거
-        viewport.classList.add('is-dragging'); 
-        
-        if (supportsPointer && pointerId !== undefined) {
+        stopAuto();
+        stopMomentum();
+        dragging = true;
+        startX = clientX; startY = clientY;
+        baseOffset = offset; currOffset = offset;
+        lastX = clientX; lastT = performance.now();
+        velocity = 0; startTime = performance.now();
+        isScrollPrevented = false;
+        track.style.transition = 'none';
+        viewport.classList.add('is-dragging');
+
+        if (supportsPointer && pointerId !== undefined){
           viewport.setPointerCapture(pointerId);
           capturedPointerId = pointerId;
         }
-
         cancelAnimationFrame(animationFrameId);
-        updateTrackPosition(); 
+        updateTrackPosition();
       }
-      
-      function onMove(clientX, clientY, e){ 
+
+      function onMove(clientX, clientY, e){
         if(!dragging) return;
         var now = performance.now();
-        var dx = startX - clientX; 
-        var dy = startY - clientY; 
-        
-        if (!isScrollPrevented && Math.abs(dx) > Math.abs(dy)) { 
-            e.preventDefault(); 
-            isScrollPrevented = true; 
-        }
+        var dx = startX - clientX;
+        var dy = startY - clientY;
 
-        if(isScrollPrevented || Math.abs(dx) > 10 || Math.abs(dy) > 10){
-            currOffset = resist(baseOffset + dx); 
-            
-            var dt = now - lastT;
-            if (dt > 0) {
-                velocity = (clientX - lastX) / dt; 
-            }
-            
-            lastX = clientX; 
-            lastT = now;
+        if (!isScrollPrevented){
+          if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > dragThreshold){
+            e.preventDefault();
+            isScrollPrevented = true;
+          }
+        }
+        if (isScrollPrevented){
+          if (isAutoPlaying) stopAuto(); // 모바일 안전장치: 드래그 중 자동재생 즉시 OFF
+          currOffset = resist(baseOffset + dx);
+          var dt = now - lastT;
+          if (dt > 0) velocity = (clientX - lastX) / dt;
+          lastX = clientX; lastT = now;
         }
       }
-      
-      function onUp(pointerId){
-        if(!dragging) return; 
-        dragging=false;
+
+      function onUp(){
+        if(!dragging) return;
+        dragging = false;
         cancelAnimationFrame(animationFrameId);
         viewport.classList.remove('is-dragging');
 
-        if (supportsPointer && capturedPointerId !== null) {
-          try { viewport.releasePointerCapture(capturedPointerId); } catch(e) {}
+        if (supportsPointer && capturedPointerId !== null){
+          try { viewport.releasePointerCapture(capturedPointerId); } catch(e){}
           capturedPointerId = null;
         }
 
-        var m = maxOffset();
-        var dragDuration = performance.now() - startTime;
-        var targetOffset;
-        
-        if (dragDuration < 200) { 
-            var inertia = velocity * 1200; 
-            
-            var d = dims();
-            var maxInertiaDistance = 2 * (d.cardW + d.gap); 
-            
-            if (Math.abs(inertia) > maxInertiaDistance) {
-                inertia = Math.sign(inertia) * maxInertiaDistance;
-            }
-            
-            targetOffset = currOffset - inertia;
-        } else {
-            targetOffset = currOffset;
+        var initialV = -velocity;
+        if (initialV >  2.0) initialV =  2.0;
+        if (initialV < -2.0) initialV = -2.0;
+
+        offset = Math.max(0, Math.min(currOffset, maxOffset()));
+        applyTransform(offset, 0);
+
+        // 스냅 없이 현재 속도로 관성 이동
+        startMomentum(initialV);
+
+        isMoving = true;
+        setTimeout(function(){ isMoving = false; }, 400);
+      }
+
+      var activeOpts = {passive:false};
+      var passiveOpts = {passive:true};
+
+      if (supportsPointer){
+        viewport.addEventListener('pointerdown', function(e){
+          if(e.button !== 0 && !e.isPrimary) return;
+          onDown(e.clientX, e.clientY, e.pointerId);
+        }, passiveOpts);
+        viewport.addEventListener('pointermove', function(e){
+          if(!dragging) return;
+          onMove(e.clientX, e.clientY, e);
+        }, activeOpts);
+        window.addEventListener('pointerup', function(){ onUp(); }, passiveOpts);
+        window.addEventListener('pointercancel', function(){ onUp(); }, passiveOpts);
+      } else {
+        viewport.addEventListener('touchstart', function(e){
+          if(!e.touches || !e.touches.length) return;
+          onDown(e.touches[0].clientX, e.touches[0].clientY);
+        }, passiveOpts);
+        viewport.addEventListener('touchmove', function(e){
+          if(!e.touches || !e.touches.length) return;
+          onMove(e.touches[0].clientX, e.touches[0].clientY, e);
+        }, activeOpts);
+        window.addEventListener('touchend', function(){ onUp(); }, passiveOpts);
+
+        viewport.addEventListener('mousedown', function(e){ onDown(e.clientX, e.clientY); }, passiveOpts);
+        window.addEventListener('mousemove', function(e){
+          if(!dragging) return;
+          onMove(e.clientX, e.clientY, e);
+        }, activeOpts);
+        window.addEventListener('mouseup', function(){ onUp(); }, passiveOpts);
+      }
+
+      /* ========= 자동 재생 ========= */
+      function autoMove(timestamp){
+        // 드래그 중에는 절대 자동 이동 금지
+        if (dragging){ 
+          if (isAutoPlaying) autoRafId = requestAnimationFrame(autoMove);
+          return;
+        }
+        if (!isAutoPlaying) return;
+
+        if (!lastTimestamp){
+          lastTimestamp = timestamp;
+          autoRafId = requestAnimationFrame(autoMove);
+          return;
         }
 
-        targetOffset = Math.max(0, Math.min(targetOffset, m));
-        
-        offset = targetOffset;
-        
-        applyTransform(offset, 500); 
-        
-        updateActiveCardIndex(offset);
-        restartAuto();
-        
-        isMoving = true;
-        setTimeout(function() { isMoving = false; }, 500);
-      }
-      
-      var activeOpts = {passive:false};
-      var passiveOpts = {passive:true}; 
+        var dt = timestamp - lastTimestamp;
+        if (dt > 100) dt = 0;
 
-      if(supportsPointer){
-        viewport.addEventListener('pointerdown', function(e){ 
-          if(e.button !== 0 && !e.isPrimary) return;
-          onDown(e.clientX, e.clientY, e.pointerId); 
-        }, passiveOpts); 
-        viewport.addEventListener('pointermove', function(e){ 
-            if(!dragging) return; 
-            onMove(e.clientX, e.clientY, e); 
-        }, activeOpts);
-        window.addEventListener('pointerup', function(e){ onUp(e.pointerId); }, passiveOpts);
-        window.addEventListener('pointercancel', function(e){ onUp(e.pointerId); }, passiveOpts);
-      }else{
-        viewport.addEventListener('touchstart', function(e){ 
-            if(!e.touches||!e.touches.length)return; 
-            onDown(e.touches[0].clientX, e.touches[0].clientY); 
-        }, passiveOpts);
-        viewport.addEventListener('touchmove',  function(e){ 
-            if(!e.touches||!e.touches.length)return; 
-            onMove(e.touches[0].clientX, e.touches[0].clientY, e); 
-        }, activeOpts); 
-        window.addEventListener('touchend',   function(){ onUp(); }, passiveOpts);
-        
-        viewport.addEventListener('mousedown', function(e){ onDown(e.clientX, e.clientY); }, passiveOpts); 
-        window.addEventListener('mousemove',   function(e){ 
-            if(!dragging) return;
-            onMove(e.clientX, e.clientY, e); 
-        }, activeOpts); 
-        window.addEventListener('mouseup',     function(){ onUp(); }, passiveOpts);
+        applyTransform(offset + autoSpeed * dt, 0);
+
+        lastTimestamp = timestamp;
+        if (isAutoPlaying) autoRafId = requestAnimationFrame(autoMove);
       }
-      
-      /* ===== 자동 재생 로직 (requestAnimationFrame 기반 부드러운 이동) ===== */
-      
-      function autoMove(timestamp){
-          if (!lastTimestamp) {
-              lastTimestamp = timestamp;
-              autoRafId = requestAnimationFrame(autoMove);
-              return;
-          }
-          
-          var deltaTime = timestamp - lastTimestamp;
-          
-          if (deltaTime > 100) deltaTime = 0; 
-          
-          var distance = autoSpeed * deltaTime;
-          
-          var nextOffset = offset + distance;
-          
-          // applyTransform 내부에서 maxOffset 체크 및 순환 로직 처리
-          applyTransform(nextOffset, 0); 
-          
-          lastTimestamp = timestamp;
-          
-          if (isAutoPlaying) {
-             autoRafId = requestAnimationFrame(autoMove);
-          }
-      }
-      
+
       function startAuto(){
-        if(isAutoPlaying) return;
+        if (isAutoPlaying) return;
         isAutoPlaying = true;
-        lastTimestamp = 0; 
+        lastTimestamp = 0;
         autoRafId = requestAnimationFrame(autoMove);
       }
-      
-      function stopAuto(){ 
+      function stopAuto(){
         if (autoRafId) cancelAnimationFrame(autoRafId);
-        isAutoPlaying = false; 
-        autoRafId = null; 
+        isAutoPlaying = false;
+        autoRafId = null;
       }
       function restartAuto(){ stopAuto(); startAuto(); }
 
-
+      /* ========= 초기화 ========= */
       document.addEventListener('DOMContentLoaded', function(){
         requestAnimationFrame(function(){
-          root.classList.add('ecs-mounted');
-          
-          var initialOffset = 0; 
-          
-          applyTransform(initialOffset, 0); 
-          updateActiveCardIndex(initialOffset); 
+          applyTransform(0, 0);
+          updateActiveCardIndex(0);
           startAuto();
         });
       });
 
+      /* ========= 리사이즈 대응 ========= */
       var rAF=null;
       window.addEventListener('resize', function(){
         cancelAnimationFrame(rAF);
         rAF = requestAnimationFrame(function(){
-          var newMaxOffset = maxOffset();
-          
-          offset = Math.max(0, Math.min(offset, newMaxOffset));
-
+          var m = maxOffset();
+          offset = Math.max(0, Math.min(offset, m));
           applyTransform(offset, 0);
           updateActiveCardIndex(offset);
-          restartAuto(); 
+          if (!momentumId && !isHovering && !dragging) restartAuto();
         });
       });
-      
-      // ✅ 호버/클릭 시 자동 재생 멈춤 로직
-      var handleInteraction = function(e){
-          if (e.type === 'click' || e.type === 'mouseenter') {
-              stopAuto();
-          } else if (e.type === 'mouseleave' && !dragging && !isMoving) {
-              // ✅ 호버가 풀리면 즉시 자동 이동 재개
-              restartAuto();
-          }
-      };
-      viewport.addEventListener('click', handleInteraction);
-      viewport.addEventListener('mouseenter', handleInteraction);
-      viewport.addEventListener('mouseleave', handleInteraction);
-      
+
+      /* ========= 호버/터치: 정지 & 즉시 재시작 ========= */
+      function pauseForHover(){ isHovering = true; stopAuto(); }
+      function resumeNow(){
+        // 드래그/모멘텀 중에는 자동 재가동 금지
+        if (dragging || momentumId) return;
+        isHovering = false;
+        restartAuto();
+      }
+
+      // 데스크톱
+      viewport.addEventListener('mouseenter', pauseForHover, {passive:true});
+      viewport.addEventListener('pointerover', pauseForHover, {passive:true});
+      viewport.addEventListener('pointerleave', resumeNow, {passive:true});
+      viewport.addEventListener('mouseleave', resumeNow, {passive:true});
+
+      // 터치: 손가락 올리면 정지, 손 떼면 즉시 재가동
+      viewport.addEventListener('touchstart', pauseForHover, {passive:true});
+      window.addEventListener('touchend', resumeNow, {passive:true});
+
+      // 클릭 시 일시정지(원 요청 유지)
+      viewport.addEventListener('click', pauseForHover, {passive:true});
     })();
   </script>
 </section>
@@ -1086,8 +1079,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         if (currentScript && currentScript.parentElement && currentScript.parentElement.classList.contains('ecs-slider')) {
           return currentScript.parentElement;
         }
-        var uninit = document.querySelector('.ecs-slider:not([data-ecs-ready])');
-        return uninit;
+        return document.querySelector('.ecs-slider:not([data-ecs-ready])');
       })();
 
       if(!root || root.hasAttribute('data-ecs-ready')) return;
@@ -1096,332 +1088,330 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       var viewport    = root.querySelector('.ecs-viewport');
       var track       = root.querySelector('.ecs-track');
       var cards       = Array.prototype.slice.call(root.querySelectorAll('[data-ecs-slide]'));
-      
       var gauge       = root.querySelector('.ecs-gauge');
       var gaugeBar    = root.querySelector('.ecs-progress-bar'); 
 
-      var idx = 0; 
-      var timer = null;
-      // var userInteractedAt = 0; // ✅ 제거: 지연 로직에 사용되던 변수
-      var offset = 0; 
-      var isMoving = false; 
-      var animationFrameId = null; 
-      
-      var autoSpeed = 0.05; 
+      var idx = 0;
+      var offset = 0;
+      var isMoving = false;
+      var animationFrameId = null;
+
+      var autoSpeed = 0.05;      // px per ms
       var lastTimestamp = 0;
-      var isAutoPlaying = false; 
+      var isAutoPlaying = false;
       var autoRafId = null;
 
+      // 드래그/호버 상태 플래그
+      var supportsPointer = typeof window.PointerEvent !== 'undefined';
+      var dragging=false, isHovering=false;
+
+      // 드래그 관련 변수
+      var startX=0, startY=0, baseOffset=0, currOffset=0;
+      var lastT=0, lastX=0, velocity=0, startTime=0;
+      var capturedPointerId = null;
+      var isScrollPrevented = false;
+      var dragThreshold = 10;
+
+      // 모멘텀(관성) 관련
+      var momentumId = null, momentumV = 0, momentumLast = 0;
+
+      function stopMomentum(){
+        if (momentumId) cancelAnimationFrame(momentumId);
+        momentumId = null; momentumV = 0; momentumLast = 0;
+      }
+      function startMomentum(v){
+        stopMomentum();
+        momentumV = v; momentumLast = 0;
+        momentumId = requestAnimationFrame(momentumStep);
+      }
+      function momentumStep(ts){
+        if (!momentumLast){ momentumLast = ts; momentumId = requestAnimationFrame(momentumStep); return; }
+        var dt = ts - momentumLast; momentumLast = ts;
+
+        var next = offset + momentumV * dt;
+        var m = maxOffset();
+        if (next < 0 || next > m){
+          next = Math.max(0, Math.min(next, m));
+          momentumV *= 0.35;
+        }
+        applyTransform(next, 0);
+
+        var per16 = Math.pow(0.94, dt / 16.7);
+        momentumV *= per16;
+
+        if (Math.abs(momentumV) < 0.02){
+          stopMomentum();
+          if (!isHovering && !dragging) restartAuto();
+          return;
+        }
+        momentumId = requestAnimationFrame(momentumStep);
+      }
 
       function setActive(i){
-        cards.forEach(function(c,k){ 
-            c.classList.toggle('ecs-active', k===i); 
+        cards.forEach(function(c,k){
+          c.classList.toggle('ecs-active', k===i);
         });
-        
         if(cards.length > 1 && gauge && gaugeBar){
-            var progressRatio = i / (cards.length - 1);
-            root.style.setProperty('--progress', progressRatio);
-            gauge.setAttribute('aria-valuenow', i + 1);
+          var progressRatio = i / (cards.length - 1);
+          root.style.setProperty('--progress', progressRatio);
+          gauge.setAttribute('aria-valuenow', i + 1);
         }
       }
 
       function dims(){
         var cs = getComputedStyle(root);
-        var cardW   = parseFloat(cs.getPropertyValue('--cardW')) || 400;
+        var cardW = parseFloat(cs.getPropertyValue('--cardW')) || 400;
         return {
-          cardW:   cardW,
-          gap:     parseFloat(cs.getPropertyValue('--gap')) || 18,
-          vp:      viewport.clientWidth,
-          sidePadR: parseFloat(getComputedStyle(viewport).paddingRight) || 20, 
-          sidePadL: parseFloat(getComputedStyle(viewport).paddingLeft) || 18, 
+          cardW: cardW,
+          gap: parseFloat(cs.getPropertyValue('--gap')) || 18,
+          vp: viewport.clientWidth,
+          sidePadR: parseFloat(getComputedStyle(viewport).paddingRight) || 20,
+          sidePadL: parseFloat(getComputedStyle(viewport).paddingLeft)  || 18
         };
       }
-      
+
       function maxOffset(){
         if (cards.length === 0) return 0;
-        
         var d = dims();
         var totalContentWidth = (d.cardW + d.gap) * cards.length - d.gap;
-        
         var maxScroll = totalContentWidth - d.vp + d.sidePadL;
-        
-        return Math.max(0, maxScroll); 
+        return Math.max(0, maxScroll);
       }
-      
-      
+
+      function updateActiveCardIndex(currentOffset){
+        var d = dims();
+        var center = currentOffset + d.vp / 2;
+        var closestIndex = 0, minDelta = Infinity;
+        for (var i=0;i<cards.length;i++){
+          var start = cards[i].offsetLeft;
+          var cardCenter = start + d.cardW/2;
+          var delta = Math.abs(cardCenter - center);
+          if (delta < minDelta){ minDelta = delta; closestIndex = i; }
+        }
+        idx = closestIndex;
+        setActive(idx);
+      }
+
       function applyTransform(x, ms){
         var m = maxOffset();
-        
-        x = Math.max(0, Math.min(x, m)); 
+        x = Math.max(0, Math.min(x, m));
         offset = x;
-        
-        var translateX = -x;
 
-        if (ms > 0) {
-            track.style.transition = 'transform '+ms+'ms cubic-bezier(.16, 1, .3, 1)';
+        if (ms > 0){
+          track.style.transition = 'transform '+ms+'ms cubic-bezier(.16,1,.3,1)';
         } else {
-            track.style.transition = 'none'; 
+          track.style.transition = 'none';
         }
-        
-        track.style.transform  = 'translate3d('+(translateX)+'px,0,0)';
-        
+        track.style.transform = 'translate3d(' + (-x) + 'px,0,0)';
+
         updateActiveCardIndex(offset);
-        
-        // ✅ 목록 끝에 도달하면 시작 위치로 이동 (부드러운 순환)
-        if (offset >= m && isAutoPlaying) {
-             // 1초 동안 부드럽게 시작 위치로 이동
-            applyTransform(0, 1000); 
+
+        // 끝에 도달하면 부드럽게(보이지 않게) 0으로 즉시 리셋
+        if (isAutoPlaying && (m > 0) && (offset >= m - 1)){
+          requestAnimationFrame(function(){
+            track.style.transition = 'none';
+            offset = 0;
+            track.style.transform = 'translate3d(0,0,0)';
+            updateActiveCardIndex(0);
+          });
         }
       }
-      
-      
-      function updateActiveCardIndex(currentOffset){
-          var d = dims();
-          var cardCenter = d.cardW / 2;
-          
-          for(var i = 0; i < cards.length; i++){
-              var cardStart = cards[i].offsetLeft - d.sidePadL;
-              
-              if(currentOffset >= cardStart - cardCenter){
-                  idx = i;
-              } else {
-                  break;
-              }
-          }
-          setActive(idx);
-      }
 
-
-      /* ===== 드래그/스와이프 로직 (유한 목록) ===== */
-      var supportsPointer = typeof window.PointerEvent !== 'undefined';
-      var startX=0, startY=0, baseOffset=0, currOffset=0, dragging=false;
-      var lastT=0, lastX=0, velocity=0, startTime=0;
-      var capturedPointerId = null;
-      var isScrollPrevented = false; 
-
+      /* ========= 드래그 ========= */
       function resist(x){
         var m = maxOffset();
         if(x < 0) return x * 0.35;
-        if(x > m) return m + (x - m)*0.35;
+        if(x > m) return m + (x - m) * 0.35;
         return x;
       }
-      
+
       function updateTrackPosition(){
         if(!dragging) return;
-        var translateX = -currOffset;
-        track.style.transform = 'translate3d('+(translateX)+'px,0,0)';
-        updateActiveCardIndex(currOffset); 
+        track.style.transform = 'translate3d(' + (-currOffset) + 'px,0,0)';
+        updateActiveCardIndex(currOffset);
         animationFrameId = requestAnimationFrame(updateTrackPosition);
       }
 
-      function onDown(clientX, clientY, pointerId){ 
+      function onDown(clientX, clientY, pointerId){
         if(isMoving) return;
-        stopAuto(); // 드래그 시작 시 자동 재생 중지
-        
-        dragging=true; 
-        startX=clientX; 
-        startY=clientY;
-        baseOffset=offset; 
-        currOffset=offset; 
-        lastX=clientX; 
-        lastT=performance.now(); 
-        velocity=0; 
-        startTime=performance.now(); 
-        isScrollPrevented=false; 
-        track.style.transition='none'; 
-        // userInteractedAt = performance.now(); // ✅ 제거
-        viewport.classList.add('is-dragging'); 
-        
-        if (supportsPointer && pointerId !== undefined) {
+        stopAuto();
+        stopMomentum();
+        dragging = true;
+        startX = clientX; startY = clientY;
+        baseOffset = offset; currOffset = offset;
+        lastX = clientX; lastT = performance.now();
+        velocity = 0; startTime = performance.now();
+        isScrollPrevented = false;
+        track.style.transition = 'none';
+        viewport.classList.add('is-dragging');
+
+        if (supportsPointer && pointerId !== undefined){
           viewport.setPointerCapture(pointerId);
           capturedPointerId = pointerId;
         }
-
         cancelAnimationFrame(animationFrameId);
-        updateTrackPosition(); 
+        updateTrackPosition();
       }
-      
-      function onMove(clientX, clientY, e){ 
+
+      function onMove(clientX, clientY, e){
         if(!dragging) return;
         var now = performance.now();
-        var dx = startX - clientX; 
-        var dy = startY - clientY; 
-        
-        if (!isScrollPrevented && Math.abs(dx) > Math.abs(dy)) { 
-            e.preventDefault(); 
-            isScrollPrevented = true; 
-        }
+        var dx = startX - clientX;
+        var dy = startY - clientY;
 
-        if(isScrollPrevented || Math.abs(dx) > 10 || Math.abs(dy) > 10){
-            currOffset = resist(baseOffset + dx); 
-            
-            var dt = now - lastT;
-            if (dt > 0) {
-                velocity = (clientX - lastX) / dt; 
-            }
-            
-            lastX = clientX; 
-            lastT = now;
+        if (!isScrollPrevented){
+          if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > dragThreshold){
+            e.preventDefault();
+            isScrollPrevented = true;
+          }
+        }
+        if (isScrollPrevented){
+          if (isAutoPlaying) stopAuto(); // 모바일 안전장치: 드래그 중 자동재생 즉시 OFF
+          currOffset = resist(baseOffset + dx);
+          var dt = now - lastT;
+          if (dt > 0) velocity = (clientX - lastX) / dt;
+          lastX = clientX; lastT = now;
         }
       }
-      
-      function onUp(pointerId){
-        if(!dragging) return; 
-        dragging=false;
+
+      function onUp(){
+        if(!dragging) return;
+        dragging = false;
         cancelAnimationFrame(animationFrameId);
         viewport.classList.remove('is-dragging');
 
-        if (supportsPointer && capturedPointerId !== null) {
-          try { viewport.releasePointerCapture(capturedPointerId); } catch(e) {}
+        if (supportsPointer && capturedPointerId !== null){
+          try { viewport.releasePointerCapture(capturedPointerId); } catch(e){}
           capturedPointerId = null;
         }
 
-        var m = maxOffset();
-        var dragDuration = performance.now() - startTime;
-        var targetOffset;
-        
-        if (dragDuration < 200) { 
-            var inertia = velocity * 1200; 
-            
-            var d = dims();
-            var maxInertiaDistance = 2 * (d.cardW + d.gap); 
-            
-            if (Math.abs(inertia) > maxInertiaDistance) {
-                inertia = Math.sign(inertia) * maxInertiaDistance;
-            }
-            
-            targetOffset = currOffset - inertia;
-        } else {
-            targetOffset = currOffset;
+        var initialV = -velocity;
+        if (initialV >  2.0) initialV =  2.0;
+        if (initialV < -2.0) initialV = -2.0;
+
+        offset = Math.max(0, Math.min(currOffset, maxOffset()));
+        applyTransform(offset, 0);
+
+        // 스냅 없이 현재 속도로 관성 이동
+        startMomentum(initialV);
+
+        isMoving = true;
+        setTimeout(function(){ isMoving = false; }, 400);
+      }
+
+      var activeOpts = {passive:false};
+      var passiveOpts = {passive:true};
+
+      if (supportsPointer){
+        viewport.addEventListener('pointerdown', function(e){
+          if(e.button !== 0 && !e.isPrimary) return;
+          onDown(e.clientX, e.clientY, e.pointerId);
+        }, passiveOpts);
+        viewport.addEventListener('pointermove', function(e){
+          if(!dragging) return;
+          onMove(e.clientX, e.clientY, e);
+        }, activeOpts);
+        window.addEventListener('pointerup', function(){ onUp(); }, passiveOpts);
+        window.addEventListener('pointercancel', function(){ onUp(); }, passiveOpts);
+      } else {
+        viewport.addEventListener('touchstart', function(e){
+          if(!e.touches || !e.touches.length) return;
+          onDown(e.touches[0].clientX, e.touches[0].clientY);
+        }, passiveOpts);
+        viewport.addEventListener('touchmove', function(e){
+          if(!e.touches || !e.touches.length) return;
+          onMove(e.touches[0].clientX, e.touches[0].clientY, e);
+        }, activeOpts);
+        window.addEventListener('touchend', function(){ onUp(); }, passiveOpts);
+
+        viewport.addEventListener('mousedown', function(e){ onDown(e.clientX, e.clientY); }, passiveOpts);
+        window.addEventListener('mousemove', function(e){
+          if(!dragging) return;
+          onMove(e.clientX, e.clientY, e);
+        }, activeOpts);
+        window.addEventListener('mouseup', function(){ onUp(); }, passiveOpts);
+      }
+
+      /* ========= 자동 재생 ========= */
+      function autoMove(timestamp){
+        // 드래그 중에는 절대 자동 이동 금지
+        if (dragging){ 
+          if (isAutoPlaying) autoRafId = requestAnimationFrame(autoMove);
+          return;
+        }
+        if (!isAutoPlaying) return;
+
+        if (!lastTimestamp){
+          lastTimestamp = timestamp;
+          autoRafId = requestAnimationFrame(autoMove);
+          return;
         }
 
-        targetOffset = Math.max(0, Math.min(targetOffset, m));
-        
-        offset = targetOffset;
-        
-        applyTransform(offset, 500); 
-        
-        updateActiveCardIndex(offset);
-        restartAuto();
-        
-        isMoving = true;
-        setTimeout(function() { isMoving = false; }, 500);
-      }
-      
-      var activeOpts = {passive:false};
-      var passiveOpts = {passive:true}; 
+        var dt = timestamp - lastTimestamp;
+        if (dt > 100) dt = 0;
 
-      if(supportsPointer){
-        viewport.addEventListener('pointerdown', function(e){ 
-          if(e.button !== 0 && !e.isPrimary) return;
-          onDown(e.clientX, e.clientY, e.pointerId); 
-        }, passiveOpts); 
-        viewport.addEventListener('pointermove', function(e){ 
-            if(!dragging) return; 
-            onMove(e.clientX, e.clientY, e); 
-        }, activeOpts);
-        window.addEventListener('pointerup', function(e){ onUp(e.pointerId); }, passiveOpts);
-        window.addEventListener('pointercancel', function(e){ onUp(e.pointerId); }, passiveOpts);
-      }else{
-        viewport.addEventListener('touchstart', function(e){ 
-            if(!e.touches||!e.touches.length)return; 
-            onDown(e.touches[0].clientX, e.touches[0].clientY); 
-        }, passiveOpts);
-        viewport.addEventListener('touchmove',  function(e){ 
-            if(!e.touches||!e.touches.length)return; 
-            onMove(e.touches[0].clientX, e.touches[0].clientY, e); 
-        }, activeOpts); 
-        window.addEventListener('touchend',   function(){ onUp(); }, passiveOpts);
-        
-        viewport.addEventListener('mousedown', function(e){ onDown(e.clientX, e.clientY); }, passiveOpts); 
-        window.addEventListener('mousemove',   function(e){ 
-            if(!dragging) return;
-            onMove(e.clientX, e.clientY, e); 
-        }, activeOpts); 
-        window.addEventListener('mouseup',     function(){ onUp(); }, passiveOpts);
+        applyTransform(offset + autoSpeed * dt, 0);
+
+        lastTimestamp = timestamp;
+        if (isAutoPlaying) autoRafId = requestAnimationFrame(autoMove);
       }
-      
-      /* ===== 자동 재생 로직 (requestAnimationFrame 기반 부드러운 이동) ===== */
-      
-      function autoMove(timestamp){
-          if (!lastTimestamp) {
-              lastTimestamp = timestamp;
-              autoRafId = requestAnimationFrame(autoMove);
-              return;
-          }
-          
-          var deltaTime = timestamp - lastTimestamp;
-          
-          if (deltaTime > 100) deltaTime = 0; 
-          
-          var distance = autoSpeed * deltaTime;
-          
-          var nextOffset = offset + distance;
-          
-          // applyTransform 내부에서 maxOffset 체크 및 순환 로직 처리
-          applyTransform(nextOffset, 0); 
-          
-          lastTimestamp = timestamp;
-          
-          if (isAutoPlaying) {
-             autoRafId = requestAnimationFrame(autoMove);
-          }
-      }
-      
+
       function startAuto(){
-        if(isAutoPlaying) return;
+        if (isAutoPlaying) return;
         isAutoPlaying = true;
-        lastTimestamp = 0; 
+        lastTimestamp = 0;
         autoRafId = requestAnimationFrame(autoMove);
       }
-      
-      function stopAuto(){ 
+      function stopAuto(){
         if (autoRafId) cancelAnimationFrame(autoRafId);
-        isAutoPlaying = false; 
-        autoRafId = null; 
+        isAutoPlaying = false;
+        autoRafId = null;
       }
       function restartAuto(){ stopAuto(); startAuto(); }
 
-
+      /* ========= 초기화 ========= */
       document.addEventListener('DOMContentLoaded', function(){
         requestAnimationFrame(function(){
-          root.classList.add('ecs-mounted');
-          
-          var initialOffset = 0; 
-          
-          applyTransform(initialOffset, 0); 
-          updateActiveCardIndex(initialOffset); 
+          applyTransform(0, 0);
+          updateActiveCardIndex(0);
           startAuto();
         });
       });
 
+      /* ========= 리사이즈 대응 ========= */
       var rAF=null;
       window.addEventListener('resize', function(){
         cancelAnimationFrame(rAF);
         rAF = requestAnimationFrame(function(){
-          var newMaxOffset = maxOffset();
-          
-          offset = Math.max(0, Math.min(offset, newMaxOffset));
-
+          var m = maxOffset();
+          offset = Math.max(0, Math.min(offset, m));
           applyTransform(offset, 0);
           updateActiveCardIndex(offset);
-          restartAuto(); 
+          if (!momentumId && !isHovering && !dragging) restartAuto();
         });
       });
-      
-      // ✅ 호버/클릭 시 자동 재생 멈춤 로직
-      var handleInteraction = function(e){
-          if (e.type === 'click' || e.type === 'mouseenter') {
-              stopAuto();
-          } else if (e.type === 'mouseleave' && !dragging && !isMoving) {
-              // ✅ 호버가 풀리면 즉시 자동 이동 재개
-              restartAuto();
-          }
-      };
-      viewport.addEventListener('click', handleInteraction);
-      viewport.addEventListener('mouseenter', handleInteraction);
-      viewport.addEventListener('mouseleave', handleInteraction);
-      
+
+      /* ========= 호버/터치: 정지 & 즉시 재시작 ========= */
+      function pauseForHover(){ isHovering = true; stopAuto(); }
+      function resumeNow(){
+        // 드래그/모멘텀 중에는 자동 재가동 금지
+        if (dragging || momentumId) return;
+        isHovering = false;
+        restartAuto();
+      }
+
+      // 데스크톱
+      viewport.addEventListener('mouseenter', pauseForHover, {passive:true});
+      viewport.addEventListener('pointerover', pauseForHover, {passive:true});
+      viewport.addEventListener('pointerleave', resumeNow, {passive:true});
+      viewport.addEventListener('mouseleave', resumeNow, {passive:true});
+
+      // 터치: 손가락 올리면 정지, 손 떼면 즉시 재가동
+      viewport.addEventListener('touchstart', pauseForHover, {passive:true});
+      window.addEventListener('touchend', resumeNow, {passive:true});
+
+      // 클릭 시 일시정지(원 요청 유지)
+      viewport.addEventListener('click', pauseForHover, {passive:true});
     })();
   </script>
 </section>
@@ -1535,8 +1525,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         if (currentScript && currentScript.parentElement && currentScript.parentElement.classList.contains('ecs-slider')) {
           return currentScript.parentElement;
         }
-        var uninit = document.querySelector('.ecs-slider:not([data-ecs-ready])');
-        return uninit;
+        return document.querySelector('.ecs-slider:not([data-ecs-ready])');
       })();
 
       if(!root || root.hasAttribute('data-ecs-ready')) return;
@@ -1545,349 +1534,344 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       var viewport    = root.querySelector('.ecs-viewport');
       var track       = root.querySelector('.ecs-track');
       var cards       = Array.prototype.slice.call(root.querySelectorAll('[data-ecs-slide]'));
-      
       var gauge       = root.querySelector('.ecs-gauge');
       var gaugeBar    = root.querySelector('.ecs-progress-bar'); 
 
-      var idx = 0; 
-      var timer = null;
-      // var userInteractedAt = 0; // ✅ 제거: 지연 로직에 사용되던 변수
-      var offset = 0; 
-      var isMoving = false; 
-      var animationFrameId = null; 
-      
-      var autoSpeed = 0.05; 
+      var idx = 0;
+      var offset = 0;
+      var isMoving = false;
+      var animationFrameId = null;
+
+      var autoSpeed = 0.05;      // px per ms
       var lastTimestamp = 0;
-      var isAutoPlaying = false; 
+      var isAutoPlaying = false;
       var autoRafId = null;
 
+      // 드래그/호버 상태 플래그
+      var supportsPointer = typeof window.PointerEvent !== 'undefined';
+      var dragging=false, isHovering=false;
+
+      // 드래그 관련 변수
+      var startX=0, startY=0, baseOffset=0, currOffset=0;
+      var lastT=0, lastX=0, velocity=0, startTime=0;
+      var capturedPointerId = null;
+      var isScrollPrevented = false;
+      var dragThreshold = 10;
+
+      // 모멘텀(관성) 관련
+      var momentumId = null, momentumV = 0, momentumLast = 0;
+
+      function stopMomentum(){
+        if (momentumId) cancelAnimationFrame(momentumId);
+        momentumId = null; momentumV = 0; momentumLast = 0;
+      }
+      function startMomentum(v){
+        stopMomentum();
+        momentumV = v; momentumLast = 0;
+        momentumId = requestAnimationFrame(momentumStep);
+      }
+      function momentumStep(ts){
+        if (!momentumLast){ momentumLast = ts; momentumId = requestAnimationFrame(momentumStep); return; }
+        var dt = ts - momentumLast; momentumLast = ts;
+
+        var next = offset + momentumV * dt;
+        var m = maxOffset();
+        if (next < 0 || next > m){
+          next = Math.max(0, Math.min(next, m));
+          momentumV *= 0.35;
+        }
+        applyTransform(next, 0);
+
+        var per16 = Math.pow(0.94, dt / 16.7);
+        momentumV *= per16;
+
+        if (Math.abs(momentumV) < 0.02){
+          stopMomentum();
+          if (!isHovering && !dragging) restartAuto();
+          return;
+        }
+        momentumId = requestAnimationFrame(momentumStep);
+      }
 
       function setActive(i){
-        cards.forEach(function(c,k){ 
-            c.classList.toggle('ecs-active', k===i); 
+        cards.forEach(function(c,k){
+          c.classList.toggle('ecs-active', k===i);
         });
-        
         if(cards.length > 1 && gauge && gaugeBar){
-            var progressRatio = i / (cards.length - 1);
-            root.style.setProperty('--progress', progressRatio);
-            gauge.setAttribute('aria-valuenow', i + 1);
+          var progressRatio = i / (cards.length - 1);
+          root.style.setProperty('--progress', progressRatio);
+          gauge.setAttribute('aria-valuenow', i + 1);
         }
       }
 
       function dims(){
         var cs = getComputedStyle(root);
-        var cardW   = parseFloat(cs.getPropertyValue('--cardW')) || 400;
+        var cardW = parseFloat(cs.getPropertyValue('--cardW')) || 400;
         return {
-          cardW:   cardW,
-          gap:     parseFloat(cs.getPropertyValue('--gap')) || 18,
-          vp:      viewport.clientWidth,
-          sidePadR: parseFloat(getComputedStyle(viewport).paddingRight) || 20, 
-          sidePadL: parseFloat(getComputedStyle(viewport).paddingLeft) || 18, 
+          cardW: cardW,
+          gap: parseFloat(cs.getPropertyValue('--gap')) || 18,
+          vp: viewport.clientWidth,
+          sidePadR: parseFloat(getComputedStyle(viewport).paddingRight) || 20,
+          sidePadL: parseFloat(getComputedStyle(viewport).paddingLeft)  || 18
         };
       }
-      
+
       function maxOffset(){
         if (cards.length === 0) return 0;
-        
         var d = dims();
         var totalContentWidth = (d.cardW + d.gap) * cards.length - d.gap;
-        
         var maxScroll = totalContentWidth - d.vp + d.sidePadL;
-        
-        return Math.max(0, maxScroll); 
+        return Math.max(0, maxScroll);
       }
-      
-      
+
+      function updateActiveCardIndex(currentOffset){
+        var d = dims();
+        var center = currentOffset + d.vp / 2;
+        var closestIndex = 0, minDelta = Infinity;
+        for (var i=0;i<cards.length;i++){
+          var start = cards[i].offsetLeft;
+          var cardCenter = start + d.cardW/2;
+          var delta = Math.abs(cardCenter - center);
+          if (delta < minDelta){ minDelta = delta; closestIndex = i; }
+        }
+        idx = closestIndex;
+        setActive(idx);
+      }
+
       function applyTransform(x, ms){
         var m = maxOffset();
-        
-        x = Math.max(0, Math.min(x, m)); 
+        x = Math.max(0, Math.min(x, m));
         offset = x;
-        
-        var translateX = -x;
 
-        if (ms > 0) {
-            track.style.transition = 'transform '+ms+'ms cubic-bezier(.16, 1, .3, 1)';
+        if (ms > 0){
+          track.style.transition = 'transform '+ms+'ms cubic-bezier(.16,1,.3,1)';
         } else {
-            track.style.transition = 'none'; 
+          track.style.transition = 'none';
         }
-        
-        track.style.transform  = 'translate3d('+(translateX)+'px,0,0)';
-        
+        track.style.transform = 'translate3d(' + (-x) + 'px,0,0)';
+
         updateActiveCardIndex(offset);
-        
-        // ✅ 목록 끝에 도달하면 시작 위치로 이동 (부드러운 순환)
-        if (offset >= m && isAutoPlaying) {
-             // 1초 동안 부드럽게 시작 위치로 이동
-            applyTransform(0, 1000); 
+
+        // 끝에 도달하면 부드럽게(보이지 않게) 0으로 즉시 리셋
+        if (isAutoPlaying && (m > 0) && (offset >= m - 1)){
+          requestAnimationFrame(function(){
+            track.style.transition = 'none';
+            offset = 0;
+            track.style.transform = 'translate3d(0,0,0)';
+            updateActiveCardIndex(0);
+          });
         }
       }
-      
-      
-      function updateActiveCardIndex(currentOffset){
-          var d = dims();
-          var cardCenter = d.cardW / 2;
-          
-          for(var i = 0; i < cards.length; i++){
-              var cardStart = cards[i].offsetLeft - d.sidePadL;
-              
-              if(currentOffset >= cardStart - cardCenter){
-                  idx = i;
-              } else {
-                  break;
-              }
-          }
-          setActive(idx);
-      }
 
-
-      /* ===== 드래그/스와이프 로직 (유한 목록) ===== */
-      var supportsPointer = typeof window.PointerEvent !== 'undefined';
-      var startX=0, startY=0, baseOffset=0, currOffset=0, dragging=false;
-      var lastT=0, lastX=0, velocity=0, startTime=0;
-      var capturedPointerId = null;
-      var isScrollPrevented = false; 
-
+      /* ========= 드래그 ========= */
       function resist(x){
         var m = maxOffset();
         if(x < 0) return x * 0.35;
-        if(x > m) return m + (x - m)*0.35;
+        if(x > m) return m + (x - m) * 0.35;
         return x;
       }
-      
+
       function updateTrackPosition(){
         if(!dragging) return;
-        var translateX = -currOffset;
-        track.style.transform = 'translate3d('+(translateX)+'px,0,0)';
-        updateActiveCardIndex(currOffset); 
+        track.style.transform = 'translate3d(' + (-currOffset) + 'px,0,0)';
+        updateActiveCardIndex(currOffset);
         animationFrameId = requestAnimationFrame(updateTrackPosition);
       }
 
-      function onDown(clientX, clientY, pointerId){ 
+      function onDown(clientX, clientY, pointerId){
         if(isMoving) return;
-        stopAuto(); // 드래그 시작 시 자동 재생 중지
-        
-        dragging=true; 
-        startX=clientX; 
-        startY=clientY;
-        baseOffset=offset; 
-        currOffset=offset; 
-        lastX=clientX; 
-        lastT=performance.now(); 
-        velocity=0; 
-        startTime=performance.now(); 
-        isScrollPrevented=false; 
-        track.style.transition='none'; 
-        // userInteractedAt = performance.now(); // ✅ 제거
-        viewport.classList.add('is-dragging'); 
-        
-        if (supportsPointer && pointerId !== undefined) {
+        stopAuto();
+        stopMomentum();
+        dragging = true;
+        startX = clientX; startY = clientY;
+        baseOffset = offset; currOffset = offset;
+        lastX = clientX; lastT = performance.now();
+        velocity = 0; startTime = performance.now();
+        isScrollPrevented = false;
+        track.style.transition = 'none';
+        viewport.classList.add('is-dragging');
+
+        if (supportsPointer && pointerId !== undefined){
           viewport.setPointerCapture(pointerId);
           capturedPointerId = pointerId;
         }
-
         cancelAnimationFrame(animationFrameId);
-        updateTrackPosition(); 
+        updateTrackPosition();
       }
-      
-      function onMove(clientX, clientY, e){ 
+
+      function onMove(clientX, clientY, e){
         if(!dragging) return;
         var now = performance.now();
-        var dx = startX - clientX; 
-        var dy = startY - clientY; 
-        
-        if (!isScrollPrevented && Math.abs(dx) > Math.abs(dy)) { 
-            e.preventDefault(); 
-            isScrollPrevented = true; 
-        }
+        var dx = startX - clientX;
+        var dy = startY - clientY;
 
-        if(isScrollPrevented || Math.abs(dx) > 10 || Math.abs(dy) > 10){
-            currOffset = resist(baseOffset + dx); 
-            
-            var dt = now - lastT;
-            if (dt > 0) {
-                velocity = (clientX - lastX) / dt; 
-            }
-            
-            lastX = clientX; 
-            lastT = now;
+        if (!isScrollPrevented){
+          if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > dragThreshold){
+            e.preventDefault();
+            isScrollPrevented = true;
+          }
+        }
+        if (isScrollPrevented){
+          if (isAutoPlaying) stopAuto(); // 모바일 안전장치: 드래그 중 자동재생 즉시 OFF
+          currOffset = resist(baseOffset + dx);
+          var dt = now - lastT;
+          if (dt > 0) velocity = (clientX - lastX) / dt;
+          lastX = clientX; lastT = now;
         }
       }
-      
-      function onUp(pointerId){
-        if(!dragging) return; 
-        dragging=false;
+
+      function onUp(){
+        if(!dragging) return;
+        dragging = false;
         cancelAnimationFrame(animationFrameId);
         viewport.classList.remove('is-dragging');
 
-        if (supportsPointer && capturedPointerId !== null) {
-          try { viewport.releasePointerCapture(capturedPointerId); } catch(e) {}
+        if (supportsPointer && capturedPointerId !== null){
+          try { viewport.releasePointerCapture(capturedPointerId); } catch(e){}
           capturedPointerId = null;
         }
 
-        var m = maxOffset();
-        var dragDuration = performance.now() - startTime;
-        var targetOffset;
-        
-        if (dragDuration < 200) { 
-            var inertia = velocity * 1200; 
-            
-            var d = dims();
-            var maxInertiaDistance = 2 * (d.cardW + d.gap); 
-            
-            if (Math.abs(inertia) > maxInertiaDistance) {
-                inertia = Math.sign(inertia) * maxInertiaDistance;
-            }
-            
-            targetOffset = currOffset - inertia;
-        } else {
-            targetOffset = currOffset;
+        var initialV = -velocity;
+        if (initialV >  2.0) initialV =  2.0;
+        if (initialV < -2.0) initialV = -2.0;
+
+        offset = Math.max(0, Math.min(currOffset, maxOffset()));
+        applyTransform(offset, 0);
+
+        // 스냅 없이 현재 속도로 관성 이동
+        startMomentum(initialV);
+
+        isMoving = true;
+        setTimeout(function(){ isMoving = false; }, 400);
+      }
+
+      var activeOpts = {passive:false};
+      var passiveOpts = {passive:true};
+
+      if (supportsPointer){
+        viewport.addEventListener('pointerdown', function(e){
+          if(e.button !== 0 && !e.isPrimary) return;
+          onDown(e.clientX, e.clientY, e.pointerId);
+        }, passiveOpts);
+        viewport.addEventListener('pointermove', function(e){
+          if(!dragging) return;
+          onMove(e.clientX, e.clientY, e);
+        }, activeOpts);
+        window.addEventListener('pointerup', function(){ onUp(); }, passiveOpts);
+        window.addEventListener('pointercancel', function(){ onUp(); }, passiveOpts);
+      } else {
+        viewport.addEventListener('touchstart', function(e){
+          if(!e.touches || !e.touches.length) return;
+          onDown(e.touches[0].clientX, e.touches[0].clientY);
+        }, passiveOpts);
+        viewport.addEventListener('touchmove', function(e){
+          if(!e.touches || !e.touches.length) return;
+          onMove(e.touches[0].clientX, e.touches[0].clientY, e);
+        }, activeOpts);
+        window.addEventListener('touchend', function(){ onUp(); }, passiveOpts);
+
+        viewport.addEventListener('mousedown', function(e){ onDown(e.clientX, e.clientY); }, passiveOpts);
+        window.addEventListener('mousemove', function(e){
+          if(!dragging) return;
+          onMove(e.clientX, e.clientY, e);
+        }, activeOpts);
+        window.addEventListener('mouseup', function(){ onUp(); }, passiveOpts);
+      }
+
+      /* ========= 자동 재생 ========= */
+      function autoMove(timestamp){
+        // 드래그 중에는 절대 자동 이동 금지
+        if (dragging){ 
+          if (isAutoPlaying) autoRafId = requestAnimationFrame(autoMove);
+          return;
+        }
+        if (!isAutoPlaying) return;
+
+        if (!lastTimestamp){
+          lastTimestamp = timestamp;
+          autoRafId = requestAnimationFrame(autoMove);
+          return;
         }
 
-        targetOffset = Math.max(0, Math.min(targetOffset, m));
-        
-        offset = targetOffset;
-        
-        applyTransform(offset, 500); 
-        
-        updateActiveCardIndex(offset);
-        restartAuto();
-        
-        isMoving = true;
-        setTimeout(function() { isMoving = false; }, 500);
-      }
-      
-      var activeOpts = {passive:false};
-      var passiveOpts = {passive:true}; 
+        var dt = timestamp - lastTimestamp;
+        if (dt > 100) dt = 0;
 
-      if(supportsPointer){
-        viewport.addEventListener('pointerdown', function(e){ 
-          if(e.button !== 0 && !e.isPrimary) return;
-          onDown(e.clientX, e.clientY, e.pointerId); 
-        }, passiveOpts); 
-        viewport.addEventListener('pointermove', function(e){ 
-            if(!dragging) return; 
-            onMove(e.clientX, e.clientY, e); 
-        }, activeOpts);
-        window.addEventListener('pointerup', function(e){ onUp(e.pointerId); }, passiveOpts);
-        window.addEventListener('pointercancel', function(e){ onUp(e.pointerId); }, passiveOpts);
-      }else{
-        viewport.addEventListener('touchstart', function(e){ 
-            if(!e.touches||!e.touches.length)return; 
-            onDown(e.touches[0].clientX, e.touches[0].clientY); 
-        }, passiveOpts);
-        viewport.addEventListener('touchmove',  function(e){ 
-            if(!e.touches||!e.touches.length)return; 
-            onMove(e.touches[0].clientX, e.touches[0].clientY, e); 
-        }, activeOpts); 
-        window.addEventListener('touchend',   function(){ onUp(); }, passiveOpts);
-        
-        viewport.addEventListener('mousedown', function(e){ onDown(e.clientX, e.clientY); }, passiveOpts); 
-        window.addEventListener('mousemove',   function(e){ 
-            if(!dragging) return;
-            onMove(e.clientX, e.clientY, e); 
-        }, activeOpts); 
-        window.addEventListener('mouseup',     function(){ onUp(); }, passiveOpts);
+        applyTransform(offset + autoSpeed * dt, 0);
+
+        lastTimestamp = timestamp;
+        if (isAutoPlaying) autoRafId = requestAnimationFrame(autoMove);
       }
-      
-      /* ===== 자동 재생 로직 (requestAnimationFrame 기반 부드러운 이동) ===== */
-      
-      function autoMove(timestamp){
-          if (!lastTimestamp) {
-              lastTimestamp = timestamp;
-              autoRafId = requestAnimationFrame(autoMove);
-              return;
-          }
-          
-          var deltaTime = timestamp - lastTimestamp;
-          
-          if (deltaTime > 100) deltaTime = 0; 
-          
-          var distance = autoSpeed * deltaTime;
-          
-          var nextOffset = offset + distance;
-          
-          // applyTransform 내부에서 maxOffset 체크 및 순환 로직 처리
-          applyTransform(nextOffset, 0); 
-          
-          lastTimestamp = timestamp;
-          
-          if (isAutoPlaying) {
-             autoRafId = requestAnimationFrame(autoMove);
-          }
-      }
-      
+
       function startAuto(){
-        if(isAutoPlaying) return;
+        if (isAutoPlaying) return;
         isAutoPlaying = true;
-        lastTimestamp = 0; 
+        lastTimestamp = 0;
         autoRafId = requestAnimationFrame(autoMove);
       }
-      
-      function stopAuto(){ 
+      function stopAuto(){
         if (autoRafId) cancelAnimationFrame(autoRafId);
-        isAutoPlaying = false; 
-        autoRafId = null; 
+        isAutoPlaying = false;
+        autoRafId = null;
       }
       function restartAuto(){ stopAuto(); startAuto(); }
 
-
+      /* ========= 초기화 ========= */
       document.addEventListener('DOMContentLoaded', function(){
         requestAnimationFrame(function(){
-          root.classList.add('ecs-mounted');
-          
-          var initialOffset = 0; 
-          
-          applyTransform(initialOffset, 0); 
-          updateActiveCardIndex(initialOffset); 
+          applyTransform(0, 0);
+          updateActiveCardIndex(0);
           startAuto();
         });
       });
 
+      /* ========= 리사이즈 대응 ========= */
       var rAF=null;
       window.addEventListener('resize', function(){
         cancelAnimationFrame(rAF);
         rAF = requestAnimationFrame(function(){
-          var newMaxOffset = maxOffset();
-          
-          offset = Math.max(0, Math.min(offset, newMaxOffset));
-
+          var m = maxOffset();
+          offset = Math.max(0, Math.min(offset, m));
           applyTransform(offset, 0);
           updateActiveCardIndex(offset);
-          restartAuto(); 
+          if (!momentumId && !isHovering && !dragging) restartAuto();
         });
       });
-      
-      // ✅ 호버/클릭 시 자동 재생 멈춤 로직
-      var handleInteraction = function(e){
-          if (e.type === 'click' || e.type === 'mouseenter') {
-              stopAuto();
-          } else if (e.type === 'mouseleave' && !dragging && !isMoving) {
-              // ✅ 호버가 풀리면 즉시 자동 이동 재개
-              restartAuto();
-          }
-      };
-      viewport.addEventListener('click', handleInteraction);
-      viewport.addEventListener('mouseenter', handleInteraction);
-      viewport.addEventListener('mouseleave', handleInteraction);
-      
+
+      /* ========= 호버/터치: 정지 & 즉시 재시작 ========= */
+      function pauseForHover(){ isHovering = true; stopAuto(); }
+      function resumeNow(){
+        // 드래그/모멘텀 중에는 자동 재가동 금지
+        if (dragging || momentumId) return;
+        isHovering = false;
+        restartAuto();
+      }
+
+      // 데스크톱
+      viewport.addEventListener('mouseenter', pauseForHover, {passive:true});
+      viewport.addEventListener('pointerover', pauseForHover, {passive:true});
+      viewport.addEventListener('pointerleave', resumeNow, {passive:true});
+      viewport.addEventListener('mouseleave', resumeNow, {passive:true});
+
+      // 터치: 손가락 올리면 정지, 손 떼면 즉시 재가동
+      viewport.addEventListener('touchstart', pauseForHover, {passive:true});
+      window.addEventListener('touchend', resumeNow, {passive:true});
+
+      // 클릭 시 일시정지(원 요청 유지)
+      viewport.addEventListener('click', pauseForHover, {passive:true});
     })();
   </script>
 </section>
 
 <section class="ecs-slider" aria-label="Finite List Drag Card Slider">
 
-
   <div class="ecs-wrap">
-    
     <div class="ecs-head">
-        <h2 class="ecs-title">노트북/태블릿</h2>
-        <div class="ecs-gauge" role="progressbar" aria-valuenow="1" aria-valuemin="1" aria-valuemax="6">
-            <div class="ecs-progress-bar"></div>
-        </div>
+      <h2 class="ecs-title">노트북/태블릿</h2>
+      <div class="ecs-gauge" role="progressbar" aria-valuenow="1" aria-valuemin="1" aria-valuemax="6">
+        <div class="ecs-progress-bar"></div>
+      </div>
     </div>
 
-    
     <div class="ecs-viewport">
       <div class="ecs-track">
         <article class="ecs-card ecs-active" data-ecs-slide>
@@ -1898,14 +1882,16 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
           <div class="ecs-grad"></div>
           <div class="ecs-body"><h3 class="ecs-title2">애플 맥북 PRO 14 노트북</h3></div>
         </article>
+
         <article class="ecs-card" data-ecs-slide>
           <div class="ecs-logo">
             <img src="./img/samsung-logo.svg" alt="The Witcher 3 Logo">
           </div>
           <div class="ecs-media"><img src="https://lh3.googleusercontent.com/o6pd1GzhTQq-wsmqbRhNfJ1OI1Ncv4eUDCq7jRDUoVEfWg4OPkFf4q-45zOl6_1NOY74qzUw2xpCVkfWNA1xjUpSbs-qOR_iusVMpigOtxuTSF8-aVdfhg=w800" alt="The Witcher 3"></div>
           <div class="ecs-grad"></div>
-          <div class="ecs-body"><h3 class="ecs-title2">삼성 갤럭시북5 Pro 360 (16인치)</h3></div>
+          <div class="ecs-body"><h3 class="ecs-title2">삼성 갤럭시бук5 Pro 360 (16인치)</h3></div>
         </article>
+
         <article class="ecs-card" data-ecs-slide>
           <div class="ecs-logo">
             <img src="./img/lg-logo.png" alt="The Witcher 3 Logo">
@@ -1915,7 +1901,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
           <div class="ecs-body"><h3 class="ecs-title2">LG 17인치 그램 노트북</h3></div>
         </article>
 
-      <article class="ecs-card" data-ecs-slide>
+        <article class="ecs-card" data-ecs-slide>
           <div class="ecs-logo">
             <img src="./img/apple-logo.png" alt="The Witcher 3 Logo">
           </div>
@@ -1923,7 +1909,8 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
           <div class="ecs-grad"></div>
           <div class="ecs-body"><h3 class="ecs-title2">애플 맥북 에어 13인치(M4) + 매직마우스 + 노트북가방</h3></div>
         </article>
-       <article class="ecs-card" data-ecs-slide>
+
+        <article class="ecs-card" data-ecs-slide>
           <div class="ecs-logo">
             <img src="./img/msi-logo.png" alt="The Witcher 3 Logo">
           </div>
@@ -1931,7 +1918,8 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
           <div class="ecs-grad"></div>
           <div class="ecs-body"><h3 class="ecs-title2">MSI 게이밍 노트북(17.3″)</h3></div>
         </article>
-         <article class="ecs-card" data-ecs-slide>
+
+        <article class="ecs-card" data-ecs-slide>
           <div class="ecs-logo">
             <img src="./img/apple-logo.png" alt="The Witcher 3 Logo">
           </div>
@@ -1940,14 +1928,9 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
           <div class="ecs-body"><h3 class="ecs-title2">애플 아이패드 에어 11인치(M3)</h3></div>
         </article>
 
-          <article class="ecs-card" data-ecs-slide style="background-color: transparent;box-shadow: none;">
-        
-        </article>
-    
+        <article class="ecs-card" data-ecs-slide style="background-color: transparent;box-shadow: none;"></article>
       </div>
-
-      </div>
-    
+    </div>
   </div>
 
   <script>
@@ -1957,8 +1940,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         if (currentScript && currentScript.parentElement && currentScript.parentElement.classList.contains('ecs-slider')) {
           return currentScript.parentElement;
         }
-        var uninit = document.querySelector('.ecs-slider:not([data-ecs-ready])');
-        return uninit;
+        return document.querySelector('.ecs-slider:not([data-ecs-ready])');
       })();
 
       if(!root || root.hasAttribute('data-ecs-ready')) return;
@@ -1967,335 +1949,334 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       var viewport    = root.querySelector('.ecs-viewport');
       var track       = root.querySelector('.ecs-track');
       var cards       = Array.prototype.slice.call(root.querySelectorAll('[data-ecs-slide]'));
-      
       var gauge       = root.querySelector('.ecs-gauge');
       var gaugeBar    = root.querySelector('.ecs-progress-bar'); 
 
-      var idx = 0; 
-      var timer = null;
-      // var userInteractedAt = 0; // ✅ 제거: 지연 로직에 사용되던 변수
-      var offset = 0; 
-      var isMoving = false; 
-      var animationFrameId = null; 
-      
-      var autoSpeed = 0.05; 
+      var idx = 0;
+      var offset = 0;
+      var isMoving = false;
+      var animationFrameId = null;
+
+      var autoSpeed = 0.05;      // px per ms
       var lastTimestamp = 0;
-      var isAutoPlaying = false; 
+      var isAutoPlaying = false;
       var autoRafId = null;
 
+      // 드래그/호버 상태 플래그
+      var supportsPointer = typeof window.PointerEvent !== 'undefined';
+      var dragging=false, isHovering=false;
+
+      // 드래그 관련 변수
+      var startX=0, startY=0, baseOffset=0, currOffset=0;
+      var lastT=0, lastX=0, velocity=0, startTime=0;
+      var capturedPointerId = null;
+      var isScrollPrevented = false;
+      var dragThreshold = 10;
+
+      // 모멘텀(관성) 관련
+      var momentumId = null, momentumV = 0, momentumLast = 0;
+
+      function stopMomentum(){
+        if (momentumId) cancelAnimationFrame(momentumId);
+        momentumId = null; momentumV = 0; momentumLast = 0;
+      }
+      function startMomentum(v){
+        stopMomentum();
+        momentumV = v; momentumLast = 0;
+        momentumId = requestAnimationFrame(momentumStep);
+      }
+      function momentumStep(ts){
+        if (!momentumLast){ momentumLast = ts; momentumId = requestAnimationFrame(momentumStep); return; }
+        var dt = ts - momentumLast; momentumLast = ts;
+
+        var next = offset + momentumV * dt;
+        var m = maxOffset();
+        if (next < 0 || next > m){
+          next = Math.max(0, Math.min(next, m));
+          momentumV *= 0.35;
+        }
+        applyTransform(next, 0);
+
+        var per16 = Math.pow(0.94, dt / 16.7);
+        momentumV *= per16;
+
+        if (Math.abs(momentumV) < 0.02){
+          stopMomentum();
+          if (!isHovering && !dragging) restartAuto();
+          return;
+        }
+        momentumId = requestAnimationFrame(momentumStep);
+      }
 
       function setActive(i){
-        cards.forEach(function(c,k){ 
-            c.classList.toggle('ecs-active', k===i); 
+        cards.forEach(function(c,k){
+          c.classList.toggle('ecs-active', k===i);
         });
-        
         if(cards.length > 1 && gauge && gaugeBar){
-            var progressRatio = i / (cards.length - 1);
-            root.style.setProperty('--progress', progressRatio);
-            gauge.setAttribute('aria-valuenow', i + 1);
+          var progressRatio = i / (cards.length - 1);
+          root.style.setProperty('--progress', progressRatio);
+          gauge.setAttribute('aria-valuenow', i + 1);
         }
       }
 
       function dims(){
         var cs = getComputedStyle(root);
-        var cardW   = parseFloat(cs.getPropertyValue('--cardW')) || 400;
+        var cardW = parseFloat(cs.getPropertyValue('--cardW')) || 400;
         return {
-          cardW:   cardW,
-          gap:     parseFloat(cs.getPropertyValue('--gap')) || 18,
-          vp:      viewport.clientWidth,
-          sidePadR: parseFloat(getComputedStyle(viewport).paddingRight) || 20, 
-          sidePadL: parseFloat(getComputedStyle(viewport).paddingLeft) || 18, 
+          cardW: cardW,
+          gap: parseFloat(cs.getPropertyValue('--gap')) || 18,
+          vp: viewport.clientWidth,
+          sidePadR: parseFloat(getComputedStyle(viewport).paddingRight) || 20,
+          sidePadL: parseFloat(getComputedStyle(viewport).paddingLeft)  || 18
         };
       }
-      
+
       function maxOffset(){
         if (cards.length === 0) return 0;
-        
         var d = dims();
         var totalContentWidth = (d.cardW + d.gap) * cards.length - d.gap;
-        
         var maxScroll = totalContentWidth - d.vp + d.sidePadL;
-        
-        return Math.max(0, maxScroll); 
+        return Math.max(0, maxScroll);
       }
-      
-      
+
+      function updateActiveCardIndex(currentOffset){
+        var d = dims();
+        var center = currentOffset + d.vp / 2;
+        var closestIndex = 0, minDelta = Infinity;
+        for (var i=0;i<cards.length;i++){
+          var start = cards[i].offsetLeft;
+          var cardCenter = start + d.cardW/2;
+          var delta = Math.abs(cardCenter - center);
+          if (delta < minDelta){ minDelta = delta; closestIndex = i; }
+        }
+        idx = closestIndex;
+        setActive(idx);
+      }
+
       function applyTransform(x, ms){
         var m = maxOffset();
-        
-        x = Math.max(0, Math.min(x, m)); 
+        x = Math.max(0, Math.min(x, m));
         offset = x;
-        
-        var translateX = -x;
 
-        if (ms > 0) {
-            track.style.transition = 'transform '+ms+'ms cubic-bezier(.16, 1, .3, 1)';
+        if (ms > 0){
+          track.style.transition = 'transform '+ms+'ms cubic-bezier(.16,1,.3,1)';
         } else {
-            track.style.transition = 'none'; 
+          track.style.transition = 'none';
         }
-        
-        track.style.transform  = 'translate3d('+(translateX)+'px,0,0)';
-        
+        track.style.transform = 'translate3d(' + (-x) + 'px,0,0)';
+
         updateActiveCardIndex(offset);
-        
-        // ✅ 목록 끝에 도달하면 시작 위치로 이동 (부드러운 순환)
-        if (offset >= m && isAutoPlaying) {
-             // 1초 동안 부드럽게 시작 위치로 이동
-            applyTransform(0, 1000); 
+
+        // 끝에 도달하면 부드럽게(보이지 않게) 0으로 즉시 리셋
+        if (isAutoPlaying && (m > 0) && (offset >= m - 1)){
+          requestAnimationFrame(function(){
+            track.style.transition = 'none';
+            offset = 0;
+            track.style.transform = 'translate3d(0,0,0)';
+            updateActiveCardIndex(0);
+          });
         }
       }
-      
-      
-      function updateActiveCardIndex(currentOffset){
-          var d = dims();
-          var cardCenter = d.cardW / 2;
-          
-          for(var i = 0; i < cards.length; i++){
-              var cardStart = cards[i].offsetLeft - d.sidePadL;
-              
-              if(currentOffset >= cardStart - cardCenter){
-                  idx = i;
-              } else {
-                  break;
-              }
-          }
-          setActive(idx);
-      }
 
-
-      /* ===== 드래그/스와이프 로직 (유한 목록) ===== */
-      var supportsPointer = typeof window.PointerEvent !== 'undefined';
-      var startX=0, startY=0, baseOffset=0, currOffset=0, dragging=false;
-      var lastT=0, lastX=0, velocity=0, startTime=0;
-      var capturedPointerId = null;
-      var isScrollPrevented = false; 
-
+      /* ========= 드래그 ========= */
       function resist(x){
         var m = maxOffset();
         if(x < 0) return x * 0.35;
-        if(x > m) return m + (x - m)*0.35;
+        if(x > m) return m + (x - m) * 0.35;
         return x;
       }
-      
+
       function updateTrackPosition(){
         if(!dragging) return;
-        var translateX = -currOffset;
-        track.style.transform = 'translate3d('+(translateX)+'px,0,0)';
-        updateActiveCardIndex(currOffset); 
+        track.style.transform = 'translate3d(' + (-currOffset) + 'px,0,0)';
+        updateActiveCardIndex(currOffset);
         animationFrameId = requestAnimationFrame(updateTrackPosition);
       }
 
-      function onDown(clientX, clientY, pointerId){ 
+      function onDown(clientX, clientY, pointerId){
         if(isMoving) return;
-        stopAuto(); // 드래그 시작 시 자동 재생 중지
-        
-        dragging=true; 
-        startX=clientX; 
-        startY=clientY;
-        baseOffset=offset; 
-        currOffset=offset; 
-        lastX=clientX; 
-        lastT=performance.now(); 
-        velocity=0; 
-        startTime=performance.now(); 
-        isScrollPrevented=false; 
-        track.style.transition='none'; 
-        // userInteractedAt = performance.now(); // ✅ 제거
-        viewport.classList.add('is-dragging'); 
-        
-        if (supportsPointer && pointerId !== undefined) {
+        stopAuto();
+        stopMomentum();
+        dragging = true;
+        startX = clientX; startY = clientY;
+        baseOffset = offset; currOffset = offset;
+        lastX = clientX; lastT = performance.now();
+        velocity = 0; startTime = performance.now();
+        isScrollPrevented = false;
+        track.style.transition = 'none';
+        viewport.classList.add('is-dragging');
+
+        if (supportsPointer && pointerId !== undefined){
           viewport.setPointerCapture(pointerId);
           capturedPointerId = pointerId;
         }
-
         cancelAnimationFrame(animationFrameId);
-        updateTrackPosition(); 
+        updateTrackPosition();
       }
-      
-      function onMove(clientX, clientY, e){ 
+
+      function onMove(clientX, clientY, e){
         if(!dragging) return;
         var now = performance.now();
-        var dx = startX - clientX; 
-        var dy = startY - clientY; 
-        
-        if (!isScrollPrevented && Math.abs(dx) > Math.abs(dy)) { 
-            e.preventDefault(); 
-            isScrollPrevented = true; 
-        }
+        var dx = startX - clientX;
+        var dy = startY - clientY;
 
-        if(isScrollPrevented || Math.abs(dx) > 10 || Math.abs(dy) > 10){
-            currOffset = resist(baseOffset + dx); 
-            
-            var dt = now - lastT;
-            if (dt > 0) {
-                velocity = (clientX - lastX) / dt; 
-            }
-            
-            lastX = clientX; 
-            lastT = now;
+        if (!isScrollPrevented){
+          if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > dragThreshold){
+            e.preventDefault();
+            isScrollPrevented = true;
+          }
+        }
+        if (isScrollPrevented){
+          if (isAutoPlaying) stopAuto(); // 모바일 안전장치: 드래그 중 자동재생 즉시 OFF
+          currOffset = resist(baseOffset + dx);
+          var dt = now - lastT;
+          if (dt > 0) velocity = (clientX - lastX) / dt;
+          lastX = clientX; lastT = now;
         }
       }
-      
-      function onUp(pointerId){
-        if(!dragging) return; 
-        dragging=false;
+
+      function onUp(){
+        if(!dragging) return;
+        dragging = false;
         cancelAnimationFrame(animationFrameId);
         viewport.classList.remove('is-dragging');
 
-        if (supportsPointer && capturedPointerId !== null) {
-          try { viewport.releasePointerCapture(capturedPointerId); } catch(e) {}
+        if (supportsPointer && capturedPointerId !== null){
+          try { viewport.releasePointerCapture(capturedPointerId); } catch(e){}
           capturedPointerId = null;
         }
 
-        var m = maxOffset();
-        var dragDuration = performance.now() - startTime;
-        var targetOffset;
-        
-        if (dragDuration < 200) { 
-            var inertia = velocity * 1200; 
-            
-            var d = dims();
-            var maxInertiaDistance = 2 * (d.cardW + d.gap); 
-            
-            if (Math.abs(inertia) > maxInertiaDistance) {
-                inertia = Math.sign(inertia) * maxInertiaDistance;
-            }
-            
-            targetOffset = currOffset - inertia;
-        } else {
-            targetOffset = currOffset;
+        var initialV = -velocity;
+        if (initialV >  2.0) initialV =  2.0;
+        if (initialV < -2.0) initialV = -2.0;
+
+        offset = Math.max(0, Math.min(currOffset, maxOffset()));
+        applyTransform(offset, 0);
+
+        // 스냅 없이 현재 속도로 관성 이동
+        startMomentum(initialV);
+
+        isMoving = true;
+        setTimeout(function(){ isMoving = false; }, 400);
+      }
+
+      var activeOpts = {passive:false};
+      var passiveOpts = {passive:true};
+
+      if (supportsPointer){
+        viewport.addEventListener('pointerdown', function(e){
+          if(e.button !== 0 && !e.isPrimary) return;
+          onDown(e.clientX, e.clientY, e.pointerId);
+        }, passiveOpts);
+        viewport.addEventListener('pointermove', function(e){
+          if(!dragging) return;
+          onMove(e.clientX, e.clientY, e);
+        }, activeOpts);
+        window.addEventListener('pointerup', function(){ onUp(); }, passiveOpts);
+        window.addEventListener('pointercancel', function(){ onUp(); }, passiveOpts);
+      } else {
+        viewport.addEventListener('touchstart', function(e){
+          if(!e.touches || !e.touches.length) return;
+          onDown(e.touches[0].clientX, e.touches[0].clientY);
+        }, passiveOpts);
+        viewport.addEventListener('touchmove', function(e){
+          if(!e.touches || !e.touches.length) return;
+          onMove(e.touches[0].clientX, e.touches[0].clientY, e);
+        }, activeOpts);
+        window.addEventListener('touchend', function(){ onUp(); }, passiveOpts);
+
+        viewport.addEventListener('mousedown', function(e){ onDown(e.clientX, e.clientY); }, passiveOpts);
+        window.addEventListener('mousemove', function(e){
+          if(!dragging) return;
+          onMove(e.clientX, e.clientY, e);
+        }, activeOpts);
+        window.addEventListener('mouseup', function(){ onUp(); }, passiveOpts);
+      }
+
+      /* ========= 자동 재생 ========= */
+      function autoMove(timestamp){
+        // 드래그 중에는 절대 자동 이동 금지
+        if (dragging){ 
+          if (isAutoPlaying) autoRafId = requestAnimationFrame(autoMove);
+          return;
+        }
+        if (!isAutoPlaying) return;
+
+        if (!lastTimestamp){
+          lastTimestamp = timestamp;
+          autoRafId = requestAnimationFrame(autoMove);
+          return;
         }
 
-        targetOffset = Math.max(0, Math.min(targetOffset, m));
-        
-        offset = targetOffset;
-        
-        applyTransform(offset, 500); 
-        
-        updateActiveCardIndex(offset);
-        restartAuto();
-        
-        isMoving = true;
-        setTimeout(function() { isMoving = false; }, 500);
-      }
-      
-      var activeOpts = {passive:false};
-      var passiveOpts = {passive:true}; 
+        var dt = timestamp - lastTimestamp;
+        if (dt > 100) dt = 0;
 
-      if(supportsPointer){
-        viewport.addEventListener('pointerdown', function(e){ 
-          if(e.button !== 0 && !e.isPrimary) return;
-          onDown(e.clientX, e.clientY, e.pointerId); 
-        }, passiveOpts); 
-        viewport.addEventListener('pointermove', function(e){ 
-            if(!dragging) return; 
-            onMove(e.clientX, e.clientY, e); 
-        }, activeOpts);
-        window.addEventListener('pointerup', function(e){ onUp(e.pointerId); }, passiveOpts);
-        window.addEventListener('pointercancel', function(e){ onUp(e.pointerId); }, passiveOpts);
-      }else{
-        viewport.addEventListener('touchstart', function(e){ 
-            if(!e.touches||!e.touches.length)return; 
-            onDown(e.touches[0].clientX, e.touches[0].clientY); 
-        }, passiveOpts);
-        viewport.addEventListener('touchmove',  function(e){ 
-            if(!e.touches||!e.touches.length)return; 
-            onMove(e.touches[0].clientX, e.touches[0].clientY, e); 
-        }, activeOpts); 
-        window.addEventListener('touchend',   function(){ onUp(); }, passiveOpts);
-        
-        viewport.addEventListener('mousedown', function(e){ onDown(e.clientX, e.clientY); }, passiveOpts); 
-        window.addEventListener('mousemove',   function(e){ 
-            if(!dragging) return;
-            onMove(e.clientX, e.clientY, e); 
-        }, activeOpts); 
-        window.addEventListener('mouseup',     function(){ onUp(); }, passiveOpts);
+        applyTransform(offset + autoSpeed * dt, 0);
+
+        lastTimestamp = timestamp;
+        if (isAutoPlaying) autoRafId = requestAnimationFrame(autoMove);
       }
-      
-      /* ===== 자동 재생 로직 (requestAnimationFrame 기반 부드러운 이동) ===== */
-      
-      function autoMove(timestamp){
-          if (!lastTimestamp) {
-              lastTimestamp = timestamp;
-              autoRafId = requestAnimationFrame(autoMove);
-              return;
-          }
-          
-          var deltaTime = timestamp - lastTimestamp;
-          
-          if (deltaTime > 100) deltaTime = 0; 
-          
-          var distance = autoSpeed * deltaTime;
-          
-          var nextOffset = offset + distance;
-          
-          // applyTransform 내부에서 maxOffset 체크 및 순환 로직 처리
-          applyTransform(nextOffset, 0); 
-          
-          lastTimestamp = timestamp;
-          
-          if (isAutoPlaying) {
-             autoRafId = requestAnimationFrame(autoMove);
-          }
-      }
-      
+
       function startAuto(){
-        if(isAutoPlaying) return;
+        if (isAutoPlaying) return;
         isAutoPlaying = true;
-        lastTimestamp = 0; 
+        lastTimestamp = 0;
         autoRafId = requestAnimationFrame(autoMove);
       }
-      
-      function stopAuto(){ 
+      function stopAuto(){
         if (autoRafId) cancelAnimationFrame(autoRafId);
-        isAutoPlaying = false; 
-        autoRafId = null; 
+        isAutoPlaying = false;
+        autoRafId = null;
       }
       function restartAuto(){ stopAuto(); startAuto(); }
 
-
+      /* ========= 초기화 ========= */
       document.addEventListener('DOMContentLoaded', function(){
         requestAnimationFrame(function(){
-          root.classList.add('ecs-mounted');
-          
-          var initialOffset = 0; 
-          
-          applyTransform(initialOffset, 0); 
-          updateActiveCardIndex(initialOffset); 
+          applyTransform(0, 0);
+          updateActiveCardIndex(0);
           startAuto();
         });
       });
 
+      /* ========= 리사이즈 대응 ========= */
       var rAF=null;
       window.addEventListener('resize', function(){
         cancelAnimationFrame(rAF);
         rAF = requestAnimationFrame(function(){
-          var newMaxOffset = maxOffset();
-          
-          offset = Math.max(0, Math.min(offset, newMaxOffset));
-
+          var m = maxOffset();
+          offset = Math.max(0, Math.min(offset, m));
           applyTransform(offset, 0);
           updateActiveCardIndex(offset);
-          restartAuto(); 
+          if (!momentumId && !isHovering && !dragging) restartAuto();
         });
       });
-      
-      // ✅ 호버/클릭 시 자동 재생 멈춤 로직
-      var handleInteraction = function(e){
-          if (e.type === 'click' || e.type === 'mouseenter') {
-              stopAuto();
-          } else if (e.type === 'mouseleave' && !dragging && !isMoving) {
-              // ✅ 호버가 풀리면 즉시 자동 이동 재개
-              restartAuto();
-          }
-      };
-      viewport.addEventListener('click', handleInteraction);
-      viewport.addEventListener('mouseenter', handleInteraction);
-      viewport.addEventListener('mouseleave', handleInteraction);
-      
+
+      /* ========= 호버/터치: 정지 & 즉시 재시작 ========= */
+      function pauseForHover(){ isHovering = true; stopAuto(); }
+      function resumeNow(){
+        // 드래그/모멘텀 중에는 자동 재가동 금지
+        if (dragging || momentumId) return;
+        isHovering = false;
+        restartAuto();
+      }
+
+      // 데스크톱
+      viewport.addEventListener('mouseenter', pauseForHover, {passive:true});
+      viewport.addEventListener('pointerover', pauseForHover, {passive:true});
+      viewport.addEventListener('pointerleave', resumeNow, {passive:true});
+      viewport.addEventListener('mouseleave', resumeNow, {passive:true});
+
+      // 터치: 손가락 올리면 정지, 손 떼면 즉시 재가동
+      viewport.addEventListener('touchstart', pauseForHover, {passive:true});
+      window.addEventListener('touchend', resumeNow, {passive:true});
+
+      // 클릭 시 일시정지(원 요청 유지)
+      viewport.addEventListener('click', pauseForHover, {passive:true});
     })();
   </script>
 </section>
+
 <section class="ecs-slider" aria-label="Finite List Drag Card Slider">
   <style>
     /*
