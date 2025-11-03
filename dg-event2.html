@@ -205,7 +205,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       </div>
     
   </div>
- <script>
+<script>
   (function(){
     var root = (function(){
       var currentScript = document.currentScript;
@@ -234,18 +234,15 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     var isAutoPlaying = false;
     var autoRafId = null;
 
-    // 드래그/호버 상태 플래그
     var supportsPointer = typeof window.PointerEvent !== 'undefined';
     var dragging=false, isHovering=false;
 
-    // 드래그 관련 변수
     var startX=0, startY=0, baseOffset=0, currOffset=0;
     var lastT=0, lastX=0, velocity=0, startTime=0;
     var capturedPointerId = null;
     var isScrollPrevented = false;
     var dragThreshold = 10;
 
-    // 모멘텀(관성) 관련
     var momentumId = null, momentumV = 0, momentumLast = 0;
 
     function stopMomentum(){
@@ -270,7 +267,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       var next = offset + momentumV * dt;
       var m = maxOffset();
 
-      // 끝 도달 시(모바일 포함) 즉시 루프 리셋
+      // ✅ 모바일 포함: 끝에 닿으면 즉시 처음으로 루프 리셋 + 자동재생 복구
       if (m > 0 && next >= m - 0.5){
         stopMomentum();
         wrapToStart();
@@ -354,19 +351,19 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
       updateActiveCardIndex(offset);
 
-      // 자동재생 중: 끝에 닿으면 즉시 루프 리셋
-      if (isAutoPlaying && (m > 0) && (offset >= m - 1)){
-        requestAnimationFrame(function(){
-          wrapToStart();
-        });
-      }
-      // 드래그/모멘텀 아님 + 끝에 정지해 있는 경우도 안전 리셋
-      if (!isAutoPlaying && !dragging && !momentumId && (m > 0) && (offset >= m - 1)){
+      // ✅ 자동재생 여부와 무관하게, 모바일에서 끝에 멈춘 상태면 즉시 처음으로 리셋
+      // (드래그/관성 중이 아닐 때만 안전 리셋)
+      var isMobile = window.matchMedia('(max-width: 768px)').matches || ('ontouchstart' in window);
+      if (isMobile && !dragging && !momentumId && (m > 0) && (offset >= m - 0.5)){
         wrapToStart();
+      }
+
+      // 기존 자동재생 중 리셋 로직 유지
+      if (isAutoPlaying && (m > 0) && (offset >= m - 1)){
+        requestAnimationFrame(function(){ wrapToStart(); });
       }
     }
 
-    /* ========= 드래그 ========= */
     function resist(x){
       var m = maxOffset();
       if(x < 0) return x * 0.35;
@@ -415,7 +412,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         }
       }
       if (isScrollPrevented){
-        if (isAutoPlaying) stopAuto(); // 드래그 중 자동재생 차단
+        if (isAutoPlaying) stopAuto();
         currOffset = resist(baseOffset + dx);
         var dt = now - lastT;
         if (dt > 0) velocity = (clientX - lastX) / dt;
@@ -441,7 +438,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       offset = Math.max(0, Math.min(currOffset, maxOffset()));
       applyTransform(offset, 0);
 
-      // 현재 속도로 관성 이동
       startMomentum(initialV);
 
       isMoving = true;
@@ -481,9 +477,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       window.addEventListener('mouseup', function(){ onUp(); }, passiveOpts);
     }
 
-    /* ========= 자동 재생 ========= */
     function autoMove(timestamp){
-      // 드래그 중에는 자동 이동 금지
       if (dragging){ 
         if (isAutoPlaying) autoRafId = requestAnimationFrame(autoMove);
         return;
@@ -502,7 +496,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       var m = maxOffset();
       var next = offset + autoSpeed * dt;
 
-      // 자동재생에서도 끝에 닿으면 루프 리셋
+      // ✅ 자동재생 중에도 끝에 닿으면 모바일 즉시 리셋
       if (m > 0 && next >= m - 0.5){
         wrapToStart();
         lastTimestamp = timestamp;
@@ -529,7 +523,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     }
     function restartAuto(){ stopAuto(); startAuto(); }
 
-    /* ========= 초기화 ========= */
     document.addEventListener('DOMContentLoaded', function(){
       requestAnimationFrame(function(){
         applyTransform(0, 0);
@@ -538,7 +531,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       });
     });
 
-    /* ========= 리사이즈 대응 ========= */
     var rAF=null;
     window.addEventListener('resize', function(){
       cancelAnimationFrame(rAF);
@@ -551,7 +543,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       });
     });
 
-    /* ========= 호버/터치: 정지 & 즉시 재시작 ========= */
     function pauseForHover(){ isHovering = true; stopAuto(); }
     function resumeNow(){
       if (dragging || momentumId) return;
@@ -570,6 +561,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     viewport.addEventListener('click', pauseForHover, {passive:true});
   })();
 </script>
+
 
 </section>
 
@@ -679,7 +671,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     
   </div>
 
- <script>
+<script>
   (function(){
     var root = (function(){
       var currentScript = document.currentScript;
@@ -708,18 +700,15 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     var isAutoPlaying = false;
     var autoRafId = null;
 
-    // 드래그/호버 상태 플래그
     var supportsPointer = typeof window.PointerEvent !== 'undefined';
     var dragging=false, isHovering=false;
 
-    // 드래그 관련 변수
     var startX=0, startY=0, baseOffset=0, currOffset=0;
     var lastT=0, lastX=0, velocity=0, startTime=0;
     var capturedPointerId = null;
     var isScrollPrevented = false;
     var dragThreshold = 10;
 
-    // 모멘텀(관성) 관련
     var momentumId = null, momentumV = 0, momentumLast = 0;
 
     function stopMomentum(){
@@ -744,7 +733,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       var next = offset + momentumV * dt;
       var m = maxOffset();
 
-      // 끝 도달 시(모바일 포함) 즉시 루프 리셋
+      // ✅ 모바일 포함: 끝에 닿으면 즉시 처음으로 루프 리셋 + 자동재생 복구
       if (m > 0 && next >= m - 0.5){
         stopMomentum();
         wrapToStart();
@@ -828,19 +817,19 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
       updateActiveCardIndex(offset);
 
-      // 자동재생 중: 끝에 닿으면 즉시 루프 리셋
-      if (isAutoPlaying && (m > 0) && (offset >= m - 1)){
-        requestAnimationFrame(function(){
-          wrapToStart();
-        });
-      }
-      // 드래그/모멘텀 아님 + 끝에 정지해 있는 경우도 안전 리셋
-      if (!isAutoPlaying && !dragging && !momentumId && (m > 0) && (offset >= m - 1)){
+      // ✅ 자동재생 여부와 무관하게, 모바일에서 끝에 멈춘 상태면 즉시 처음으로 리셋
+      // (드래그/관성 중이 아닐 때만 안전 리셋)
+      var isMobile = window.matchMedia('(max-width: 768px)').matches || ('ontouchstart' in window);
+      if (isMobile && !dragging && !momentumId && (m > 0) && (offset >= m - 0.5)){
         wrapToStart();
+      }
+
+      // 기존 자동재생 중 리셋 로직 유지
+      if (isAutoPlaying && (m > 0) && (offset >= m - 1)){
+        requestAnimationFrame(function(){ wrapToStart(); });
       }
     }
 
-    /* ========= 드래그 ========= */
     function resist(x){
       var m = maxOffset();
       if(x < 0) return x * 0.35;
@@ -889,7 +878,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         }
       }
       if (isScrollPrevented){
-        if (isAutoPlaying) stopAuto(); // 드래그 중 자동재생 차단
+        if (isAutoPlaying) stopAuto();
         currOffset = resist(baseOffset + dx);
         var dt = now - lastT;
         if (dt > 0) velocity = (clientX - lastX) / dt;
@@ -915,7 +904,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       offset = Math.max(0, Math.min(currOffset, maxOffset()));
       applyTransform(offset, 0);
 
-      // 현재 속도로 관성 이동
       startMomentum(initialV);
 
       isMoving = true;
@@ -955,9 +943,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       window.addEventListener('mouseup', function(){ onUp(); }, passiveOpts);
     }
 
-    /* ========= 자동 재생 ========= */
     function autoMove(timestamp){
-      // 드래그 중에는 자동 이동 금지
       if (dragging){ 
         if (isAutoPlaying) autoRafId = requestAnimationFrame(autoMove);
         return;
@@ -976,7 +962,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       var m = maxOffset();
       var next = offset + autoSpeed * dt;
 
-      // 자동재생에서도 끝에 닿으면 루프 리셋
+      // ✅ 자동재생 중에도 끝에 닿으면 모바일 즉시 리셋
       if (m > 0 && next >= m - 0.5){
         wrapToStart();
         lastTimestamp = timestamp;
@@ -1003,7 +989,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     }
     function restartAuto(){ stopAuto(); startAuto(); }
 
-    /* ========= 초기화 ========= */
     document.addEventListener('DOMContentLoaded', function(){
       requestAnimationFrame(function(){
         applyTransform(0, 0);
@@ -1012,7 +997,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       });
     });
 
-    /* ========= 리사이즈 대응 ========= */
     var rAF=null;
     window.addEventListener('resize', function(){
       cancelAnimationFrame(rAF);
@@ -1025,7 +1009,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       });
     });
 
-    /* ========= 호버/터치: 정지 & 즉시 재시작 ========= */
     function pauseForHover(){ isHovering = true; stopAuto(); }
     function resumeNow(){
       if (dragging || momentumId) return;
@@ -1044,6 +1027,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     viewport.addEventListener('click', pauseForHover, {passive:true});
   })();
 </script>
+
 
 </section>
 
@@ -1120,7 +1104,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     
   </div>
 
- <script>
+<script>
   (function(){
     var root = (function(){
       var currentScript = document.currentScript;
@@ -1149,18 +1133,15 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     var isAutoPlaying = false;
     var autoRafId = null;
 
-    // 드래그/호버 상태 플래그
     var supportsPointer = typeof window.PointerEvent !== 'undefined';
     var dragging=false, isHovering=false;
 
-    // 드래그 관련 변수
     var startX=0, startY=0, baseOffset=0, currOffset=0;
     var lastT=0, lastX=0, velocity=0, startTime=0;
     var capturedPointerId = null;
     var isScrollPrevented = false;
     var dragThreshold = 10;
 
-    // 모멘텀(관성) 관련
     var momentumId = null, momentumV = 0, momentumLast = 0;
 
     function stopMomentum(){
@@ -1185,7 +1166,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       var next = offset + momentumV * dt;
       var m = maxOffset();
 
-      // 끝 도달 시(모바일 포함) 즉시 루프 리셋
+      // ✅ 모바일 포함: 끝에 닿으면 즉시 처음으로 루프 리셋 + 자동재생 복구
       if (m > 0 && next >= m - 0.5){
         stopMomentum();
         wrapToStart();
@@ -1269,19 +1250,19 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
       updateActiveCardIndex(offset);
 
-      // 자동재생 중: 끝에 닿으면 즉시 루프 리셋
-      if (isAutoPlaying && (m > 0) && (offset >= m - 1)){
-        requestAnimationFrame(function(){
-          wrapToStart();
-        });
-      }
-      // 드래그/모멘텀 아님 + 끝에 정지해 있는 경우도 안전 리셋
-      if (!isAutoPlaying && !dragging && !momentumId && (m > 0) && (offset >= m - 1)){
+      // ✅ 자동재생 여부와 무관하게, 모바일에서 끝에 멈춘 상태면 즉시 처음으로 리셋
+      // (드래그/관성 중이 아닐 때만 안전 리셋)
+      var isMobile = window.matchMedia('(max-width: 768px)').matches || ('ontouchstart' in window);
+      if (isMobile && !dragging && !momentumId && (m > 0) && (offset >= m - 0.5)){
         wrapToStart();
+      }
+
+      // 기존 자동재생 중 리셋 로직 유지
+      if (isAutoPlaying && (m > 0) && (offset >= m - 1)){
+        requestAnimationFrame(function(){ wrapToStart(); });
       }
     }
 
-    /* ========= 드래그 ========= */
     function resist(x){
       var m = maxOffset();
       if(x < 0) return x * 0.35;
@@ -1330,7 +1311,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         }
       }
       if (isScrollPrevented){
-        if (isAutoPlaying) stopAuto(); // 드래그 중 자동재생 차단
+        if (isAutoPlaying) stopAuto();
         currOffset = resist(baseOffset + dx);
         var dt = now - lastT;
         if (dt > 0) velocity = (clientX - lastX) / dt;
@@ -1356,7 +1337,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       offset = Math.max(0, Math.min(currOffset, maxOffset()));
       applyTransform(offset, 0);
 
-      // 현재 속도로 관성 이동
       startMomentum(initialV);
 
       isMoving = true;
@@ -1396,9 +1376,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       window.addEventListener('mouseup', function(){ onUp(); }, passiveOpts);
     }
 
-    /* ========= 자동 재생 ========= */
     function autoMove(timestamp){
-      // 드래그 중에는 자동 이동 금지
       if (dragging){ 
         if (isAutoPlaying) autoRafId = requestAnimationFrame(autoMove);
         return;
@@ -1417,7 +1395,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       var m = maxOffset();
       var next = offset + autoSpeed * dt;
 
-      // 자동재생에서도 끝에 닿으면 루프 리셋
+      // ✅ 자동재생 중에도 끝에 닿으면 모바일 즉시 리셋
       if (m > 0 && next >= m - 0.5){
         wrapToStart();
         lastTimestamp = timestamp;
@@ -1444,7 +1422,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     }
     function restartAuto(){ stopAuto(); startAuto(); }
 
-    /* ========= 초기화 ========= */
     document.addEventListener('DOMContentLoaded', function(){
       requestAnimationFrame(function(){
         applyTransform(0, 0);
@@ -1453,7 +1430,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       });
     });
 
-    /* ========= 리사이즈 대응 ========= */
     var rAF=null;
     window.addEventListener('resize', function(){
       cancelAnimationFrame(rAF);
@@ -1466,7 +1442,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       });
     });
 
-    /* ========= 호버/터치: 정지 & 즉시 재시작 ========= */
     function pauseForHover(){ isHovering = true; stopAuto(); }
     function resumeNow(){
       if (dragging || momentumId) return;
@@ -1485,6 +1460,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     viewport.addEventListener('click', pauseForHover, {passive:true});
   })();
 </script>
+
 
 </section>
 
@@ -1590,7 +1566,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     
   </div>
 
- <script>
+<script>
   (function(){
     var root = (function(){
       var currentScript = document.currentScript;
@@ -1619,18 +1595,15 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     var isAutoPlaying = false;
     var autoRafId = null;
 
-    // 드래그/호버 상태 플래그
     var supportsPointer = typeof window.PointerEvent !== 'undefined';
     var dragging=false, isHovering=false;
 
-    // 드래그 관련 변수
     var startX=0, startY=0, baseOffset=0, currOffset=0;
     var lastT=0, lastX=0, velocity=0, startTime=0;
     var capturedPointerId = null;
     var isScrollPrevented = false;
     var dragThreshold = 10;
 
-    // 모멘텀(관성) 관련
     var momentumId = null, momentumV = 0, momentumLast = 0;
 
     function stopMomentum(){
@@ -1655,7 +1628,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       var next = offset + momentumV * dt;
       var m = maxOffset();
 
-      // 끝 도달 시(모바일 포함) 즉시 루프 리셋
+      // ✅ 모바일 포함: 끝에 닿으면 즉시 처음으로 루프 리셋 + 자동재생 복구
       if (m > 0 && next >= m - 0.5){
         stopMomentum();
         wrapToStart();
@@ -1739,19 +1712,19 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
       updateActiveCardIndex(offset);
 
-      // 자동재생 중: 끝에 닿으면 즉시 루프 리셋
-      if (isAutoPlaying && (m > 0) && (offset >= m - 1)){
-        requestAnimationFrame(function(){
-          wrapToStart();
-        });
-      }
-      // 드래그/모멘텀 아님 + 끝에 정지해 있는 경우도 안전 리셋
-      if (!isAutoPlaying && !dragging && !momentumId && (m > 0) && (offset >= m - 1)){
+      // ✅ 자동재생 여부와 무관하게, 모바일에서 끝에 멈춘 상태면 즉시 처음으로 리셋
+      // (드래그/관성 중이 아닐 때만 안전 리셋)
+      var isMobile = window.matchMedia('(max-width: 768px)').matches || ('ontouchstart' in window);
+      if (isMobile && !dragging && !momentumId && (m > 0) && (offset >= m - 0.5)){
         wrapToStart();
+      }
+
+      // 기존 자동재생 중 리셋 로직 유지
+      if (isAutoPlaying && (m > 0) && (offset >= m - 1)){
+        requestAnimationFrame(function(){ wrapToStart(); });
       }
     }
 
-    /* ========= 드래그 ========= */
     function resist(x){
       var m = maxOffset();
       if(x < 0) return x * 0.35;
@@ -1800,7 +1773,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         }
       }
       if (isScrollPrevented){
-        if (isAutoPlaying) stopAuto(); // 드래그 중 자동재생 차단
+        if (isAutoPlaying) stopAuto();
         currOffset = resist(baseOffset + dx);
         var dt = now - lastT;
         if (dt > 0) velocity = (clientX - lastX) / dt;
@@ -1826,7 +1799,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       offset = Math.max(0, Math.min(currOffset, maxOffset()));
       applyTransform(offset, 0);
 
-      // 현재 속도로 관성 이동
       startMomentum(initialV);
 
       isMoving = true;
@@ -1866,9 +1838,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       window.addEventListener('mouseup', function(){ onUp(); }, passiveOpts);
     }
 
-    /* ========= 자동 재생 ========= */
     function autoMove(timestamp){
-      // 드래그 중에는 자동 이동 금지
       if (dragging){ 
         if (isAutoPlaying) autoRafId = requestAnimationFrame(autoMove);
         return;
@@ -1887,7 +1857,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       var m = maxOffset();
       var next = offset + autoSpeed * dt;
 
-      // 자동재생에서도 끝에 닿으면 루프 리셋
+      // ✅ 자동재생 중에도 끝에 닿으면 모바일 즉시 리셋
       if (m > 0 && next >= m - 0.5){
         wrapToStart();
         lastTimestamp = timestamp;
@@ -1914,7 +1884,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     }
     function restartAuto(){ stopAuto(); startAuto(); }
 
-    /* ========= 초기화 ========= */
     document.addEventListener('DOMContentLoaded', function(){
       requestAnimationFrame(function(){
         applyTransform(0, 0);
@@ -1923,7 +1892,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       });
     });
 
-    /* ========= 리사이즈 대응 ========= */
     var rAF=null;
     window.addEventListener('resize', function(){
       cancelAnimationFrame(rAF);
@@ -1936,7 +1904,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       });
     });
 
-    /* ========= 호버/터치: 정지 & 즉시 재시작 ========= */
     function pauseForHover(){ isHovering = true; stopAuto(); }
     function resumeNow(){
       if (dragging || momentumId) return;
@@ -1955,6 +1922,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     viewport.addEventListener('click', pauseForHover, {passive:true});
   })();
 </script>
+
 
 </section>
 
@@ -2029,7 +1997,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     </div>
   </div>
 
- <script>
+<script>
   (function(){
     var root = (function(){
       var currentScript = document.currentScript;
@@ -2058,18 +2026,15 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     var isAutoPlaying = false;
     var autoRafId = null;
 
-    // 드래그/호버 상태 플래그
     var supportsPointer = typeof window.PointerEvent !== 'undefined';
     var dragging=false, isHovering=false;
 
-    // 드래그 관련 변수
     var startX=0, startY=0, baseOffset=0, currOffset=0;
     var lastT=0, lastX=0, velocity=0, startTime=0;
     var capturedPointerId = null;
     var isScrollPrevented = false;
     var dragThreshold = 10;
 
-    // 모멘텀(관성) 관련
     var momentumId = null, momentumV = 0, momentumLast = 0;
 
     function stopMomentum(){
@@ -2094,7 +2059,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       var next = offset + momentumV * dt;
       var m = maxOffset();
 
-      // 끝 도달 시(모바일 포함) 즉시 루프 리셋
+      // ✅ 모바일 포함: 끝에 닿으면 즉시 처음으로 루프 리셋 + 자동재생 복구
       if (m > 0 && next >= m - 0.5){
         stopMomentum();
         wrapToStart();
@@ -2178,19 +2143,19 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
       updateActiveCardIndex(offset);
 
-      // 자동재생 중: 끝에 닿으면 즉시 루프 리셋
-      if (isAutoPlaying && (m > 0) && (offset >= m - 1)){
-        requestAnimationFrame(function(){
-          wrapToStart();
-        });
-      }
-      // 드래그/모멘텀 아님 + 끝에 정지해 있는 경우도 안전 리셋
-      if (!isAutoPlaying && !dragging && !momentumId && (m > 0) && (offset >= m - 1)){
+      // ✅ 자동재생 여부와 무관하게, 모바일에서 끝에 멈춘 상태면 즉시 처음으로 리셋
+      // (드래그/관성 중이 아닐 때만 안전 리셋)
+      var isMobile = window.matchMedia('(max-width: 768px)').matches || ('ontouchstart' in window);
+      if (isMobile && !dragging && !momentumId && (m > 0) && (offset >= m - 0.5)){
         wrapToStart();
+      }
+
+      // 기존 자동재생 중 리셋 로직 유지
+      if (isAutoPlaying && (m > 0) && (offset >= m - 1)){
+        requestAnimationFrame(function(){ wrapToStart(); });
       }
     }
 
-    /* ========= 드래그 ========= */
     function resist(x){
       var m = maxOffset();
       if(x < 0) return x * 0.35;
@@ -2239,7 +2204,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         }
       }
       if (isScrollPrevented){
-        if (isAutoPlaying) stopAuto(); // 드래그 중 자동재생 차단
+        if (isAutoPlaying) stopAuto();
         currOffset = resist(baseOffset + dx);
         var dt = now - lastT;
         if (dt > 0) velocity = (clientX - lastX) / dt;
@@ -2265,7 +2230,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       offset = Math.max(0, Math.min(currOffset, maxOffset()));
       applyTransform(offset, 0);
 
-      // 현재 속도로 관성 이동
       startMomentum(initialV);
 
       isMoving = true;
@@ -2305,9 +2269,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       window.addEventListener('mouseup', function(){ onUp(); }, passiveOpts);
     }
 
-    /* ========= 자동 재생 ========= */
     function autoMove(timestamp){
-      // 드래그 중에는 자동 이동 금지
       if (dragging){ 
         if (isAutoPlaying) autoRafId = requestAnimationFrame(autoMove);
         return;
@@ -2326,7 +2288,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       var m = maxOffset();
       var next = offset + autoSpeed * dt;
 
-      // 자동재생에서도 끝에 닿으면 루프 리셋
+      // ✅ 자동재생 중에도 끝에 닿으면 모바일 즉시 리셋
       if (m > 0 && next >= m - 0.5){
         wrapToStart();
         lastTimestamp = timestamp;
@@ -2353,7 +2315,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     }
     function restartAuto(){ stopAuto(); startAuto(); }
 
-    /* ========= 초기화 ========= */
     document.addEventListener('DOMContentLoaded', function(){
       requestAnimationFrame(function(){
         applyTransform(0, 0);
@@ -2362,7 +2323,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       });
     });
 
-    /* ========= 리사이즈 대응 ========= */
     var rAF=null;
     window.addEventListener('resize', function(){
       cancelAnimationFrame(rAF);
@@ -2375,7 +2335,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       });
     });
 
-    /* ========= 호버/터치: 정지 & 즉시 재시작 ========= */
     function pauseForHover(){ isHovering = true; stopAuto(); }
     function resumeNow(){
       if (dragging || momentumId) return;
@@ -2394,6 +2353,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     viewport.addEventListener('click', pauseForHover, {passive:true});
   })();
 </script>
+
 
 </section>
 
@@ -2572,7 +2532,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         </article>
 
                 <article class="ecs-card" data-ecs-slide style="background-color: transparent;box-shadow: none;"></article>
-                
+
       </div>
     </div>
   </div>
