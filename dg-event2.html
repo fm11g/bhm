@@ -2364,7 +2364,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     .ecs-slider .ecs-grad{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 35%,rgba(0,0,0,.78) 95%);z-index:1}
     .ecs-slider .ecs-body{position:absolute;left:16px;right:16px;bottom:14px;z-index:2;color:#fff;transform:translateY(0);opacity:.98;transition:opacity 380ms cubic-bezier(.15,.7,.25,1.05);}
     .ecs-slider .ecs-title2{font-size:clamp(12px,2vw,16px);line-height:1.2;margin:0;font-weight:800;letter-spacing:-.01em}
-    .ecs-slider .ecs-card:not(.ecs-active) .ecs-body{opacity: 0.8;} 
+   .ecs-slider .ecs-card:not(.ecs-active) .ecs-body{opacity: 0.8;} 
 
     .ecs-slider .ecs-gauge{
         width: clamp(120px, 15vw, 180px); 
@@ -2506,24 +2506,20 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         var dt = ts - momentumLast;
         momentumLast = ts;
 
-        // 이동
         var next = offset + momentumV * dt;
         var m = maxOffset();
 
         if (next < 0 || next > m){
-          // 경계 도달 시 감쇠 강화 및 클램프
           next = Math.max(0, Math.min(next, m));
           momentumV *= 0.35;
         }
         applyTransform(next, 0);
 
-        // 마찰(감쇠) 곡선: 프레임 보정
         var per16 = Math.pow(0.94, dt / 16.7);
         momentumV *= per16;
 
         if (Math.abs(momentumV) < 0.02){
           stopMomentum();
-          // 모멘텀 종료 후 자동재생 재개 (호버/드래그가 아닐 때)
           if (!isHovering && !dragging) restartAuto();
           return;
         }
@@ -2580,7 +2576,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         
         updateActiveCardIndex(offset);
 
-        // 끝 도달 시 끊김 없이 루프
         if (isAutoPlaying && (m > 0) && (offset >= m - 1)) {
           requestAnimationFrame(function(){
             track.style.transition = 'none';
@@ -2612,7 +2607,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       var capturedPointerId = null;
       var isScrollPrevented = false; 
       var dragThreshold = 10; 
-      var isHovering = false; // 호버 상태
+      var isHovering = false;
 
       function resist(x){
         var m = maxOffset();
@@ -2631,7 +2626,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       function onDown(clientX, clientY, pointerId){ 
         if(isMoving) return;
         stopAuto();
-        stopMomentum();                 // 드래그 시작 시 모멘텀 중지
+        stopMomentum();
         dragging=true; 
         startX=clientX; 
         startY=clientY;
@@ -2668,7 +2663,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         if(isScrollPrevented){
           currOffset = resist(baseOffset + dx); 
           var dt = now - lastT;
-          if (dt > 0) velocity = (clientX - lastX) / dt; // px/ms (오른쪽 양수)
+          if (dt > 0) velocity = (clientX - lastX) / dt; 
           lastX = clientX; 
           lastT = now;
         }
@@ -2684,18 +2679,13 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
           capturedPointerId = null;
         }
 
-        // 스냅 제거, 현재 속도 기반 모멘텀 시작
-        // offset 증가(왼쪽 이동) = clientX 감소(velocity 음수) → offsetV는 -velocity
-        var initialV = -velocity;      // px/ms
-        // 과도한 초속 제한 (너무 빨리 튀는 것 방지)
+        var initialV = -velocity;      
         if (initialV >  2.0) initialV =  2.0;
         if (initialV < -2.0) initialV = -2.0;
 
-        // 현재 위치를 반영
         offset = Math.max(0, Math.min(currOffset, maxOffset()));
         applyTransform(offset, 0);
 
-        // 손 뗀 뒤 부드럽게 관성 이동
         startMomentum(initialV);
 
         isMoving = true;
@@ -2786,37 +2776,47 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
           offset = Math.max(0, Math.min(offset, m));
           applyTransform(offset, 0);
           updateActiveCardIndex(offset);
-          // 모멘텀 중이면 유지, 아니면 자동재생 재개
           if (!momentumId && !isHovering && !dragging) restartAuto();
         }, 100);
       });
       
-      /* ===== 호버/터치 시 자동재생 일시정지 ===== */
+      /* ===== 호버/터치 시 자동재생 일시정지 & 즉시 재시작(영역 이탈) ===== */
       function pauseForHover(){ isHovering = true; stopAuto(); }
       function resumeFromHover(){ 
         isHovering = false; 
         if (!dragging && !momentumId) startAuto(); 
       }
+      /* ✅ 추가: 영역을 벗어나면 즉시 자동 이동 재시작 */
+      function resumeNow(){
+        isHovering = false;
+        stopMomentum();   // 손 뗀 뒤 바로 자동 이동 재개를 보장
+        restartAuto();    // 즉시 재가동
+      }
 
-      // 데스크톱: 마우스 호버 멈춤
+      // 데스크톱: 호버 시 일시정지
       viewport.addEventListener('mouseenter', pauseForHover, {passive:true});
-      viewport.addEventListener('mouseleave', resumeFromHover, {passive:true});
       viewport.addEventListener('pointerover', pauseForHover, {passive:true});
 
-      // 터치: 손가락 올리면 멈춤, 떼면(모멘텀 없을 때) 재개
-      viewport.addEventListener('touchstart', function(){ pauseForHover(); }, {passive:true});
-      window.addEventListener('touchend', function(){ 
-        // 드래그 onUp에서 모멘텀을 시작하므로, 모멘텀 종료 후 자동재생 재개
-        if (!dragging && !momentumId) resumeFromHover();
-      }, {passive:true});
+      // 기존 재개 로직(남김)
+      viewport.addEventListener('mouseleave', resumeFromHover, {passive:true});
 
-      // 클릭시 일시정지(기존 동작 유지), 영역 이탈 시 재개
+      // ✅ 즉시 재시작 트리거(추가)
+      viewport.addEventListener('pointerleave', resumeNow, {passive:true});
+      viewport.addEventListener('mouseleave', resumeNow, {passive:true});
+
+      // 터치: 손가락 올리면 멈춤
+      viewport.addEventListener('touchstart', function(){ pauseForHover(); }, {passive:true});
+      // ✅ 손 뗀 즉시 재가동
+      window.addEventListener('touchend', resumeNow, {passive:true});
+
+      // 클릭시 일시정지(기존 동작 유지)
       viewport.addEventListener('click', pauseForHover, {passive:true});
-      // mouseleave 위에서 처리
+      // mouseleave는 위 처리
 
     })();
   </script>
 </section>
+
 
 
 
