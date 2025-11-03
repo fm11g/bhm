@@ -2322,24 +2322,18 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       overflow: hidden; 
       padding:10px 8px;
       --sidePad:max(20px,(100% - 1000px)/2);
-      /* min-height는 cardW보다 작아도 정사각형 유지를 위해 cardW에 의존 */
-       /* ✅ 수정: min-height 200px */
       padding-left:var(--gap); 
       padding-right:var(--sidePad);
       
       contain:layout paint size;border-radius:20px;
-      /* 카드 높이(var(--cardW))에 맞추어 뷰포트 높이 설정 */
       height:calc(var(--cardW) + 20px); 
       min-height:200px;
       transition:opacity var(--fadeDur) var(--ease),transform var(--fadeDur) var(--ease);
       touch-action: pan-y pinch-zoom; 
       user-select: none; 
-      
       box-sizing: border-box; 
     }
-    .ecs-slider .ecs-viewport.is-dragging {
-        cursor: grabbing; 
-    }
+    .ecs-slider .ecs-viewport.is-dragging { cursor: grabbing; }
 
     .ecs-slider.ecs-mounted .ecs-viewport{opacity:1;}
 
@@ -2353,9 +2347,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     .ecs-slider .ecs-card{
       position:relative;
       flex:0 0 var(--cardW);
-      /* 정사각형 유지를 위해 height를 var(--cardW)로 설정 */
       height:var(--cardW); 
-      /* min-height를 var(--cardW)와 200px 중 큰 값으로 설정하여 정사각형 또는 최소 높이 200px 유지 */
       min-height:200px;
       border-radius:var(--radius);overflow:hidden;background:#fff;
       box-shadow:var(--shadow); 
@@ -2363,9 +2355,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       transition: box-shadow 360ms var(--ease); 
       isolation:isolate
     }
-    .ecs-slider .ecs-card.ecs-active{
-        box-shadow: 0 24px 60px rgba(13,18,30,.18); 
-    }
+    .ecs-slider .ecs-card.ecs-active{ box-shadow: 0 24px 60px rgba(13,18,30,.18); }
     .ecs-slider .ecs-logo{position:absolute;top:16px;left:16px;z-index:3;width:40px;height:40px;border-radius:10px;overflow:hidden;background:transparent;box-shadow:0 2px 6px rgba(15,23,42,.1);display:grid;place-items:center;pointer-events:none;}
     .ecs-slider .ecs-logo img{width:70%;height:70%;object-fit:contain;display:block;}
     .ecs-slider .ecs-media{position:absolute;inset:0}
@@ -2396,10 +2386,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     /* 반응형 */
     @media (max-width:1100px){.ecs-slider{--cardW:320px;}}
     @media (max-width:820px){
-        .ecs-slider{
-            --cardW:260px;
-            --gap:14px;
-        }
+        .ecs-slider{ --cardW:260px; --gap:14px; }
         .ecs-slider .ecs-wrap{padding:44px 16px}
     }
     @media (max-width:420px){
@@ -2408,22 +2395,18 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
             --cardW: calc((100% - var(--gap) * 2) / 1.5); 
             --gap: 14px;
         }
-        .ecs-slider .ecs-gauge {
-             width: 80px; 
-        }
+        .ecs-slider .ecs-gauge { width: 80px; }
     }
   </style>
 
   <div class="ecs-wrap">
-    
     <div class="ecs-head">
-        <h2 class="ecs-title">안마의자/정수기</h2>
-        <div class="ecs-gauge" role="progressbar" aria-valuenow="1" aria-valuemin="1" aria-valuemax="6">
-            <div class="ecs-progress-bar"></div>
-        </div>
+      <h2 class="ecs-title">안마의자/정수기</h2>
+      <div class="ecs-gauge" role="progressbar" aria-valuenow="1" aria-valuemin="1" aria-valuemax="6">
+        <div class="ecs-progress-bar"></div>
+      </div>
     </div>
 
-    
     <div class="ecs-viewport">
       <div class="ecs-track">
         <article class="ecs-card ecs-active" data-ecs-slide>
@@ -2433,13 +2416,12 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
           <div class="ecs-body"><h3 class="ecs-title2">바디프랜드 헬스케어로봇 [팔콘S]</h3></div>
         </article>
 
-         <article class="ecs-card" data-ecs-slide>
+        <article class="ecs-card" data-ecs-slide>
           <div class="ecs-logo"><img src="./img/bf-logo.webp" alt="The Witcher 3 Logo"></div>
           <div class="ecs-media"><img src="https://lh3.googleusercontent.com/gAMHQZwL6odDs6cgGpmVQwY9xYxZ0T4o8RbZm4Ej6xB4WtNibvFIlry_U7EmIPifg9nt2zATLBHUPIVLX-g0PFvFCPRgo4ajiSABidD3Rd39LaH9fGhQiQ=w800" alt="The Witcher 3"></div>
           <div class="ecs-grad"></div>
           <div class="ecs-body"><h3 class="ecs-title2">바디프랜드 헬스케어로봇 [팔콘]</h3></div>
         </article>
-
 
         <article class="ecs-card" data-ecs-slide>
           <div class="ecs-logo"><img src="./img/lg-logo.png" alt="The Witcher 3 Logo"></div>
@@ -2447,25 +2429,22 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
           <div class="ecs-grad"></div>
           <div class="ecs-body"><h3 class="ecs-title2">LG 오브제 얼음정수기</h3></div>
         </article>
-       
 
-          <article class="ecs-card" data-ecs-slide>
+        <article class="ecs-card" data-ecs-slide>
           <div class="ecs-logo"><img src="./img/sk-logo.png" alt="The Witcher 3 Logo"></div>
           <div class="ecs-media"><img src="https://lh3.googleusercontent.com/EusKBLB4epfKV3_lorg97y7TEP78DgUEoXEkHFXrC9Bk_VVgR_wjumS3uFaNhtAP0AjWbzauDV2vRhBPRS35AfC2LR-qgDC8uilI1UEBfqp85qD03GKgSw=w800" alt="The Witcher 3"></div>
           <div class="ecs-grad"></div>
           <div class="ecs-body"><h3 class="ecs-title2">SK 매직 얼음물 정수기</h3></div>
         </article>
 
-          <article class="ecs-card" data-ecs-slide>
+        <article class="ecs-card" data-ecs-slide>
           <div class="ecs-logo"><img src="./img/lg-logo.png" alt="The Witcher 3 Logo"></div>
           <div class="ecs-media"><img src="https://lh3.googleusercontent.com/dwgAvcYsYN3khFtvXBANMq_Y-ag2Xfx5oOm5DthPIRo4Xm1mkdM8XWEyLwWZT9uBodddTgASIXhsvxjcj05-eFe5zE6d2KSjXzpkJko1eCYBIL-BzqxySg=w800" alt="The Witcher 3"></div>
           <div class="ecs-grad"></div>
           <div class="ecs-body"><h3 class="ecs-title2">LG 오브제 라이트온 온정 정수기</h3></div>
         </article>
 
-
-
-      <article class="ecs-card" data-ecs-slide>
+        <article class="ecs-card" data-ecs-slide>
           <div class="ecs-logo"><img src="./img/cuckoo-logo.png" alt="The Witcher 3 Logo"></div>
           <div class="ecs-media"><img src="https://lh3.googleusercontent.com/NjK64wDytyDEx71RASQjzL6cAoYrUT1GX4PBaKKUYYCCChcjDKz1OXAOlbiunwghSU9InLewctdR27R9_bzh7sOh5As32RMSm4U_bhiBpyFGMdtaQNkdAQ=w800" alt="The Witcher 3"></div>
           <div class="ecs-grad"></div>
@@ -2492,12 +2471,10 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       var viewport    = root.querySelector('.ecs-viewport');
       var track       = root.querySelector('.ecs-track');
       var cards       = Array.prototype.slice.call(root.querySelectorAll('[data-ecs-slide]'));
-      
       var gauge       = root.querySelector('.ecs-gauge');
       var gaugeBar    = root.querySelector('.ecs-progress-bar'); 
 
       var idx = 0; 
-      var timer = null;
       var offset = 0; 
       var isMoving = false; 
       var animationFrameId = null; 
@@ -2507,20 +2484,63 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       var isAutoPlaying = false; 
       var autoRafId = null;
 
+      /* === 모멘텀(관성) 이동 관련 === */
+      var momentumId = null;
+      var momentumV = 0;         // px/ms
+      var momentumLast = 0;
+
+      function stopMomentum(){
+        if (momentumId) cancelAnimationFrame(momentumId);
+        momentumId = null;
+        momentumV = 0;
+        momentumLast = 0;
+      }
+      function startMomentum(v){
+        stopMomentum();
+        momentumV = v;           // px/ms
+        momentumLast = 0;
+        momentumId = requestAnimationFrame(momentumStep);
+      }
+      function momentumStep(ts){
+        if (!momentumLast) { momentumLast = ts; momentumId = requestAnimationFrame(momentumStep); return; }
+        var dt = ts - momentumLast;
+        momentumLast = ts;
+
+        // 이동
+        var next = offset + momentumV * dt;
+        var m = maxOffset();
+
+        if (next < 0 || next > m){
+          // 경계 도달 시 감쇠 강화 및 클램프
+          next = Math.max(0, Math.min(next, m));
+          momentumV *= 0.35;
+        }
+        applyTransform(next, 0);
+
+        // 마찰(감쇠) 곡선: 프레임 보정
+        var per16 = Math.pow(0.94, dt / 16.7);
+        momentumV *= per16;
+
+        if (Math.abs(momentumV) < 0.02){
+          stopMomentum();
+          // 모멘텀 종료 후 자동재생 재개 (호버/드래그가 아닐 때)
+          if (!isHovering && !dragging) restartAuto();
+          return;
+        }
+        momentumId = requestAnimationFrame(momentumStep);
+      }
 
       function setActive(i){
         cards.forEach(function(c,k){ 
-            c.classList.toggle('ecs-active', k===i); 
+          c.classList.toggle('ecs-active', k===i); 
         });
-        
         if(cards.length > 1 && gauge && gaugeBar){
-            var progressRatio = i / (cards.length - 1);
-            root.style.setProperty('--progress', progressRatio);
-            gauge.setAttribute('aria-valuenow', i + 1);
+          var progressRatio = i / (cards.length - 1);
+          root.style.setProperty('--progress', progressRatio);
+          gauge.setAttribute('aria-valuenow', i + 1);
         }
       }
 
-      /* ✅ 실제 렌더 기준 치수 계산 (모바일에서 calc() 문제 회피) */
       function dims(){
         var firstCard = cards[0];
         var rectW = firstCard ? firstCard.getBoundingClientRect().width : 400;
@@ -2540,15 +2560,11 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
           sidePadR: padR
         };
       }
-      
-      /* ✅ 트랙 전체 폭 - 뷰포트 폭 = 최대 오프셋 (모바일에서 안정적) */
       function maxOffset(){
-        var total = track.scrollWidth;              // 트랙 실제 총 너비
-        var vp = viewport.clientWidth;              // 뷰포트 너비
-        var m = total - vp;                         // 이동 가능한 최대치
-        return Math.max(0, m);
+        var total = track.scrollWidth;
+        var vp = viewport.clientWidth;
+        return Math.max(0, total - vp);
       }
-      
       function applyTransform(x, ms){
         var m = maxOffset();
         x = Math.max(0, Math.min(x, m)); 
@@ -2564,9 +2580,8 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         
         updateActiveCardIndex(offset);
 
-        // ✅ 끝 도달 시 끊김 없이 즉시 처음으로 점프 후 계속 진행
+        // 끝 도달 시 끊김 없이 루프
         if (isAutoPlaying && (m > 0) && (offset >= m - 1)) {
-          // 다음 프레임에서 0으로 세팅 (transition 없음)
           requestAnimationFrame(function(){
             track.style.transition = 'none';
             offset = 0;
@@ -2575,36 +2590,29 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
           });
         }
       }
-      
       function updateActiveCardIndex(currentOffset){
-          var d = dims();
-          var center = currentOffset + d.vp / 2; // 뷰포트 중앙 기준
-          var closestIndex = 0;
-          var minDelta = Infinity;
-
-          for(var i = 0; i < cards.length; i++){
-              var cardRect = cards[i].getBoundingClientRect();
-              // 카드의 왼쪽 기준 위치를 offsetLeft로 계산 (transform 고려 위해 상대적 추정)
-              var start = cards[i].offsetLeft; 
-              var cardCenter = start + d.cardW / 2;
-              var delta = Math.abs(cardCenter - center);
-              if (delta < minDelta){
-                minDelta = delta;
-                closestIndex = i;
-              }
-          }
-          idx = closestIndex;
-          setActive(idx);
+        var d = dims();
+        var center = currentOffset + d.vp / 2; 
+        var closestIndex = 0;
+        var minDelta = Infinity;
+        for(var i = 0; i < cards.length; i++){
+          var start = cards[i].offsetLeft; 
+          var cardCenter = start + d.cardW / 2;
+          var delta = Math.abs(cardCenter - center);
+          if (delta < minDelta){ minDelta = delta; closestIndex = i; }
+        }
+        idx = closestIndex;
+        setActive(idx);
       }
 
-
-      /* ===== 드래그/스와이프 로직 (유한 목록) ===== */
+      /* ===== 드래그/스와이프 로직 ===== */
       var supportsPointer = typeof window.PointerEvent !== 'undefined';
       var startX=0, startY=0, baseOffset=0, currOffset=0, dragging=false;
       var lastT=0, lastX=0, velocity=0, startTime=0;
       var capturedPointerId = null;
       var isScrollPrevented = false; 
       var dragThreshold = 10; 
+      var isHovering = false; // 호버 상태
 
       function resist(x){
         var m = maxOffset();
@@ -2612,7 +2620,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         if(x > m) return m + (x - m)*0.35;
         return x;
       }
-      
       function updateTrackPosition(){
         if(!dragging) return;
         var translateX = -currOffset;
@@ -2623,7 +2630,8 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
       function onDown(clientX, clientY, pointerId){ 
         if(isMoving) return;
-        stopAuto(); 
+        stopAuto();
+        stopMomentum();                 // 드래그 시작 시 모멘텀 중지
         dragging=true; 
         startX=clientX; 
         startY=clientY;
@@ -2645,7 +2653,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         cancelAnimationFrame(animationFrameId);
         updateTrackPosition(); 
       }
-      
       function onMove(clientX, clientY, e){ 
         if(!dragging) return;
         var now = performance.now();
@@ -2658,16 +2665,14 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
             isScrollPrevented = true; 
           }
         }
-
         if(isScrollPrevented){
           currOffset = resist(baseOffset + dx); 
           var dt = now - lastT;
-          if (dt > 0) velocity = (clientX - lastX) / dt; 
+          if (dt > 0) velocity = (clientX - lastX) / dt; // px/ms (오른쪽 양수)
           lastX = clientX; 
           lastT = now;
         }
       }
-      
       function onUp(pointerId){
         if(!dragging) return; 
         dragging=false;
@@ -2679,48 +2684,24 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
           capturedPointerId = null;
         }
 
-        var m = maxOffset();
-        var dragDuration = performance.now() - startTime;
-        var targetOffset;
-        
-        if (dragDuration < 200) { 
-          var d = dims();
-          var single = d.cardW + d.gap;
-          var inertia = velocity * 600; 
-          var maxInertia = 1.5 * single; 
-          if (Math.abs(inertia) > maxInertia) inertia = Math.sign(inertia) * maxInertia;
-          targetOffset = currOffset - inertia;
+        // 스냅 제거, 현재 속도 기반 모멘텀 시작
+        // offset 증가(왼쪽 이동) = clientX 감소(velocity 음수) → offsetV는 -velocity
+        var initialV = -velocity;      // px/ms
+        // 과도한 초속 제한 (너무 빨리 튀는 것 방지)
+        if (initialV >  2.0) initialV =  2.0;
+        if (initialV < -2.0) initialV = -2.0;
 
-          // 가장 가까운 카드 시작점으로 스냅
-          var snap = 0, minDiff = Infinity;
-          for(var i = 0; i < cards.length; i++){
-            var start = cards[i].offsetLeft; 
-            var diff = Math.abs(targetOffset - start);
-            if (diff < minDiff){ minDiff = diff; snap = start; }
-          }
-          targetOffset = snap;
+        // 현재 위치를 반영
+        offset = Math.max(0, Math.min(currOffset, maxOffset()));
+        applyTransform(offset, 0);
 
-        } else {
-          targetOffset = currOffset;
-          var snap2 = 0, min2 = Infinity;
-          for(var j = 0; j < cards.length; j++){
-            var start2 = cards[j].offsetLeft; 
-            var diff2 = Math.abs(targetOffset - start2);
-            if (diff2 < min2){ min2 = diff2; snap2 = start2; }
-          }
-          targetOffset = snap2;
-        }
+        // 손 뗀 뒤 부드럽게 관성 이동
+        startMomentum(initialV);
 
-        targetOffset = Math.max(0, Math.min(targetOffset, m));
-        offset = targetOffset;
-        applyTransform(offset, 500); 
-        updateActiveCardIndex(offset);
-        restartAuto();
-        
         isMoving = true;
-        setTimeout(function() { isMoving = false; }, 500);
+        setTimeout(function() { isMoving = false; }, 400);
       }
-      
+
       var activeOpts = {passive:false};
       var passiveOpts = {passive:true}; 
 
@@ -2766,12 +2747,11 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         var distance = autoSpeed * delta;
         var next = offset + distance;
 
-        applyTransform(next, 0); // 내부에서 끝 처리 & 점프
+        applyTransform(next, 0);
         
         lastTimestamp = timestamp;
         if (isAutoPlaying) autoRafId = requestAnimationFrame(autoMove);
       }
-      
       function startAuto(){
         if(isAutoPlaying) return;
         isAutoPlaying = true;
@@ -2785,7 +2765,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       }
       function restartAuto(){ stopAuto(); startAuto(); }
 
-
+      /* ===== 초기화 ===== */
       document.addEventListener('DOMContentLoaded', function(){
         requestAnimationFrame(function(){
           root.classList.add('ecs-mounted');
@@ -2797,7 +2777,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         });
       });
 
-      // 리사이즈 대응 (모바일 회전 포함)
+      /* ===== 리사이즈 대응 ===== */
       var resizeTimeout;
       window.addEventListener('resize', function(){
         clearTimeout(resizeTimeout);
@@ -2806,26 +2786,38 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
           offset = Math.max(0, Math.min(offset, m));
           applyTransform(offset, 0);
           updateActiveCardIndex(offset);
-          restartAuto(); 
+          // 모멘텀 중이면 유지, 아니면 자동재생 재개
+          if (!momentumId && !isHovering && !dragging) restartAuto();
         }, 100);
       });
       
-      // 호버/클릭 시 자동 재생 멈춤/재개
-      var handleInteraction = function(e){
-        if (e.type === 'click' || e.type === 'mouseenter' || e.type === 'pointerover') {
-          stopAuto();
-        } else if (e.type === 'mouseleave' && !dragging && !isMoving) {
-          restartAuto();
-        }
-      };
-      viewport.addEventListener('click', handleInteraction);
-      viewport.addEventListener('mouseenter', handleInteraction);
-      viewport.addEventListener('mouseleave', handleInteraction);
-      viewport.addEventListener('pointerover', handleInteraction);
-      
+      /* ===== 호버/터치 시 자동재생 일시정지 ===== */
+      function pauseForHover(){ isHovering = true; stopAuto(); }
+      function resumeFromHover(){ 
+        isHovering = false; 
+        if (!dragging && !momentumId) startAuto(); 
+      }
+
+      // 데스크톱: 마우스 호버 멈춤
+      viewport.addEventListener('mouseenter', pauseForHover, {passive:true});
+      viewport.addEventListener('mouseleave', resumeFromHover, {passive:true});
+      viewport.addEventListener('pointerover', pauseForHover, {passive:true});
+
+      // 터치: 손가락 올리면 멈춤, 떼면(모멘텀 없을 때) 재개
+      viewport.addEventListener('touchstart', function(){ pauseForHover(); }, {passive:true});
+      window.addEventListener('touchend', function(){ 
+        // 드래그 onUp에서 모멘텀을 시작하므로, 모멘텀 종료 후 자동재생 재개
+        if (!dragging && !momentumId) resumeFromHover();
+      }, {passive:true});
+
+      // 클릭시 일시정지(기존 동작 유지), 영역 이탈 시 재개
+      viewport.addEventListener('click', pauseForHover, {passive:true});
+      // mouseleave 위에서 처리
+
     })();
   </script>
 </section>
+
 
 
 <section id="eventList">
