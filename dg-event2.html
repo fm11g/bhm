@@ -2276,7 +2276,6 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
     })();
   </script>
 </section>
-
 <section class="ecs-slider" aria-label="Finite List Drag Card Slider">
   <style>
     /*
@@ -2625,8 +2624,8 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
 
       function onDown(clientX, clientY, pointerId){ 
         if(isMoving) return;
-        stopAuto();
-        stopMomentum();
+        stopAuto();          /* 드래그 시작 → 자동 이동 중지 */
+        stopMomentum();      /* 진행 중 모멘텀 중단 */
         dragging=true; 
         startX=clientX; 
         startY=clientY;
@@ -2686,7 +2685,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         offset = Math.max(0, Math.min(currOffset, maxOffset()));
         applyTransform(offset, 0);
 
-        startMomentum(initialV);
+        startMomentum(initialV);  /* 스냅 없이 현재 속도로 관성 이동 */
 
         isMoving = true;
         setTimeout(function() { isMoving = false; }, 400);
@@ -2727,6 +2726,11 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       
       /* ===== 자동 재생 (requestAnimationFrame) ===== */
       function autoMove(timestamp){
+        if (!isAutoPlaying){ return; }
+        if (dragging){               /* 드래그 중엔 절대 자동 이동 안 함 */
+          autoRafId = requestAnimationFrame(autoMove);
+          return;
+        }
         if (!lastTimestamp) {
           lastTimestamp = timestamp;
           autoRafId = requestAnimationFrame(autoMove);
@@ -2780,38 +2784,32 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
         }, 100);
       });
       
-      /* ===== 호버/터치 시 자동재생 일시정지 & 즉시 재시작(영역 이탈) ===== */
+      /* ===== 호버/터치 시 자동재생 일시정지 & 영역 이탈/손 떼면 즉시 재시작 ===== */
       function pauseForHover(){ isHovering = true; stopAuto(); }
       function resumeFromHover(){ 
         isHovering = false; 
         if (!dragging && !momentumId) startAuto(); 
       }
-      /* ✅ 추가: 영역을 벗어나면 즉시 자동 이동 재시작 */
-      function resumeNow(){
+      function resumeNow(){        /* 즉시 재시작(중복 재개 방지용) */
         isHovering = false;
-        stopMomentum();   // 손 뗀 뒤 바로 자동 이동 재개를 보장
-        restartAuto();    // 즉시 재가동
+        stopMomentum();
+        restartAuto();
       }
 
-      // 데스크톱: 호버 시 일시정지
+      // 데스크톱: 호버 시 정지
       viewport.addEventListener('mouseenter', pauseForHover, {passive:true});
       viewport.addEventListener('pointerover', pauseForHover, {passive:true});
 
-      // 기존 재개 로직(남김)
-      viewport.addEventListener('mouseleave', resumeFromHover, {passive:true});
-
-      // ✅ 즉시 재시작 트리거(추가)
+      // ✅ 영역 이탈 시 즉시 재가동 (한 군데로 통일하여 중복 재시작 방지)
       viewport.addEventListener('pointerleave', resumeNow, {passive:true});
       viewport.addEventListener('mouseleave', resumeNow, {passive:true});
 
-      // 터치: 손가락 올리면 멈춤
+      // 터치: 손가락 올리면 정지, 손 떼면 즉시 재가동
       viewport.addEventListener('touchstart', function(){ pauseForHover(); }, {passive:true});
-      // ✅ 손 뗀 즉시 재가동
       window.addEventListener('touchend', resumeNow, {passive:true});
 
-      // 클릭시 일시정지(기존 동작 유지)
+      // 클릭 시 일시정지(기존 동작 유지)
       viewport.addEventListener('click', pauseForHover, {passive:true});
-      // mouseleave는 위 처리
 
     })();
   </script>
