@@ -697,6 +697,594 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
   </script>
 </section>
 
+<section class="ecs-slider" aria-label="Finite List Drag Card Slider">
+  <style>
+    /*
+      ====================================
+      CSS: 디자인 및 반응형 설정
+      ====================================
+    */
+    .ecs-slider{
+      --ink:#0f172a;
+      --accent:#e73700;
+      --bg:#f6f7fb;
+      --cardW: 400px; 
+      --gap: 18px;
+      --radius: 18px;
+      --shadow: 0 10px 24px rgba(15,23,42,.08); 
+      --fadeDur: 700ms;
+      --autoMs: 3800; 
+      --ease: cubic-bezier(.22,.61,.36,1); 
+      --progress: 0; 
+      
+      font-family: "Pretendard","Noto Sans KR",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+      background: var(--bg);
+      position: relative;
+    }
+
+    .ecs-slider .ecs-wrap{margin:0 auto;padding:56px 20px}
+    .ecs-slider .ecs-head{
+        display:flex;
+        align-items:center; 
+        justify-content:space-between;
+        margin-bottom:18px;
+    }
+    .ecs-slider .ecs-title{
+      font-size:clamp(18px,2.2vw,24px);line-height:1.3;color:var(--ink);
+      font-weight:800;position:relative;padding-bottom:0; 
+      margin-bottom:10px; 
+      letter-spacing:-.02em
+    }
+    .ecs-slider .ecs-title:after{content:"";position:absolute;left:0;bottom:-10px;width:36px;height:4px;border-radius:2px;background:var(--accent)}
+
+    .ecs-slider .ecs-viewport{
+      position:relative;
+      overflow: hidden; 
+      padding:10px 8px;
+      --sidePad:max(20px,(100% - 1000px)/2);
+      padding-left:var(--gap); 
+      padding-right:var(--sidePad);
+      
+      contain:layout paint size;border-radius:20px;
+      height:calc(var(--cardW) + 20px); 
+      min-height:200px;
+      transition:opacity var(--fadeDur) var(--ease),transform var(--fadeDur) var(--ease);
+      touch-action: pan-y pinch-zoom; 
+      user-select: none; 
+      box-sizing: border-box; 
+    }
+    .ecs-slider .ecs-viewport.is-dragging { cursor: grabbing; }
+
+    .ecs-slider.ecs-mounted .ecs-viewport{opacity:1;}
+
+    .ecs-slider .ecs-track{
+      display:flex;gap:var(--gap);
+      will-change: transform;
+      transition:transform 500ms cubic-bezier(.16, 1, .3, 1); 
+    }
+
+    /* 카드 */
+    .ecs-slider .ecs-card{
+      position:relative;
+      flex:0 0 var(--cardW);
+      height:var(--cardW); 
+      min-height:200px;
+      border-radius:var(--radius);overflow:hidden;background:#fff;
+      box-shadow:var(--shadow); 
+      transform:translateZ(0);cursor:grab; 
+      transition: box-shadow 360ms var(--ease); 
+      isolation:isolate
+    }
+    .ecs-slider .ecs-card.ecs-active{ box-shadow: 0 24px 60px rgba(13,18,30,.18); }
+    .ecs-slider .ecs-logo{position:absolute;top:16px;left:16px;z-index:3;width:40px;height:40px;border-radius:10px;overflow:hidden;background:transparent;box-shadow:0 2px 6px rgba(15,23,42,.1);display:grid;place-items:center;pointer-events:none;}
+    .ecs-slider .ecs-logo img{width:70%;height:70%;object-fit:contain;display:block;}
+    .ecs-slider .ecs-media{position:absolute;inset:0}
+    .ecs-slider .ecs-media img{width:100%;height:100%;object-fit:contain;display:block;transform:scale(1.02);transition:transform 600ms var(--ease),filter 600ms var(--ease)}
+    .ecs-slider .ecs-card:hover .ecs-media img,.ecs-slider .ecs-card.ecs-active .ecs-media img{transform:scale(1.05);filter:saturate(1.04)}
+    .ecs-slider .ecs-grad{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 35%,rgba(0,0,0,.78) 95%);z-index:1}
+    .ecs-slider .ecs-body{position:absolute;left:16px;right:16px;bottom:14px;z-index:2;color:#fff;transform:translateY(0);opacity:.98;transition:opacity 380ms cubic-bezier(.15,.7,.25,1.05);}
+    .ecs-slider .ecs-title2{font-size:clamp(12px,2vw,16px);line-height:1.2;margin:0;font-weight:800;letter-spacing:-.01em}
+    .ecs-slider .ecs-card:not(.ecs-active) .ecs-body{opacity: 0.8;} 
+
+    .ecs-slider .ecs-gauge{
+        width: clamp(120px, 15vw, 180px); 
+        height: 6px; 
+        background: #e2e8f0; 
+        border-radius: 3px;
+        overflow: hidden;
+        margin-top: 10px;
+    }
+    .ecs-slider .ecs-progress-bar{
+        width: 100%;
+        height: 100%;
+        background: var(--accent); 
+        transform: scaleX(var(--progress)); 
+        transform-origin: left center;
+        transition: transform 380ms var(--ease);
+    }
+
+    /* 반응형 */
+    @media (max-width:1100px){.ecs-slider{--cardW:320px;}}
+    @media (max-width:820px){
+        .ecs-slider{ --cardW:260px; --gap:14px; }
+        .ecs-slider .ecs-wrap{padding:44px 16px}
+    }
+    @media (max-width:420px){
+        .ecs-slider{
+            /* 모바일에서 1.5개 카드 노출 */
+            --cardW: calc((100% - var(--gap) * 2) / 1.5); 
+            --gap: 14px;
+        }
+        .ecs-slider .ecs-gauge { width: 80px; }
+    }
+  </style>
+
+  <div class="ecs-wrap">
+    
+    <div class="ecs-head">
+        <h2 class="ecs-title">냉장고/김치냉장고</h2>
+        <div class="ecs-gauge" role="progressbar" aria-valuenow="1" aria-valuemin="1" aria-valuemax="6">
+            <div class="ecs-progress-bar"></div>
+        </div>
+    </div>
+
+    <div class="ecs-viewport">
+      <div class="ecs-track">
+        <article class="ecs-card ecs-active" data-ecs-slide>
+          <div class="ecs-logo">
+            <img src="./img/lg-logo.png" alt="Dota 2 Logo">
+          </div>
+          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/6E6nTrsNby-0ZVfowLSQbSQ0MSF_XRiYsUI9G8sg111BLKko-ulNuZxNvFxgbU2NPWYiGZbipcuhXJVPFUVJOJfGSuVqbvnaUl7HMhA5dBClmRUwlaDL=w800" alt="Dota 2"></div>
+          <div class="ecs-grad"></div>
+          <div class="ecs-body"><h3 class="ecs-title2">LG 오브제 베이직 냉장고 (870ℓ)</h3></div>
+        </article>
+
+        <article class="ecs-card ecs-active" data-ecs-slide>
+          <div class="ecs-logo">
+            <img src="./img/lg-logo.png" alt="Dota 2 Logo">
+          </div>
+          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/nIi7CVvP3UTMZLrGgbpdvXT4lgRKiZUnWA7WUNXlvgDiGpJgtNh9CFZtHkmrPRJxSdyVlup1rHR80Hz7QAyuCN5SEU-YFwQHY9YuDs9vlGNvhkGMJ1zpUg=w800" alt="Dota 2"></div>
+          <div class="ecs-grad"></div>
+          <div class="ecs-body"><h3 class="ecs-title2">LG 오브제 STEM 노크온 냉장고 (860ℓ)</h3></div>
+        </article>
+
+        
+
+        <article class="ecs-card" data-ecs-slide>
+          <div class="ecs-logo">
+            <img src="./img/lg-logo.png" alt="The Witcher 3 Logo">
+          </div>
+          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/LC4NyVbhN9OfQKukH93hBYtCs58l2iDxGZ0dVmTbGRT4U_RAFjbZA4m4l91cnK3pPdU8doJJkkkxDtTrTcD2adIiNu2QXbuNFfxEketpQSRMvo18K3_pJxQ=w800" alt="The Witcher 3"></div>
+          <div class="ecs-grad"></div>
+          <div class="ecs-body"><h3 class="ecs-title2">LG 오브제 김치냉장고(김치톡톡) 324ℓ</h3></div>
+        </article>
+        <article class="ecs-card" data-ecs-slide>
+          <div class="ecs-logo">
+            <img src="./img/lg-logo.png" alt="RDR 2 Logo">
+          </div>
+          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/IVKi0q5x-eDG_CW59M1ZujqSfI6l7ioF_mC2Yh6qJrGykAKHEywkTNLLiORJvudxUj4jCGraep_iMPp4Zo-5u6C5OTG8xsARwS8jSjGQ1TY85yE-1aan8SU=w800" alt="RDR 2"></div>
+          <div class="ecs-grad"></div>
+          <div class="ecs-body"><h3 class="ecs-title2">LG 오브제 김치냉장고(김치톡톡) 505ℓ</h3></div>
+        </article>
+       
+        <article class="ecs-card" data-ecs-slide>
+          <div class="ecs-logo">
+            <img src="./img/samsung-logo.svg" alt="Fortnite Logo">
+          </div>
+          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/CsvQZVMas9KMCamRsRXiJzKX38jlz8VnTLj5CSGzbXnn4l4_R98fa9qPzCQeoIAozktm9FNora05Vw27t-KUo_PFo8mLPLy_dt2Asl39GZx0q8A5QLuNvg=w800" alt="Fortnite"></div>
+          <div class="ecs-grad"></div>
+          <div class="ecs-body"><h3 class="ecs-title2">삼성 비스포크 냉장고 884ℓ</h3></div>
+        </article>
+       <article class="ecs-card" data-ecs-slide>
+          <div class="ecs-logo">
+            <img src="./img/samsung-logo.svg" alt="Fortnite Logo">
+          </div>
+          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/5bK5aAFs2QWlF3FQ7XbHIjj8m_eIz5cGT_L_J4KltP4FLZ8iKVd6xml376pYbgKhsqdA6qqYxd0vtt76cRS1ZRkjrsJIQF_94VFODYRLD1Hk9vyJMXitpwo=w800" alt="Fortnite"></div>
+          <div class="ecs-grad"></div>
+          <div class="ecs-body"><h3 class="ecs-title2">삼성 비스포크 냉장고 902ℓ</h3></div>
+        </article>
+
+         <article class="ecs-card" data-ecs-slide>
+          <div class="ecs-logo">
+            <img src="./img/samsung-logo.svg" alt="Fortnite Logo">
+          </div>
+          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/1ufGZzQ47DJhKUrWIILpHmLbaJbOvDeT44JcUz71OELiRrR3tdLx9ytqKX6gesQyXiZoqqb26quilOUpjSh_QjvSMZieC7XsH7mJym_Zzp2mf1_mgzei=w800" alt="Fortnite"></div>
+          <div class="ecs-grad"></div>
+          <div class="ecs-body"><h3 class="ecs-title2">삼성 비스포크 키친핏 냉장고 640ℓ</h3></div>
+        </article>
+
+         <article class="ecs-card" data-ecs-slide>
+          <div class="ecs-logo">
+            <img src="./img/samsung-logo.svg" alt="Fortnite Logo">
+          </div>
+          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/oEc6_Mg3XJAHsDmsEmwzdc8Jspr9KCXmu5q-k8C14LOP3cpspehrimQ1fa5JBfM2Hw7nddrAgArGErMgiTD29VTb3m5BLK6nkx3Ow869cc6xzWPJSVgILg=w800" alt="Fortnite"></div>
+          <div class="ecs-grad"></div>
+          <div class="ecs-body"><h3 class="ecs-title2">삼성 비스포크 김치냉장고 490L</h3></div>
+        </article>
+
+         <article class="ecs-card" data-ecs-slide>
+          <div class="ecs-logo">
+            <img src="./img/samsung-logo.svg" alt="Fortnite Logo">
+          </div>
+          <div class="ecs-media"><img src="https://lh3.googleusercontent.com/rfcWSkB4dfqdu-LdbZ7B12RVblGBBaU_sAMzdbjVSVP8i1SmIQch7u6tAaMUVNnMVKsbJx7bf_tvDdjeTy9DbtODRHdr8INdkHjkZMxuOycacNRLjuOKYg=w800" alt="Fortnite"></div>
+          <div class="ecs-grad"></div>
+          <div class="ecs-body"><h3 class="ecs-title2">삼성 비스포크 김치냉장고 키친핏 420ℓ</h3></div>
+        </article>
+      </div>
+
+      </div>
+    
+  </div>
+
+
+
+  <script>
+    (function(){
+      var root = (function(){
+        var currentScript = document.currentScript;
+        if (currentScript && currentScript.parentElement && currentScript.parentElement.classList.contains('ecs-slider')) {
+          return currentScript.parentElement;
+        }
+        var uninit = document.querySelector('.ecs-slider:not([data-ecs-ready])');
+        return uninit;
+      })();
+
+      if(!root || root.hasAttribute('data-ecs-ready')) return;
+      root.setAttribute('data-ecs-ready','');
+
+      var viewport    = root.querySelector('.ecs-viewport');
+      var track       = root.querySelector('.ecs-track');
+      var cards       = Array.prototype.slice.call(root.querySelectorAll('[data-ecs-slide]'));
+      var gauge       = root.querySelector('.ecs-gauge');
+      var gaugeBar    = root.querySelector('.ecs-progress-bar'); 
+
+      var idx = 0; 
+      var offset = 0; 
+      var isMoving = false; 
+      var animationFrameId = null; 
+      
+      var autoSpeed = 0.05; 
+      var lastTimestamp = 0;
+      var isAutoPlaying = false; 
+      var autoRafId = null;
+
+      /* === 모멘텀(관성) 이동 관련 === */
+      var momentumId = null;
+      var momentumV = 0;         // px/ms
+      var momentumLast = 0;
+
+      function stopMomentum(){
+        if (momentumId) cancelAnimationFrame(momentumId);
+        momentumId = null;
+        momentumV = 0;
+        momentumLast = 0;
+      }
+      function startMomentum(v){
+        stopMomentum();
+        momentumV = v;           // px/ms
+        momentumLast = 0;
+        momentumId = requestAnimationFrame(momentumStep);
+      }
+      function momentumStep(ts){
+        if (!momentumLast) { momentumLast = ts; momentumId = requestAnimationFrame(momentumStep); return; }
+        var dt = ts - momentumLast;
+        momentumLast = ts;
+
+        var next = offset + momentumV * dt;
+        var m = maxOffset();
+
+        if (next < 0 || next > m){
+          next = Math.max(0, Math.min(next, m));
+          momentumV *= 0.35;
+        }
+        applyTransform(next, 0);
+
+        var per16 = Math.pow(0.94, dt / 16.7);
+        momentumV *= per16;
+
+        if (Math.abs(momentumV) < 0.02){
+          stopMomentum();
+          if (!isHovering && !dragging) restartAuto();
+          return;
+        }
+        momentumId = requestAnimationFrame(momentumStep);
+      }
+
+      function setActive(i){
+        cards.forEach(function(c,k){ 
+          c.classList.toggle('ecs-active', k===i); 
+        });
+        if(cards.length > 1 && gauge && gaugeBar){
+          var progressRatio = i / (cards.length - 1);
+          root.style.setProperty('--progress', progressRatio);
+          gauge.setAttribute('aria-valuenow', i + 1);
+        }
+      }
+
+      function dims(){
+        var firstCard = cards[0];
+        var rectW = firstCard ? firstCard.getBoundingClientRect().width : 400;
+        var gapPx = 0;
+        try{
+          var gapStr = getComputedStyle(track).gap || '0px';
+          gapPx = parseFloat(gapStr) || 0;
+        }catch(e){ gapPx = 0; }
+        var vpW = viewport.clientWidth;
+        var padL = parseFloat(getComputedStyle(viewport).paddingLeft) || 0;
+        var padR = parseFloat(getComputedStyle(viewport).paddingRight) || 0;
+        return {
+          cardW: rectW,
+          gap: gapPx,
+          vp: vpW,
+          sidePadL: padL,
+          sidePadR: padR
+        };
+      }
+      function maxOffset(){
+        var total = track.scrollWidth;
+        var vp = viewport.clientWidth;
+        return Math.max(0, total - vp);
+      }
+      function applyTransform(x, ms){
+        var m = maxOffset();
+        x = Math.max(0, Math.min(x, m)); 
+        offset = x;
+        var translateX = -x;
+
+        if (ms > 0) {
+          track.style.transition = 'transform '+ms+'ms cubic-bezier(.16, 1, .3, 1)';
+        } else {
+          track.style.transition = 'none';
+        }
+        track.style.transform  = 'translate3d('+(translateX)+'px,0,0)';
+        
+        updateActiveCardIndex(offset);
+
+        if (isAutoPlaying && (m > 0) && (offset >= m - 1)) {
+          requestAnimationFrame(function(){
+            track.style.transition = 'none';
+            offset = 0;
+            track.style.transform = 'translate3d(0px,0,0)';
+            updateActiveCardIndex(0);
+          });
+        }
+      }
+      function updateActiveCardIndex(currentOffset){
+        var d = dims();
+        var center = currentOffset + d.vp / 2; 
+        var closestIndex = 0;
+        var minDelta = Infinity;
+        for(var i = 0; i < cards.length; i++){
+          var start = cards[i].offsetLeft; 
+          var cardCenter = start + d.cardW / 2;
+          var delta = Math.abs(cardCenter - center);
+          if (delta < minDelta){ minDelta = delta; closestIndex = i; }
+        }
+        idx = closestIndex;
+        setActive(idx);
+      }
+
+      /* ===== 드래그/스와이프 로직 ===== */
+      var supportsPointer = typeof window.PointerEvent !== 'undefined';
+      var startX=0, startY=0, baseOffset=0, currOffset=0, dragging=false;
+      var lastT=0, lastX=0, velocity=0, startTime=0;
+      var capturedPointerId = null;
+      var isScrollPrevented = false; 
+      var dragThreshold = 10; 
+      var isHovering = false;
+
+      function resist(x){
+        var m = maxOffset();
+        if(x < 0) return x * 0.35;
+        if(x > m) return m + (x - m)*0.35;
+        return x;
+      }
+      function updateTrackPosition(){
+        if(!dragging) return;
+        var translateX = -currOffset;
+        track.style.transform = 'translate3d('+(translateX)+'px,0,0)';
+        updateActiveCardIndex(currOffset); 
+        animationFrameId = requestAnimationFrame(updateTrackPosition);
+      }
+
+      function onDown(clientX, clientY, pointerId){ 
+        if(isMoving) return;
+        stopAuto();          /* 드래그 시작 → 자동 이동 중지 */
+        stopMomentum();      /* 진행 중 모멘텀 중단 */
+        dragging=true; 
+        startX=clientX; 
+        startY=clientY;
+        baseOffset=offset; 
+        currOffset=offset; 
+        lastX=clientX; 
+        lastT=performance.now(); 
+        velocity=0; 
+        startTime=performance.now(); 
+        isScrollPrevented=false; 
+        track.style.transition='none'; 
+        viewport.classList.add('is-dragging'); 
+        
+        if (supportsPointer && pointerId !== undefined) {
+          viewport.setPointerCapture(pointerId);
+          capturedPointerId = pointerId;
+        }
+
+        cancelAnimationFrame(animationFrameId);
+        updateTrackPosition(); 
+      }
+      function onMove(clientX, clientY, e){ 
+        if(!dragging) return;
+        var now = performance.now();
+        var dx = startX - clientX; 
+        var dy = startY - clientY; 
+        
+        if (!isScrollPrevented) {
+          if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > dragThreshold) {
+            e.preventDefault(); 
+            isScrollPrevented = true; 
+          }
+        }
+        if(isScrollPrevented){
+          /* ✅ 드래그 중 자동재생이 혹시 켜져 있으면 즉시 끔 (모바일 안전장치) */
+          if (isAutoPlaying) stopAuto();
+
+          currOffset = resist(baseOffset + dx); 
+          var dt = now - lastT;
+          if (dt > 0) velocity = (clientX - lastX) / dt; 
+          lastX = clientX; 
+          lastT = now;
+        }
+      }
+      function onUp(pointerId){
+        if(!dragging) return; 
+        dragging=false;
+        cancelAnimationFrame(animationFrameId);
+        viewport.classList.remove('is-dragging');
+
+        if (supportsPointer && capturedPointerId !== null) {
+          try { viewport.releasePointerCapture(capturedPointerId); } catch(e) {}
+          capturedPointerId = null;
+        }
+
+        var initialV = -velocity;      
+        if (initialV >  2.0) initialV =  2.0;
+        if (initialV < -2.0) initialV = -2.0;
+
+        offset = Math.max(0, Math.min(currOffset, maxOffset()));
+        applyTransform(offset, 0);
+
+        startMomentum(initialV);  /* 스냅 없이 현재 속도로 관성 이동 */
+
+        isMoving = true;
+        setTimeout(function() { isMoving = false; }, 400);
+      }
+
+      var activeOpts = {passive:false};
+      var passiveOpts = {passive:true}; 
+
+      if(supportsPointer){
+        viewport.addEventListener('pointerdown', function(e){ 
+          if(e.button !== 0 && !e.isPrimary) return;
+          onDown(e.clientX, e.clientY, e.pointerId); 
+        }, passiveOpts); 
+        viewport.addEventListener('pointermove', function(e){ 
+          if(!dragging) return; 
+          onMove(e.clientX, e.clientY, e); 
+        }, activeOpts);
+        window.addEventListener('pointerup', function(e){ onUp(e.pointerId); }, passiveOpts);
+        window.addEventListener('pointercancel', function(e){ onUp(e.pointerId); }, passiveOpts);
+      }else{
+        viewport.addEventListener('touchstart', function(e){ 
+          if(!e.touches||!e.touches.length)return; 
+          onDown(e.touches[0].clientX, e.touches[0].clientY); 
+        }, passiveOpts);
+        viewport.addEventListener('touchmove',  function(e){ 
+          if(!e.touches||!e.touches.length)return; 
+          onMove(e.touches[0].clientX, e.touches[0].clientY, e); 
+        }, activeOpts); 
+        window.addEventListener('touchend',   function(){ onUp(); }, passiveOpts);
+        
+        viewport.addEventListener('mousedown', function(e){ onDown(e.clientX, e.clientY); }, passiveOpts); 
+        window.addEventListener('mousemove',   function(e){ 
+          if(!dragging) return;
+          onMove(e.clientX, e.clientY, e); 
+        }, activeOpts); 
+        window.addEventListener('mouseup',     function(){ onUp(); }, passiveOpts);
+      }
+      
+      /* ===== 자동 재생 (requestAnimationFrame) ===== */
+      function autoMove(timestamp){
+        /* ✅ 드래그 중에는 절대 자동 이동하지 않음 */
+        if (dragging) { 
+          if (isAutoPlaying) { /* 프레임 루프만 유지하고 이동은 금지 */
+            autoRafId = requestAnimationFrame(autoMove);
+          }
+          return;
+        }
+        if (!isAutoPlaying){ return; }
+
+        if (!lastTimestamp) {
+          lastTimestamp = timestamp;
+          autoRafId = requestAnimationFrame(autoMove);
+          return;
+        }
+        var delta = timestamp - lastTimestamp;
+        if (delta > 100) delta = 0;
+        var distance = autoSpeed * delta;
+        var next = offset + distance;
+
+        applyTransform(next, 0);
+        
+        lastTimestamp = timestamp;
+        if (isAutoPlaying) autoRafId = requestAnimationFrame(autoMove);
+      }
+      function startAuto(){
+        if(isAutoPlaying) return;
+        isAutoPlaying = true;
+        lastTimestamp = 0; 
+        autoRafId = requestAnimationFrame(autoMove);
+      }
+      function stopAuto(){ 
+        if (autoRafId) cancelAnimationFrame(autoRafId);
+        isAutoPlaying = false; 
+        autoRafId = null; 
+      }
+      function restartAuto(){ stopAuto(); startAuto(); }
+
+      /* ===== 초기화 ===== */
+      document.addEventListener('DOMContentLoaded', function(){
+        requestAnimationFrame(function(){
+          root.classList.add('ecs-mounted');
+          setTimeout(function() {
+            applyTransform(0, 0); 
+            updateActiveCardIndex(0); 
+            startAuto();
+          }, 0); 
+        });
+      });
+
+      /* ===== 리사이즈 대응 ===== */
+      var resizeTimeout;
+      window.addEventListener('resize', function(){
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(function() {
+          var m = maxOffset();
+          offset = Math.max(0, Math.min(offset, m));
+          applyTransform(offset, 0);
+          updateActiveCardIndex(offset);
+          if (!momentumId && !isHovering && !dragging) restartAuto();
+        }, 100);
+      });
+      
+      /* ===== 호버/터치 일시정지 & 즉시 재시작 ===== */
+      function pauseForHover(){ isHovering = true; stopAuto(); }
+      function resumeFromHover(){ 
+        isHovering = false; 
+        if (!dragging && !momentumId) startAuto(); 
+      }
+      function resumeNow(){
+        /* ✅ 드래그/모멘텀 중이면 재가동 금지 (모바일 안전) */
+        if (dragging || momentumId) return;
+        isHovering = false;
+        restartAuto();
+      }
+
+      // 데스크톱: 호버 시 정지 / 이탈 시 즉시 재가동
+      viewport.addEventListener('mouseenter', pauseForHover, {passive:true});
+      viewport.addEventListener('pointerover', pauseForHover, {passive:true});
+      viewport.addEventListener('pointerleave', resumeNow, {passive:true});
+      viewport.addEventListener('mouseleave', resumeNow, {passive:true});
+
+      // 터치: 손가락 올리면 정지, 손 떼면 즉시 재가동
+      viewport.addEventListener('touchstart', function(){ pauseForHover(); }, {passive:true});
+      window.addEventListener('touchend', resumeNow, {passive:true});
+
+      // 클릭 시 일시정지(기존 동작 유지)
+      viewport.addEventListener('click', pauseForHover, {passive:true});
+
+    })();
+  </script>
+</section>
 
 <section class="ecs-slider" aria-label="Finite List Drag Card Slider">
   <style>
