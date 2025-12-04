@@ -4325,5 +4325,35 @@ document.getElementById('phone1').addEventListener('input', function() {
 });
 </script>
 
+<script>
+(function(){
+
+  const db3 = document.getElementById("db3");
+  const db4 = document.getElementById("db4");
+  const hidden = document.querySelector("input[name='entry.1024743880']");
+
+  function updateHiddenValue(){
+    const v1 = db3?.value?.trim() || "";
+    const v2 = db4?.value?.trim() || "";
+
+    let combined = "";
+
+    if(v1 && v2){
+      combined = v1 + " / " + v2;
+    } else if(v1){
+      combined = v1;
+    } else if(v2){
+      combined = v2;
+    }
+
+    hidden.value = combined;
+  }
+
+  db3.addEventListener("change", updateHiddenValue);
+  db4.addEventListener("change", updateHiddenValue);
+
+})();
+</script>
+
 </body>
 </html>

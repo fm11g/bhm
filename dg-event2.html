@@ -2,14 +2,27 @@
 <!doctype html>
 <html lang="en">
  <head>
+
+
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-11087160868"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'AW-11087160868');
+</script>
+
+
 <meta charset="UTF-8">
-<title>월100대 한정 | 다이렉트 11월 최신 가전 다이렉트 재입고</title>
+<title>월100대 한정 | 다이렉트 12월 최신 가전 다이렉트 재입고</title>
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="robots" content="index,follow">
-<meta name="description" lang="ko" content="11월 한정 수량! 최신 가전 월 100대 다이렉트 재입고. 원하는 브랜드·모델 맞춤 상담, 설치/배송 지원, 재고 소진 시 마감." />
-<meta name="keywords" lang="ko" content="가전 재입고, 11월 한정, 월 100대, 다이렉트 구매, 냉장고, 세탁기, TV, 에어컨, 최신 가전, 설치 지원, 즉시 상담" />
-<meta property="og:title" content="월 100대 한정 | 11월 최신 가전 다이렉트 재입고" />
-<meta property="og:description" content="11월 최신 가전 재입고! 원하는 모델로 빠르게 상담/설치까지. 수량 한정, 재고 소진 시 종료." />
+<meta name="description" lang="ko" content="12월 한정 수량! 최신 가전 월 100대 다이렉트 재입고. 원하는 브랜드·모델 맞춤 상담, 설치/배송 지원, 재고 소진 시 마감." />
+<meta name="keywords" lang="ko" content="가전 재입고, 12월 한정, 월 100대, 다이렉트 구매, 냉장고, 세탁기, TV, 에어컨, 최신 가전, 설치 지원, 즉시 상담" />
+<meta property="og:title" content="월 100대 한정 | 12월 최신 가전 다이렉트 재입고" />
+<meta property="og:description" content="12월 최신 가전 재입고! 원하는 모델로 빠르게 상담/설치까지. 수량 한정, 재고 소진 시 종료." />
 <!-- <link rel="shortcut icon" href="./img/favicon.ico"> -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=yes" />
 <!-- <link rel="stylesheet" href="./css/fonts.css"> -->
@@ -185,7 +198,7 @@ src="https://www.facebook.com/tr?id=2033006394107460&ev=PageView&noscript=1"
       
       contain:layout paint size;border-radius:20px;
       height:calc(var(--cardW) + 20px); 
-      min-height:230px;
+      min-height:200px;
       transition:opacity var(--fadeDur) var(--ease),transform var(--fadeDur) var(--ease);
       touch-action: pan-y pinch-zoom; 
       user-select: none; 
@@ -4310,6 +4323,36 @@ document.getElementById('phone1').addEventListener('input', function() {
     document.getElementById('phone-dash').value = "";
   }
 });
+</script>
+
+<script>
+(function(){
+
+  const db3 = document.getElementById("db3");
+  const db4 = document.getElementById("db4");
+  const hidden = document.querySelector("input[name='entry.1024743880']");
+
+  function updateHiddenValue(){
+    const v1 = db3?.value?.trim() || "";
+    const v2 = db4?.value?.trim() || "";
+
+    let combined = "";
+
+    if(v1 && v2){
+      combined = v1 + " / " + v2;
+    } else if(v1){
+      combined = v1;
+    } else if(v2){
+      combined = v2;
+    }
+
+    hidden.value = combined;
+  }
+
+  db3.addEventListener("change", updateHiddenValue);
+  db4.addEventListener("change", updateHiddenValue);
+
+})();
 </script>
 
 </body>
